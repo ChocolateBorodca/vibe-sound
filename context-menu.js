@@ -1,8 +1,10 @@
-// Автоматически подгружаем новые файлы статистики и стилей, не ломая index.html и старый CSS
+// Автоматически подгружаем новые файлы статистики, стилей, жанров и счетчиков
 if (!document.querySelector('script[src="stats.js"]')) {
     const s1 = document.createElement('script'); s1.src = 'stats.js'; document.head.appendChild(s1);
     const s2 = document.createElement('script'); s2.src = 'stats-ui.js'; document.head.appendChild(s2);
     const s3 = document.createElement('script'); s3.src = 'stats-style.js'; document.head.appendChild(s3);
+    const s4 = document.createElement('script'); s4.src = 'wave-genres.js'; document.head.appendChild(s4);
+    const s5 = document.createElement('script'); s5.src = 'stats-collector.js'; document.head.appendChild(s5);
 }
 
 const favoritesList = document.getElementById('favorites-list');
