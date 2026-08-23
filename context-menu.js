@@ -11,6 +11,7 @@ if (!tgMenu) {
     document.body.appendChild(tgMenu);
 }
 
+// ИСПРАВЛЕНО: Сделали окошко шире (180px), чтобы текст помещался, и добавили внутренний отступ
 tgMenu.style.cssText = `
     position: fixed;
     display: none;
@@ -19,18 +20,18 @@ tgMenu.style.cssText = `
     -webkit-backdrop-filter: blur(35px) saturate(150%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
-    width: 150px;
+    width: 180px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     z-index: 999999;
-    padding: 6px;
+    padding: 8px;
 `;
 
 tgMenu.innerHTML = `
-    <div class="tg-menu-item" id="tg-menu-share" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: #ffffff; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s;">
-        <i data-lucide="share-2" style="width: 16px; height: 16px; color: rgba(255,255,255,0.7);"></i> Поделиться
+    <div class="tg-menu-item" id="tg-menu-share" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: #ffffff; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s; white-space: nowrap;">
+        <i data-lucide="share-2" style="width: 18px; height: 18px; color: rgba(255,255,255,0.7);"></i> Поделиться
     </div>
-    <div class="tg-menu-item delete" id="tg-menu-delete" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: #ff4d6d; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s;">
-        <i data-lucide="trash-2" style="width: 16px; height: 16px; color: #ff4d6d;"></i> Удалить
+    <div class="tg-menu-item delete" id="tg-menu-delete" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: #ff4d6d; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s; white-space: nowrap;">
+        <i data-lucide="trash-2" style="width: 18px; height: 18px; color: #ff4d6d;"></i> Удалить
     </div>
 `;
 
@@ -56,9 +57,16 @@ function openContextMenu(e, type, id) {
     }
     
     tgMenu.style.display = 'block';
+    
     const rect = e.currentTarget.getBoundingClientRect();
-    tgMenu.style.left = `${rect.right - 165}px`;
+    
+    // ИСПРАВЛЕНО: Сдвинули окошко на 195px влево от кнопки, чтобы оно никогда не вылетало за экран справа
+    tgMenu.style.left = `${rect.right - 195}px`;
     tgMenu.style.top = `${rect.bottom + 8}px`;
+
+    const delBtn = document.getElementById('tg-menu-delete');
+    if (id === "classic") delBtn.style.display = 'none';
+    else delBtn.style.display = 'flex';
 }
 
 document.addEventListener('click', () => {
@@ -99,7 +107,8 @@ document.getElementById('tg-menu-share').addEventListener('click', (e) => {
     e.stopPropagation();
     tgMenu.style.display = 'none';
 
-    const siteUrl = window.location.origin + window.location.pathname;
+    // ИСПРАВЛЕНО: Теперь в ссылке строго ваше чистое имя домена без лишних путей
+    const siteUrl = "https://vibe-sound.vercel.app/";
     alert("Готовим файл к отправке, подождите секунду...");
 
     if (activeMenuType === 'track') {
@@ -107,12 +116,12 @@ document.getElementById('tg-menu-share').addEventListener('click', (e) => {
         const reader = new FileReader();
         reader.readAsDataURL(track.audioFile);
         reader.onloadend = function() {
-            const base64Audio = reader.result.split(',')[1];
+            const base64Audio = reader.result.split(',');
             if (track.coverFile) {
                 const coverReader = new FileReader();
                 coverReader.readAsDataURL(track.coverFile);
                 coverReader.onloadend = function() {
-                    const base64Cover = coverReader.result.split(',')[1];
+                    const base64Cover = coverReader.result.split(',');
                     const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}&cover=${base64Cover}`;
                     copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Кликни по ссылке, и он сам автоматически запишется к тебе: ${finalUrl}`);
                 };
@@ -126,7 +135,7 @@ document.getElementById('tg-menu-share').addEventListener('click', (e) => {
         const reader = new FileReader();
         reader.readAsDataURL(wp.gifFile);
         reader.onloadend = function() {
-            const base64Gif = reader.result.split(',')[1];
+            const base64Gif = reader.result.split(',');
             const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${base64Gif}`;
             copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы сразу поставить их себе на фон: ${finalUrl}`);
         };
