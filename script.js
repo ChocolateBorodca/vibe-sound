@@ -2,8 +2,8 @@
 // Сюда можно дописывать вечные треки из Vercel Blob, если захотите
 const tracks = [
     {
-        title: "Night , Blooming Jasmine",
-        artist: "fakemink",
+        title: "",
+        artist: "",
         audio: "https://vercel-storage.com",
         cover: "https://vercel-storage.com"
     }
