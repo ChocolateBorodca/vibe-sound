@@ -17,7 +17,6 @@
 
     <div class="app-container">
         
-        <!-- БОКОВАЯ ПАНЕЛЬ -->
         <aside class="sidebar">
             <div class="brand">
                 <div class="logo">
@@ -61,37 +60,31 @@
             </nav>
         </aside>
 
-        <!-- ОСНОВНОЙ КОНТЕНТ -->
         <main class="main-content">
             <header class="content-header">
                 <h1 id="page-title">Главная</h1>
             </header>
 
-            <!-- ЭКРАН 1: ГЛАВНАЯ (ПЛЕЕР) -->
             <section id="tab-main" class="tab-content active">
                 <div class="player-card">
                     <div class="player-cover" id="cover-parent">
-                        <!-- Убрали текст alt, чтобы не мозолил глаза -->
                         <img id="cover" src="" alt="">
                     </div>
                     <div class="player-info">
-                        <h2 id="title">Загрузка...</h2>
-                        <p id="artist">Исполнитель</p>
+                        <h2 id="title">Нет треков</h2>
+                        <p id="artist">Загрузите музыку во вкладке Любимое</p>
                     </div>
                 </div>
             </section>
 
-            <!-- ЭКРАН 2: МЕДИАТЕКА (СПИСОК ТРЕКОВ + ДВЕ КНОПКИ УПРАВЛЕНИЯ) -->
             <section id="tab-favorites" class="tab-content">
                 <div class="playlist-container">
                     <div class="playlist-top-bar">
                         <div class="playlist-header-text">Ваша медиатека</div>
                         <div style="display: flex; gap: 8px;">
-                            <!-- Кнопка для обложки -->
                             <button class="upload-action-btn" onclick="document.getElementById('local-cover-input').click()">
                                 <i data-lucide="image"></i> Обложка к треку
                             </button>
-                            <!-- Кнопка для песни -->
                             <button class="upload-action-btn" onclick="document.getElementById('local-audio-input').click()">
                                 <i data-lucide="plus"></i> Песня
                             </button>
@@ -103,7 +96,6 @@
                 </div>
             </section>
 
-            <!-- ЭКРАН 3: ОБОИ -->
             <section id="tab-wallpaper" class="tab-content">
                 <div class="wallpaper-container">
                     <div class="playlist-top-bar">
@@ -119,7 +111,6 @@
 
             <audio id="audio"></audio>
 
-            <!-- НИЖНЯЯ ПАНЕЛЬ УПРАВЛЕНИЯ -->
             <footer class="player-controls-bar">
                 <div class="timeline-container">
                     <span id="current-time" class="time-label">0:00</span>
@@ -146,6 +137,7 @@
             if(window.lucide) lucide.createIcons();
         });
     </script>
+    <script src="database.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
