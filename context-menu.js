@@ -3,8 +3,56 @@ let activeTargetId = null;
 
 const favoritesList = document.getElementById('favorites-list');
 const wallpaperGrid = document.getElementById('wallpaper-grid');
-const tgMenu = document.getElementById('tg-context-menu');
 
+// Создаем компактное стеклянное окошко Telegram-меню прямо через JS
+let tgMenu = document.getElementById('tg-context-menu');
+if (!tgMenu) {
+    tgMenu = document.createElement('div');
+    tgMenu.id = 'tg-context-menu';
+    document.body.appendChild(tgMenu);
+}
+
+// Принудительно задаем стиль жидкого стекла (Liquid Glass)
+tgMenu.style.cssText = `
+    position: fixed;
+    display: none;
+    background: rgba(15, 15, 22, 0.7);
+    backdrop-filter: blur(35px) saturate(150%);
+    -webkit-backdrop-filter: blur(35px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    width: 150px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    z-index: 999999;
+    padding: 6px;
+`;
+
+// Наполняем меню кнопками в стиле Telegram
+tgMenu.innerHTML = `
+    <div class="tg-menu-item" id="tg-menu-share" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: #ffffff; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s;">
+        <i data-lucide="share-2" style="width: 16px; height: 16px; color: rgba(255,255,255,0.7);"></i> Поделиться
+    </div>
+    <div class="tg-menu-item delete" id="tg-menu-delete" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: #ff4d6d; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s;">
+        <i data-lucide="trash-2" style="width: 16px; height: 16px; color: #ff4d6d;"></i> Удалить
+    </div>
+`;
+
+// Стили для эффекта наведения (hover) на пункты меню
+tgMenu.addEventListener('mouseover', (e) => {
+    const item = e.target.closest('.tg-menu-item');
+    if (!item) return;
+    if (item.classList.contains('delete')) {
+        item.style.background = 'rgba(255, 77, 109, 0.15)';
+    } else {
+        item.style.background = 'rgba(255, 255, 255, 0.1)';
+    }
+});
+tgMenu.addEventListener('mouseout', (e) => {
+    const item = e.target.closest('.tg-menu-item');
+    if (item) item.style.background = 'none';
+});
+
+// Логика привязки меню строго справа от нажатой кнопки трех точек
 function openContextMenu(e, type, id) {
     e.stopPropagation();
     activeMenuType = type;
@@ -13,20 +61,19 @@ function openContextMenu(e, type, id) {
     tgMenu.style.display = 'block';
     
     const rect = e.currentTarget.getBoundingClientRect();
-    const parentRect = document.body.getBoundingClientRect();
-    
-    tgMenu.style.left = `${rect.left - parentRect.left - 160}px`;
-    tgMenu.style.top = `${rect.top - parentRect.top}px`;
+    tgMenu.style.left = `${rect.right - 165}px`;
+    tgMenu.style.top = `${rect.bottom + 8}px`;
 
     const delBtn = document.getElementById('tg-menu-delete');
-    if (id === "classic") delBtn.style.display = 'none';
+    if (id === "classic") delBtn.style.style.display = 'none';
     else delBtn.style.display = 'flex';
 }
 
 document.addEventListener('click', () => {
-    if (tgMenu) tgMenu.style.display = 'none';
+    tgMenu.style.display = 'none';
 });
 
+// Кнопка удаления файла из IndexedDB
 document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
     e.stopPropagation();
     tgMenu.style.display = 'none';
@@ -57,30 +104,31 @@ document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
     }
 });
 
+// Умная упаковка медиафайла в ссылку-установщик для друга
 document.getElementById('tg-menu-share').addEventListener('click', (e) => {
     e.stopPropagation();
     tgMenu.style.display = 'none';
 
     const siteUrl = window.location.origin + window.location.pathname;
-    alert("Готовим файл к отправке, подождите секунду...");
+    alert("Упаковываем файл в ссылку, подождите секунду...");
 
     if (activeMenuType === 'track') {
         const track = tracks.find(t => t.id === activeTargetId);
         const reader = new FileReader();
         reader.readAsDataURL(track.audioFile);
         reader.onloadend = function() {
-            const base64Audio = reader.result.split(',');
+            const base64Audio = reader.result.split(',')[1];
             if (track.coverFile) {
                 const coverReader = new FileReader();
                 coverReader.readAsDataURL(track.coverFile);
                 coverReader.onloadend = function() {
-                    const base64Cover = coverReader.result.split(',');
+                    const base64Cover = coverReader.result.split(',')[1];
                     const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}&cover=${base64Cover}`;
-                    copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Кликни, и он сам установится у тебя на сайте: ${finalUrl}`);
+                    copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Перейди по ссылке, и он сам автоматически запишется к тебе на сайт: ${finalUrl}`);
                 };
             } else {
                 const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}`;
-                copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Кликни, и он сам установится у тебя на сайте: ${finalUrl}`);
+                copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Перейди по ссылке, и он сам автоматически запишется к тебе на сайт: ${finalUrl}`);
             }
         };
     } else if (activeMenuType === 'wallpaper') {
@@ -88,9 +136,9 @@ document.getElementById('tg-menu-share').addEventListener('click', (e) => {
         const reader = new FileReader();
         reader.readAsDataURL(wp.gifFile);
         reader.onloadend = function() {
-            const base64Gif = reader.result.split(',');
+            const base64Gif = reader.result.split(',')[1];
             const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${base64Gif}`;
-            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы сразу поставить их себе на фон: ${finalUrl}`);
+            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы они сразу установились у тебя на фон: ${finalUrl}`);
         };
     }
 });
@@ -102,13 +150,14 @@ function copyTextToClipboard(text) {
     textarea.select();
     try {
         document.execCommand("copy");
-        alert("Умная ссылка скопирована! Отправь её другу в ЛС, при переходе файл сам загрузится к нему в плеер.");
+        alert("Умная ссылка скопирована! Отправь её другу в ЛС, при клике медиафайл сам установится у него на сайте.");
     } catch (err) {
-        alert("Не удалось скопировать ссылку.");
+        alert("Не удалось скопировать.");
     }
     document.body.removeChild(textarea);
 }
 
+// Отрисовка сетки обоев с крупной кнопкой трех точек
 function buildWallpaperUI() {
     if (!wallpaperGrid) return;
     wallpaperGrid.innerHTML = '';
@@ -121,8 +170,8 @@ function buildWallpaperUI() {
             <div class="wallpaper-preview" style="${bgStyle}"></div>
             <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 4px; gap: 8px;">
                 <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;">${wp.name}</span>
-                <button class="more-actions-btn" onclick="openContextMenu(event, 'wallpaper', '${wp.id}')">
-                    <i data-lucide="more-vertical"></i>
+                <button class="more-actions-btn" onclick="openContextMenu(event, 'wallpaper', '${wp.id}')" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                    <i data-lucide="more-horizontal" style="width: 18px; height: 18px;"></i>
                 </button>
             </div>
         `;
@@ -132,6 +181,7 @@ function buildWallpaperUI() {
     if (window.lucide) lucide.createIcons();
 }
 
+// Отрисовка списка треков с крупной кнопкой трех точек
 function buildFavoritesUI() {
     if (!favoritesList) return;
     favoritesList.innerHTML = '';
@@ -148,8 +198,8 @@ function buildFavoritesUI() {
                 <div class="track-row-title">${track.title}</div>
                 <div class="track-row-artist">${track.artist}</div>
             </div>
-            <button class="more-actions-btn" onclick="openContextMenu(event, 'track', ${track.id})">
-                <i data-lucide="more-vertical"></i>
+            <button class="more-actions-btn" onclick="openContextMenu(event, 'track', ${track.id})" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                <i data-lucide="more-horizontal" style="width: 18px; height: 18px;"></i>
             </button>
         `;
         row.addEventListener('click', () => {
