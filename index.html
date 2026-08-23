@@ -4,18 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nextmove Music</title>
-    <!-- Подключаем шрифт Inter для максимального сходства с макетом -->
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
     <link href="https://googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Подключаем иконки Lucide для бокового меню и кнопок -->
     <script src="https://unpkg.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Переливающийся анимированный фон на заднем плане -->
-    <div class="bg-glow"></div>
+    <!-- Анимированный задний фон (сюда JS будет подставлять GIF или цвет) -->
+    <div class="bg-wallpaper" id="bg-wallpaper"></div>
+    <div class="bg-glow" id="bg-glow-layer"></div>
 
     <div class="app-container">
         
@@ -44,6 +43,11 @@
                     <i data-lucide="heart"></i>
                     <span>Любимое</span>
                 </div>
+                <!-- НОВАЯ ВКЛАДКА ОБОИ -->
+                <div id="menu-wallpaper" class="menu-item">
+                    <i data-lucide="image"></i>
+                    <span>Обои</span>
+                </div>
                 <div class="menu-item">
                     <i data-lucide="music-4"></i>
                     <span>Плейлисты</span>
@@ -69,7 +73,7 @@
             <section id="tab-main" class="tab-content active">
                 <div class="player-card">
                     <div class="player-cover">
-                        <img id="cover" src="cover1.jpg" alt="Обложка">
+                        <img id="cover" src="" alt="Обложка">
                     </div>
                     <div class="player-info">
                         <h2 id="title">Загрузка...</h2>
@@ -78,22 +82,28 @@
                 </div>
             </section>
 
-            <!-- ЭКРАН 2: ЛЮБИМОЕ (СПИСОК ТРЕКОВ) -->
+            <!-- ЭКРАН 2: ЛЮБИМОЕ -->
             <section id="tab-favorites" class="tab-content">
                 <div class="playlist-container">
                     <div class="playlist-header-text">Ваши любимые треки</div>
-                    <div class="tracks-list" id="favorites-list">
-                        <!-- Сюда JS добавит список любимых песен -->
+                    <div class="tracks-list" id="favorites-list"></div>
+                </div>
+            </section>
+
+            <!-- ЭКРАН 3: ОБОИ (WALLPAPER) -->
+            <section id="tab-wallpaper" class="tab-content">
+                <div class="wallpaper-container">
+                    <div class="playlist-header-text">Выберите фоновое оформление</div>
+                    <div class="wallpaper-grid" id="wallpaper-grid">
+                        <!-- Сюда JS добавит карточки обоев -->
                     </div>
                 </div>
             </section>
 
-            <!-- ТЕГ АУДИО -->
             <audio id="audio"></audio>
 
             <!-- НИЖНЯЯ ПАНЕЛЬ УПРАВЛЕНИЯ -->
             <footer class="player-controls-bar">
-                <!-- Прогресс-бар сверху панели -->
                 <div class="timeline-container">
                     <span id="current-time" class="time-label">0:00</span>
                     <div class="slider-wrapper">
@@ -102,7 +112,6 @@
                     <span id="duration" class="time-label">0:00</span>
                 </div>
 
-                <!-- Блок с кнопками переключения и Play/Pause -->
                 <div class="controls-buttons">
                     <button class="ctrl-btn" id="prev"><i data-lucide="skip-back"></i></button>
                     <button class="play-pause-btn" id="play">
@@ -115,7 +124,6 @@
 
     </div>
 
-    <!-- Инициализация иконок Lucide -->
     <script>lucide.createIcons();</script>
     <script src="script.js"></script>
 </body>
