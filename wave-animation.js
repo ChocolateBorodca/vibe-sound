@@ -1,188 +1,116 @@
-let audioCtx = null;
-let analyser = null;
-let source = null;
-let dataArray = null;
-let isAudioContextInitialized = false;
-let animationFrameId = null;
-let phase = 0;
-
-function initWaveLiveAnimation() {
-    const waveTabSection = document.getElementById('tab-wave');
-    const mainContent = document.querySelector('.main-content');
-    const audio = document.getElementById('audio');
-
-    const isWaveTabActive = waveTabSection && waveTabSection.classList.contains('active');
-
-    if (isWaveTabActive) {
-        if (mainContent) {
-            mainContent.style.setProperty('background', '#000000', 'important');
-            mainContent.style.setProperty('background-color', '#000000', 'important');
-        }
-        if (waveTabSection) {
-            waveTabSection.style.setProperty('background', '#000000', 'important');
-            waveTabSection.style.setProperty('background-color', '#000000', 'important');
-            waveTabSection.style.setProperty('background-image', 'none', 'important');
-            waveTabSection.style.setProperty('backdrop-filter', 'none', 'important');
-            waveTabSection.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-            waveTabSection.style.setProperty('border', 'none', 'important');
-        }
-    } else {
-        if (mainContent) {
-            mainContent.style.removeProperty('background');
-            mainContent.style.removeProperty('background-color');
-        }
-        if (waveTabSection) {
-            waveTabSection.style.removeProperty('background');
-            waveTabSection.style.removeProperty('background-color');
-            waveTabSection.style.removeProperty('background-image');
-            waveTabSection.style.removeProperty('backdrop-filter');
-            waveTabSection.style.removeProperty('-webkit-backdrop-filter');
-            waveTabSection.style.removeProperty('border');
-        }
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-        }
+/**
+ * Изолированный скрипт анимации «Моей волны» в стиле Яндекс Музыки
+ * Автоматически встраивается в элемент с id="wave-container"
+ */
+(function () {
+    // 1. Создаем Canvas и добавляем его в контейнер
+    const container = document.getElementById('wave-container');
+    if (!container) {
+        console.error('Элемент #wave-container не найден!');
         return;
     }
 
-    let container = document.getElementById('wave-animation-container');
-    if (!container && waveTabSection) {
-        container = document.createElement('div');
-        container.id = 'wave-animation-container';
-        const centerBtn = document.getElementById('wave-center-toggle-btn');
-        if (centerBtn) waveTabSection.insertBefore(container, centerBtn);
-        else waveTabSection.appendChild(container);
-    }
-
-    if (!container) return;
-
-    let canvas = document.getElementById('wave-visual-canvas');
-    if (!canvas) {
-        container.innerHTML = '';
-        canvas = document.createElement('canvas');
-        canvas.id = 'wave-visual-canvas';
-        canvas.width = 600;
-        canvas.height = 300;
-        canvas.style.cssText = `
-            display: block !important;
-            margin: 0 auto !important;
-            max-width: 100% !important;
-            height: auto !important;
-            box-shadow: 0 0 50px rgba(255, 40, 100, 0.2);
-            border-radius: 20px !important;
-        `;
-        container.appendChild(canvas);
-
-        container.style.cssText = `
-            width: 100% !important;
-            max-width: 600px !important;
-            height: auto !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            margin: auto !important;
-        `;
-        
-        if (container.parentElement) {
-            container.parentElement.style.setProperty('display', 'flex', 'important');
-            container.parentElement.style.setProperty('flex-direction', 'column', 'important');
-            container.parentElement.style.setProperty('align-items', 'center', 'important');
-            container.parentElement.style.setProperty('justify-content', 'center', 'important');
-            container.parentElement.style.setProperty('height', '100%', 'important');
-            container.parentElement.style.setProperty('gap', '30px', 'important');
-            container.parentElement.style.setProperty('background', '#000000', 'important');
-        }
-    }
-
-    // Инициализируем анализатор частот Web Audio API, привязываясь к плееру
-    if (!isAudioContextInitialized && audio) {
-        try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioCtx.createAnalyser();
-            
-            // Задаем важный параметр CORS, чтобы браузер разрешал читать частоты трека
-            audio.crossOrigin = "anonymous";
-            
-            source = audioCtx.createMediaElementSource(audio);
-            source.connect(analyser);
-            analyser.connect(audioCtx.destination);
-            analyser.fftSize = 256;
-            
-            dataArray = new Uint8Array(analyser.frequencyBinCount);
-            isAudioContextInitialized = true;
-        } catch (e) {
-            console.log("AudioContext инициализируется после старта трека");
-        }
-    }
-
-    // Запускаем перерисовку волны, если плеер играет и вкладка открыта
-    if (audio && !audio.paused && !animationFrameId && isAudioContextInitialized) {
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        drawAdvancedRhythmWave();
-    }
-}
-
-// Перенос математического алгоритма Яндекса и твоего примера
-function drawAdvancedRhythmWave() {
-    const canvas = document.getElementById('wave-visual-canvas');
-    const audio = document.getElementById('audio');
-    if (!canvas || !audio || audio.paused) {
-        animationFrameId = null;
-        return;
-    }
-
-    animationFrameId = requestAnimationFrame(drawAdvancedRhythmWave);
+    const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
+    container.appendChild(canvas);
 
-    if (analyser && dataArray) {
-        analyser.getByteFrequencyData(dataArray);
-    } else {
-        return;
+    // Стилизуем canvas, чтобы он занимал все пространство родителя
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+
+    // Функция подгонки разрешения под реальные размеры с учетом Retina-экранов
+    function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = container.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
     }
     
-    let sum = dataArray.reduce((a, b) => a + b, 0);
-    let avg = sum / dataArray.length;
+    window.addEventListener('resize', resize);
+    resize();
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Отрисовка трех наложенных неоновых линий из твоего примера
-    for (let j = 0; j < 3; j++) {
-        ctx.beginPath();
-        ctx.lineWidth = 4 - j;
-        
-        // Красивое неоновое свечение струн
-        ctx.strokeStyle = `rgba(255, ${40 + j * 60}, ${100 + j * 50}, ${0.8 - j * 0.2})`;
-        ctx.shadowBlur = j === 0 ? 15 : 0;
-        ctx.shadowColor = `rgba(255, 40, 100, 0.5)`;
-
-        let sliceWidth = canvas.width / dataArray.length;
-        let x = 0;
-
-        phase += 0.015; // базовая скорость движения волн
-
-        for (let i = 0; i < dataArray.length; i++) {
-            let v = dataArray[i] / 128.0;
-            
-            // Расчет высоты волны по частотам твоего примера
-            let y = (canvas.height / 2) + (v * (avg * 0.4) * Math.sin(i * 0.08 + phase + j));
-
-            // Плавное сужение краев к центру (как у оригинальной Моей Волны)
-            let edgeFade = Math.sin((x / canvas.width) * Math.PI);
-            y = (canvas.height / 2) + (y - (canvas.height / 2)) * edgeFade;
-
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-            x += sliceWidth;
+    // 2. Настройки анимации волн
+    let phase = 0;
+    
+    // Параметры для 3-х слоев волн (можно менять для кастомизации)
+    const waves = [
+        { 
+            amplitude: 45,  // Высота волны в пикселях
+            frequency: 0.008, // Плотность волн (чем меньше, тем шире волна)
+            speed: 0.02,    // Скорость движения
+            color: 'rgba(255, 40, 100, 0.4)', // Розово-красный
+            lineWidth: 4
+        },
+        { 
+            amplitude: 30, 
+            frequency: 0.012, 
+            speed: -0.015,  // Отрицательная скорость — волна идет в другую сторону
+            color: 'rgba(140, 40, 255, 0.5)', // Фиолетовый
+            lineWidth: 3
+        },
+        { 
+            amplitude: 20, 
+            frequency: 0.018, 
+            speed: 0.025, 
+            color: 'rgba(0, 230, 255, 0.3)',  // Бирюзовый
+            lineWidth: 2
         }
-        ctx.stroke();
-    }
-}
+    ];
 
-// Интервал проверки активности
-setInterval(initWaveLiveAnimation, 300);
+    // 3. Главный цикл анимации
+    function animate() {
+        requestAnimationFrame(animate);
+
+        const width = canvas.width / (window.devicePixelRatio || 1);
+        const height = canvas.height / (window.devicePixelRatio || 1);
+        const centerY = height / 2;
+
+        // Очищаем холст перед каждым кадром
+        ctx.clearRect(0, 0, width, height);
+
+        // Используем режим наложения цветов для красивого эффекта свечения на стыках
+        ctx.globalCompositeOperation = 'screen';
+
+        // Рисуем каждую волну из массива
+        waves.forEach((wave) => {
+            ctx.beginPath();
+            ctx.lineWidth = wave.lineWidth;
+            ctx.strokeStyle = wave.color;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Двигаем фазу конкретной волны с ее собственной скоростью
+            wave.currentPhase = (wave.currentPhase || 0) + wave.speed;
+
+            let x = 0;
+            let y = centerY + Math.sin(x * wave.frequency + wave.currentPhase) * wave.amplitude;
+            ctx.moveTo(x, y);
+
+            // Шаг отрисовки в пикселях (чем меньше шаг, тем плавнее линии)
+            const step = 5; 
+
+            for (let i = step; i <= width; i += step) {
+                const nextX = i;
+                // Математическая магия синуса для создания живой кривой
+                const nextY = centerY + Math.sin(nextX * wave.frequency + wave.currentPhase) * wave.amplitude;
+                
+                // Сглаживание через вычисление средней точки (эффект кривых Безье)
+                const xc = (x + nextX) / 2;
+                const yc = (y + nextY) / 2;
+                
+                ctx.quadraticCurveTo(x, y, xc, yc);
+                
+                x = nextX;
+                y = nextY;
+            }
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        });
+    }
+
+    // Запускаем бесконечный цикл
+    animate();
+})();
