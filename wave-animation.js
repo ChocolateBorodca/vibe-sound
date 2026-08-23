@@ -1,6 +1,6 @@
 function initWaveLiveAnimation() {
     // Ссылка на твою GIF-анимацию волны из хранилища Vercel
-    const gifUrl = "https://vercel-storage.com";
+    const gifUrl = "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/fmahalem.gif";
     
     const waveTabSection = document.getElementById('tab-wave');
     const mainContent = document.querySelector('.main-content');
