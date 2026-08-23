@@ -56,36 +56,54 @@ function startWavePlayback() {
     }
 }
 
+// СВЕРХНАДЕЖНЫЙ СИСТЕМНЫЙ ПЕРЕКЛЮЧАТЕЛЬ ВСЕХ ВКЛАДОК
 setTimeout(() => {
-    if (typeof switchTab === 'function') {
-        const originalSwitchTab = switchTab;
-        window.switchTab = function(tabName) {
-            originalSwitchTab(tabName);
-            
-            if (tabName === 'wave') {
-                const waveMenuBtn = document.getElementById('menu-wave');
-                if (waveMenuBtn) waveMenuBtn.classList.add('active');
-                const waveTabSection = document.getElementById('tab-wave');
-                if (waveTabSection) waveTabSection.style.setProperty('display', 'flex', 'important');
-                document.getElementById('page-title').textContent = "Моя Волна";
-                if (typeof initVibeWaveMap === 'function') initVibeWaveMap();
-            } else {
-                const waveTabSection = document.getElementById('tab-wave');
-                if (waveTabSection) waveTabSection.style.display = 'none';
-                const waveMenuBtn = document.getElementById('menu-wave');
-                if (waveMenuBtn) waveMenuBtn.classList.remove('active');
-            }
-        };
-    }
-
-    const waveMenuBtn = document.getElementById('menu-wave');
-    if (waveMenuBtn) {
-        waveMenuBtn.style.cursor = 'pointer';
-        waveMenuBtn.addEventListener('click', () => {
-            if (typeof switchTab === 'function') switchTab('wave');
+    window.switchTab = function(tabName) {
+        // Гарантированно прячем абсолютно все вкладки на сайте
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.style.display = 'none';
+            tab.classList.remove('active');
         });
-    }
+        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
 
+        // Активируем нужный контейнер по имени
+        const targetTab = document.getElementById(`tab-${tabName}`);
+        const targetMenu = document.getElementById(`menu-${tabName}`);
+
+        if (targetTab) {
+            if (tabName === 'wave' || tabName === 'playlists' || tabName === 'settings' || tabName === 'stats') {
+                targetTab.style.setProperty('display', 'flex', 'important');
+            } else {
+                targetTab.style.display = 'block';
+            }
+            targetTab.classList.add('active');
+        }
+
+        if (targetMenu) targetMenu.classList.add('active');
+
+        // Управляем заголовками
+        let titleText = "Главная";
+        if (tabName === 'favorites') titleText = "Медиатека";
+        if (tabName === 'wallpaper') titleText = "Обои";
+        if (tabName === 'wave') { titleText = "Моя Волна"; if (typeof initVibeWaveMap === 'function') initVibeWaveMap(); }
+        if (tabName === 'playlists') { titleText = "Плейлисты"; if (typeof renderPlaylistsUI === 'function') renderPlaylistsUI(); }
+        if (tabName === 'stats') { titleText = "Статистика"; if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI(); }
+        if (tabName === 'settings') { titleText = "Настройки"; if (typeof renderSettingsUI === 'function') renderSettingsUI(); }
+
+        const pageTitle = document.getElementById('page-title');
+        if (pageTitle) pageTitle.textContent = titleText;
+    };
+
+    // Биндим чистые клики на боковое меню плеера
+    document.getElementById('menu-main').addEventListener('click', () => switchTab('main'));
+    document.getElementById('menu-favorites').addEventListener('click', () => switchTab('favorites'));
+    document.getElementById('menu-wallpaper').addEventListener('click', () => switchTab('wallpaper'));
+    document.getElementById('menu-wave').addEventListener('click', () => switchTab('wave'));
+    document.getElementById('menu-playlists').addEventListener('click', () => switchTab('playlists'));
+    document.getElementById('menu-stats').addEventListener('click', () => switchTab('stats'));
+    document.getElementById('menu-settings').addEventListener('click', () => switchTab('settings'));
+
+    // Привязываем окончание аудиопотока
     const audio = document.getElementById('audio');
     if (audio) {
         audio.addEventListener('ended', () => {
@@ -94,4 +112,4 @@ setTimeout(() => {
             }
         });
     }
-}, 1500);
+}, 1000);
