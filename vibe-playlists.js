@@ -1,31 +1,17 @@
 let localPlaylists = JSON.parse(localStorage.getItem('vibe_custom_playlists') || "[]");
 
 function renderPlaylistsUI() {
-    // Находим вкладку плейлистов (четвертый элемент в разметке)
-    const tabContents = document.querySelectorAll('.tab-content');
-    let playlistsTab = null;
-    
-    // Ищем вкладку, у которой нет жесткого ID, методом исключения
-    tabContents.forEach(tab => {
-        if (tab.id !== 'tab-main' && tab.id !== 'tab-favorites' && tab.id !== 'tab-wallpaper' && tab.id !== 'tab-stats' && tab.id !== 'tab-wave') {
-            playlistsTab = tab;
-        }
-    });
-
+    const playlistsTab = document.getElementById('tab-playlists');
     if (!playlistsTab) return;
-    
-    // Сбрасываем старый ID для надежной работы системного переключателя
-    playlistsTab.id = 'tab-playlists';
 
     playlistsTab.innerHTML = `
-        <div class="playlist-container" style="max-height: calc(88vh - 160px); overflow-y: auto;">
+        <div class="playlist-container" style="max-height: calc(88vh - 160px); overflow-y: auto; width:100%;">
             <div class="playlist-top-bar">
                 <div class="playlist-header-text">Ваши Плейлисты</div>
                 <button class="upload-action-btn" id="create-playlist-btn">
                     <i data-lucide="plus"></i> Создать плейлист
                 </button>
             </div>
-            
             <div id="playlists-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-top: 15px;"></div>
         </div>
     `;
@@ -64,15 +50,12 @@ function createPlaylistModal() {
     if (!name) return;
 
     if (tracks.length === 0) {
-        alert("Сначала загрузите треки в Медиатеку (Любимое), чтобы добавить их в плейлист!");
+        alert("Сначала загрузите треки в Любимое!");
         return;
     }
 
-    // Собираем список песен для добавления
-    let promptText = "Доступные треки. Введите номера через запятую (например: 1,3,4):\n";
-    tracks.forEach((t, i) => {
-        promptText += `${i + 1}. ${t.title}\n`;
-    });
+    let promptText = "Доступные треки. Введите номера через запятую (например: 1,3):\n";
+    tracks.forEach((t, i) => { promptText += `${i + 1}. ${t.title}\n`; });
     
     const choices = prompt(promptText, "1");
     if (!choices) return;
@@ -83,15 +66,9 @@ function createPlaylistModal() {
         if (tracks[idx]) selectedIds.push(tracks[idx].id);
     });
 
-    // Запрос обложки через ссылку (URL фото или GIF)
-    const coverUrl = prompt("Вставьте ссылку на обложку (или оставьте пустым для стандартного градиента):", "");
+    const coverUrl = prompt("Вставьте ссылку на обложку (или оставьте пустым):", "");
 
-    localPlaylists.push({
-        name: name,
-        cover: coverUrl || "",
-        trackIds: selectedIds
-    });
-
+    localPlaylists.push({ name: name, cover: coverUrl || "", trackIds: selectedIds });
     localStorage.setItem('vibe_custom_playlists', JSON.stringify(localPlaylists));
     renderPlaylistsUI();
 }
@@ -101,10 +78,7 @@ function playPlaylistAction(e, idx) {
     const pl = localPlaylists[idx];
     if (!pl || pl.trackIds.length === 0) return;
 
-    // Находим первый существующий трек из плейлиста в общем массиве
-    let firstTrackId = pl.trackIds[0];
-    let matchIdx = tracks.findIndex(t => t.id === firstTrackId);
-    
+    let matchIdx = tracks.findIndex(t => t.id === pl.trackIds[0]);
     if (matchIdx !== -1) {
         currentIndex = matchIdx;
         if (typeof loadTrack === 'function') loadTrack();
@@ -115,7 +89,6 @@ function playPlaylistAction(e, idx) {
             if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
             if (window.lucide) lucide.createIcons();
         }
-        alert(`▶️ Запущено воспроизведение плейлиста: ${pl.name}`);
     }
 }
 
@@ -125,20 +98,3 @@ function deletePlaylistAction(e, idx) {
     localStorage.setItem('vibe_custom_playlists', JSON.stringify(localPlaylists));
     renderPlaylistsUI();
 }
-
-// Привязываем вкладку левого меню
-setTimeout(() => {
-    const menuItems = document.querySelectorAll('.sidebar .menu-item');
-    menuItems.forEach(item => {
-        if (item.textContent.includes('Плейлисты')) {
-            item.id = 'menu-playlists';
-            item.addEventListener('click', () => {
-                if (typeof switchTab === 'function') {
-                    switchTab('playlists');
-                    document.getElementById('page-title').textContent = "Плейлисты";
-                    renderPlaylistsUI();
-                }
-            });
-        }
-    });
-}, 1600);
