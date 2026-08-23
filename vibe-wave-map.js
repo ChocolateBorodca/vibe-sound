@@ -6,14 +6,13 @@ function initVibeWaveMap() {
     if (!waveTabSection) return;
 
     waveTabSection.innerHTML = '';
-    // ИСПРАВЛЕНО: Убрали принудительный черный цвет, вернули родное стекло и центрирование
     waveTabSection.style.cssText = 'padding: 30px 40px; height: calc(88vh - 180px); display: flex; align-items: center; justify-content: center; position: relative; width: 100%;';
 
     // Создаем контейнер-основу для круга
     const mapWrapper = document.createElement('div');
     mapWrapper.style.cssText = 'position: relative; width: 450px; height: 450px; display: flex; align-items: center; justify-content: center;';
 
-    // Собираем все уникальные жанры, вписанные пользователем вручную
+    // Считываем все уникальные жанры, вписанные пользователем вручную
     let uniqueGenres = [];
     if (typeof tracks !== 'undefined') {
         tracks.forEach(track => {
@@ -42,7 +41,7 @@ function initVibeWaveMap() {
     uniqueGenres.forEach(g => allNodes.push({ name: g, isSmart: false }));
 
     if (allNodes.length === 0) {
-        waveTabSection.innerHTML = '<div style="color: rgba(255,255,255,0.4); font-size: 14px; text-align: center; backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.02);">Загрузите треки во вкладке Любимое и укажите им жанры, чтобы запустить Мою Волну!</div>';
+        waveTabSection.innerHTML = '<div style="color: rgba(255,255,255,0.4); font-size: 14px; text-align: center; padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.02);">Загрузите треки во вкладке Любимое и укажите им жанры, чтобы запустить Мою Волну!</div>';
         return;
     }
 
@@ -65,7 +64,7 @@ function initVibeWaveMap() {
 
     allNodes.forEach((node, index) => {
         const angle = (index * 2 * Math.PI) / totalNodes - (Math.PI / 2);
-        const x = Math.cos(angle) * radius + 225 - 65; // 225 - центр холста
+        const x = Math.cos(angle) * radius + 225 - 65; 
         const y = Math.sin(angle) * radius + 225 - 20;
 
         const btn = document.createElement('button');
@@ -129,40 +128,42 @@ function startWavePlayback() {
     }
 }
 
-// Принудительное связывание событий клика левого меню без ломающих интервалов
+// ИСПРАВЛЕНО: Интегрируем вкладку Моей Волны напрямую в системную функцию switchTab()
 setTimeout(() => {
+    // 1. Делаем инъекцию поддержки вкладки 'wave' в системный переключатель
+    if (typeof switchTab === 'function') {
+        const originalSwitchTab = switchTab;
+        window.switchTab = function(tabName) {
+            // Вызываем родное переключение для всех вкладок
+            originalSwitchTab(tabName);
+            
+            // Если переключились на Волну — подсвечиваем кнопку и строим орбиту
+            if (tabName === 'wave') {
+                const waveMenuBtn = document.getElementById('menu-wave');
+                if (waveMenuBtn) waveMenuBtn.classList.add('active');
+                
+                const waveTabSection = document.getElementById('tab-wave');
+                if (waveTabSection) waveTabSection.style.setProperty('display', 'flex', 'important');
+                
+                document.getElementById('page-title').textContent = "Моя Волна";
+                initVibeWaveMap();
+            } else {
+                // Если ушли с Волны — гарантированно тушим её контейнер
+                const waveTabSection = document.getElementById('tab-wave');
+                if (waveTabSection) waveTabSection.style.display = 'none';
+                
+                const waveMenuBtn = document.getElementById('menu-wave');
+                if (waveMenuBtn) waveMenuBtn.classList.remove('active');
+            }
+        };
+    }
+
+    // 2. Вешаем чистый клик на кнопку бокового меню
     const waveMenuBtn = document.getElementById('menu-wave');
-    if (!waveMenuBtn) return;
-
-    waveMenuBtn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.style.display = 'none';
-            tab.classList.remove('active');
+    if (waveMenuBtn) {
+        waveMenuBtn.style.cursor = 'pointer';
+        waveMenuBtn.addEventListener('click', () => {
+            if (typeof switchTab === 'function') switchTab('wave');
         });
-        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-
-        const waveTab = document.getElementById('tab-wave');
-        if (waveTab) {
-            waveTab.style.setProperty('display', 'flex', 'important');
-            waveTab.classList.add('active');
-        }
-        
-        waveMenuBtn.classList.add('active');
-        const pageTitle = document.getElementById('page-title');
-        if (pageTitle) pageTitle.textContent = "Моя Волна";
-        
-        initVibeWaveMap();
-    });
-
-    document.querySelectorAll('.menu-item').forEach(item => {
-        if (item.id !== 'menu-wave') {
-            item.addEventListener('click', () => {
-                const waveTab = document.getElementById('tab-wave');
-                if (waveTab) {
-                    waveTab.style.display = 'none';
-                    waveTab.classList.remove('active');
-                }
-            });
-        }
-    });
-}, 1200);
+    }
+}, 1500);
