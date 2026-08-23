@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- ИСПРАВЛЕНО: Теперь вкладка в браузере называется Vibe Sound -->
     <title>Vibe Sound</title>
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
@@ -18,7 +17,6 @@
 
     <div class="app-container">
         
-        <!-- БОКОВАЯ ПАНЕЛЬ -->
         <aside class="sidebar">
             <div class="brand">
                 <div class="logo">
@@ -56,7 +54,6 @@
             </nav>
         </aside>
 
-        <!-- ОСНОВНОЙ КОНТЕНТ -->
         <main class="main-content">
             <header class="content-header">
                 <h1 id="page-title">Главная</h1>
@@ -106,7 +103,6 @@
                 </div>
             </section>
 
-            <!-- КОНТЕКСТНОЕ МЕНЮ В СТИЛЕ ТЕЛЕГРАМ -->
             <div id="tg-context-menu" class="tg-menu">
                 <div class="tg-menu-item" id="tg-menu-share">
                     <i data-lucide="share-2"></i> Поделиться
@@ -145,6 +141,8 @@
         });
     </script>
     <script src="database.js"></script>
+    <!-- ИСПРАВЛЕНО: Подключаем новый файл UI между базой и плеером -->
+    <script src="ui.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
