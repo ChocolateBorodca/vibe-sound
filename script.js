@@ -4,7 +4,7 @@ const tracks = [
     {
         title: "Night , Blooming Jasmine",
         artist: "fakemink",
-        audio: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/fakemink%20-%20Night%20%2C%20Blooming%20Jasmine.mp3",
+        audio: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/fakemink%20-%20Night%2C%20Blooming%20Jasmine.mp3",
         cover: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/images%20%282%29.png"
     },
     {
