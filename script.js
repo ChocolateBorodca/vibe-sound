@@ -19,7 +19,7 @@ const wallpapers = [
     {
         id: "requiem", // ИСПРАВЛЕНО: Теперь тут обычная строка без лишних кавычек
         name: "Requiem for a Dream",
-        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/ezgif-3591c7aa9e627762.gif"
+        url: "a"
     },
     {
         id: "Register",
