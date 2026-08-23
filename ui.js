@@ -11,8 +11,12 @@ function openContextMenu(e, type, id) {
     activeTargetId = id;
     
     tgMenu.style.display = 'block';
-    tgMenu.style.left = `${e.clientX - 140}px`;
-    tgMenu.style.top = `${e.clientY + 10}px`;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const parentRect = document.body.getBoundingClientRect();
+    
+    tgMenu.style.left = `${rect.left - parentRect.left - 160}px`;
+    tgMenu.style.top = `${rect.top - parentRect.top}px`;
 
     const delBtn = document.getElementById('tg-menu-delete');
     if (id === "classic") delBtn.style.display = 'none';
@@ -20,7 +24,7 @@ function openContextMenu(e, type, id) {
 }
 
 document.addEventListener('click', () => {
-    tgMenu.style.display = 'none';
+    if (tgMenu) tgMenu.style.display = 'none';
 });
 
 document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
@@ -57,20 +61,53 @@ document.getElementById('tg-menu-share').addEventListener('click', (e) => {
     e.stopPropagation();
     tgMenu.style.display = 'none';
 
-    let shareText = "";
-    const siteUrl = window.location.origin;
+    const siteUrl = window.location.origin + window.location.pathname;
+    alert("Готовим файл к отправке, подождите секунду...");
 
     if (activeMenuType === 'track') {
         const track = tracks.find(t => t.id === activeTargetId);
-        shareText = `🎵 Слушаю трек «${track.title}» в Vibe Sound! Зацени мой личный плеер: ${siteUrl}`;
-    } else {
-        shareText = `🎨 Зацени крутые анимированные обои в моем плеере Vibe Sound! Слушай музыку со стилем здесь: ${siteUrl}`;
+        const reader = new FileReader();
+        reader.readAsDataURL(track.audioFile);
+        reader.onloadend = function() {
+            const base64Audio = reader.result.split(',')[1];
+            if (track.coverFile) {
+                const coverReader = new FileReader();
+                coverReader.readAsDataURL(track.coverFile);
+                coverReader.onloadend = function() {
+                    const base64Cover = coverReader.result.split(',')[1];
+                    const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}&cover=${base64Cover}`;
+                    copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Кликни, и он сам установится у тебя на сайте: ${finalUrl}`);
+                };
+            } else {
+                const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}`;
+                copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Кликни, и он сам установится у тебя на сайте: ${finalUrl}`);
+            }
+        };
+    } else if (activeMenuType === 'wallpaper') {
+        const wp = wallpapers.find(w => w.id === activeTargetId);
+        const reader = new FileReader();
+        reader.readAsDataURL(wp.gifFile);
+        reader.onloadend = function() {
+            const base64Gif = reader.result.split(',')[1];
+            const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${base64Gif}`;
+            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы сразу поставить их себе на фон: ${finalUrl}`);
+        };
     }
-
-    navigator.clipboard.writeText(shareText).then(() => {
-        alert("Ссылка скопирована в буфер обмена!");
-    });
 });
+
+function copyTextToClipboard(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand("copy");
+        alert("Умная ссылка скопирована! Отправь её другу в ЛС, при переходе файл сам загрузится к нему в плеер.");
+    } catch (err) {
+        alert("Не удалось скопировать, ссылка слишком большая для этого браузера.");
+    }
+    document.body.removeChild(textarea);
+}
 
 function buildWallpaperUI() {
     if (!wallpaperGrid) return;
@@ -82,8 +119,8 @@ function buildWallpaperUI() {
         
         card.innerHTML = `
             <div class="wallpaper-preview" style="${bgStyle}"></div>
-            <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 4px;">
-                <span>${wp.name}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 4px; gap: 8px;">
+                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;">${wp.name}</span>
                 <button class="more-actions-btn" onclick="openContextMenu(event, 'wallpaper', '${wp.id}')">
                     <i data-lucide="more-vertical"></i>
                 </button>
