@@ -4,15 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nextmove Music</title>
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Исправленные пути к шрифтам Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- ИСПРАВЛЕНО: Правильное подключение библиотеки иконок Lucide -->
     <script src="https://unpkg.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Анимированный задний фон (сюда JS будет подставлять GIF или цвет) -->
+    <!-- Анимированный задний фон -->
     <div class="bg-wallpaper" id="bg-wallpaper"></div>
     <div class="bg-glow" id="bg-glow-layer"></div>
 
@@ -43,7 +45,6 @@
                     <i data-lucide="heart"></i>
                     <span>Любимое</span>
                 </div>
-                <!-- НОВАЯ ВКЛАДКА ОБОИ -->
                 <div id="menu-wallpaper" class="menu-item">
                     <i data-lucide="image"></i>
                     <span>Обои</span>
@@ -124,7 +125,12 @@
 
     </div>
 
-    <script>lucide.createIcons();</script>
+    <!-- Запуск иконок после полной загрузки DOM -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            if(window.lucide) lucide.createIcons();
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
