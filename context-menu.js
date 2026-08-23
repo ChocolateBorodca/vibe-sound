@@ -11,7 +11,7 @@ if (!tgMenu) {
     document.body.appendChild(tgMenu);
 }
 
-// ИСПРАВЛЕНО: Сделали окошко шире (180px), чтобы текст помещался, и добавили внутренний отступ
+// Уменьшили ширину окна до 120px, так как осталась одна кнопка
 tgMenu.style.cssText = `
     position: fixed;
     display: none;
@@ -19,27 +19,25 @@ tgMenu.style.cssText = `
     backdrop-filter: blur(35px) saturate(150%);
     -webkit-backdrop-filter: blur(35px) saturate(150%);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    width: 180px;
+    border-radius: 14px;
+    width: 120px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     z-index: 999999;
-    padding: 8px;
+    padding: 4px;
 `;
 
+// ИСПРАВЛЕНО: Убрали кнопку «Поделиться»
 tgMenu.innerHTML = `
-    <div class="tg-menu-item" id="tg-menu-share" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: #ffffff; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s; white-space: nowrap;">
-        <i data-lucide="share-2" style="width: 18px; height: 18px; color: rgba(255,255,255,0.7);"></i> Поделиться
-    </div>
-    <div class="tg-menu-item delete" id="tg-menu-delete" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: #ff4d6d; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s; white-space: nowrap;">
-        <i data-lucide="trash-2" style="width: 18px; height: 18px; color: #ff4d6d;"></i> Удалить
+    <div class="tg-menu-item delete" id="tg-menu-delete" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: #ff4d6d; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s; white-space: nowrap; width: 100%;">
+        <i data-lucide="trash-2" style="width: 16px; height: 16px; color: #ff4d6d;"></i> Удалить
     </div>
 `;
 
 tgMenu.addEventListener('mouseover', (e) => {
     const item = e.target.closest('.tg-menu-item');
-    if (!item) return;
-    if (item.classList.contains('delete')) item.style.background = 'rgba(255, 77, 109, 0.15)';
-    else item.style.background = 'rgba(255, 255, 255, 0.1)';
+    if (item && item.classList.contains('delete')) {
+        item.style.background = 'rgba(255, 77, 109, 0.15)';
+    }
 });
 tgMenu.addEventListener('mouseout', (e) => {
     const item = e.target.closest('.tg-menu-item');
@@ -52,7 +50,7 @@ function openContextMenu(e, type, id) {
     activeTargetId = id;
     
     if (id === "classic") {
-        alert("Это базовое оформление плеера, его нельзя удалить или переслать.");
+        alert("Это базовое оформление плеера, его нельзя удалить.");
         return;
     }
     
@@ -60,13 +58,9 @@ function openContextMenu(e, type, id) {
     
     const rect = e.currentTarget.getBoundingClientRect();
     
-    // ИСПРАВЛЕНО: Сдвинули окошко на 195px влево от кнопки, чтобы оно никогда не вылетало за экран справа
-    tgMenu.style.left = `${rect.right - 195}px`;
-    tgMenu.style.top = `${rect.bottom + 8}px`;
-
-    const delBtn = document.getElementById('tg-menu-delete');
-    if (id === "classic") delBtn.style.display = 'none';
-    else delBtn.style.display = 'flex';
+    // ИСПРАВЛЕНО: Сдвинули блок далеко влево (на 135px от края кнопки трех точек), чтобы он гарантированно помещался на экране
+    tgMenu.style.left = `${rect.right - 135}px`;
+    tgMenu.style.top = `${rect.bottom + 6}px`;
 }
 
 document.addEventListener('click', () => {
@@ -102,59 +96,6 @@ document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
         }
     }
 });
-
-document.getElementById('tg-menu-share').addEventListener('click', (e) => {
-    e.stopPropagation();
-    tgMenu.style.display = 'none';
-
-    // ИСПРАВЛЕНО: Теперь в ссылке строго ваше чистое имя домена без лишних путей
-    const siteUrl = "https://vibe-sound.vercel.app/";
-    alert("Готовим файл к отправке, подождите секунду...");
-
-    if (activeMenuType === 'track') {
-        const track = tracks.find(t => t.id === activeTargetId);
-        const reader = new FileReader();
-        reader.readAsDataURL(track.audioFile);
-        reader.onloadend = function() {
-            const base64Audio = reader.result.split(',');
-            if (track.coverFile) {
-                const coverReader = new FileReader();
-                coverReader.readAsDataURL(track.coverFile);
-                coverReader.onloadend = function() {
-                    const base64Cover = coverReader.result.split(',');
-                    const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}&cover=${base64Cover}`;
-                    copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Кликни по ссылке, и он сам автоматически запишется к тебе: ${finalUrl}`);
-                };
-            } else {
-                const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}`;
-                copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Кликни по ссылке, и он сам автоматически запишется к тебе: ${finalUrl}`);
-            }
-        };
-    } else if (activeMenuType === 'wallpaper') {
-        const wp = wallpapers.find(w => w.id === activeTargetId);
-        const reader = new FileReader();
-        reader.readAsDataURL(wp.gifFile);
-        reader.onloadend = function() {
-            const base64Gif = reader.result.split(',');
-            const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${base64Gif}`;
-            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы сразу поставить их себе на фон: ${finalUrl}`);
-        };
-    }
-});
-
-function copyTextToClipboard(text) {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-        document.execCommand("copy");
-        alert("Ссылка скопирована! Отправь её другу в ЛС, при клике медиафайл сам установится у него на сайте.");
-    } catch (err) {
-        alert("Не удалось скопировать.");
-    }
-    document.body.removeChild(textarea);
-}
 
 function buildWallpaperUI() {
     if (!wallpaperGrid) return;
