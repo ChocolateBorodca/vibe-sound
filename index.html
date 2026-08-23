@@ -70,8 +70,9 @@
             <!-- ЭКРАН 1: ГЛАВНАЯ (ПЛЕЕР) -->
             <section id="tab-main" class="tab-content active">
                 <div class="player-card">
-                    <div class="player-cover">
-                        <img id="cover" src="" alt="Обложка">
+                    <div class="player-cover" id="cover-parent">
+                        <!-- Убрали текст alt, чтобы не мозолил глаза -->
+                        <img id="cover" src="" alt="">
                     </div>
                     <div class="player-info">
                         <h2 id="title">Загрузка...</h2>
@@ -80,27 +81,33 @@
                 </div>
             </section>
 
-            <!-- ЭКРАН 2: ЛЮБИМОЕ (СПИСОК ТРЕКОВ + ЗАГРУЗКА) -->
+            <!-- ЭКРАН 2: МЕДИАТЕКА (СПИСОК ТРЕКОВ + ДВЕ КНОПКИ УПРАВЛЕНИЯ) -->
             <section id="tab-favorites" class="tab-content">
                 <div class="playlist-container">
                     <div class="playlist-top-bar">
                         <div class="playlist-header-text">Ваша медиатека</div>
-                        <!-- Кнопка добавления музыки с телефона -->
-                        <button class="upload-action-btn" onclick="document.getElementById('local-audio-input').click()">
-                            <i data-lucide="plus"></i> Добавить песню
-                        </button>
+                        <div style="display: flex; gap: 8px;">
+                            <!-- Кнопка для обложки -->
+                            <button class="upload-action-btn" onclick="document.getElementById('local-cover-input').click()">
+                                <i data-lucide="image"></i> Обложка к треку
+                            </button>
+                            <!-- Кнопка для песни -->
+                            <button class="upload-action-btn" onclick="document.getElementById('local-audio-input').click()">
+                                <i data-lucide="plus"></i> Песня
+                            </button>
+                        </div>
                         <input type="file" id="local-audio-input" accept="audio/mp3,audio/*" style="display: none;">
+                        <input type="file" id="local-cover-input" accept="image/*" style="display: none;">
                     </div>
                     <div class="tracks-list" id="favorites-list"></div>
                 </div>
             </section>
 
-            <!-- ЭКРАН 3: ОБОИ (+ ЗАГРУЗКА СВОИХ ГИФОК) -->
+            <!-- ЭКРАН 3: ОБОИ -->
             <section id="tab-wallpaper" class="tab-content">
                 <div class="wallpaper-container">
                     <div class="playlist-top-bar">
                         <div class="playlist-header-text">Фоновое оформление</div>
-                        <!-- Кнопка добавления обоев из галереи -->
                         <button class="upload-action-btn" onclick="document.getElementById('local-bg-input').click()">
                             <i data-lucide="upload"></i> Свои обои (GIF/Фото)
                         </button>
