@@ -1,32 +1,15 @@
 // === БАЗОВЫЙ ПЛЕЕР ===
-// Сюда можно дописывать вечные треки из Vercel Blob, если захотите
 const tracks = [
     {
-        title: "",
-        artist: "",
+        title: "Night , Blooming Jasmine",
+        artist: "fakemink",
         audio: "https://vercel-storage.com",
-        cover: "https://vercel-storage.com"
+        cover: "" // Сделали пустой, чтобы сразу сработал наш красивый матовый фон-заглушка!
     }
 ];
 
-// === СПИСОК ОБОЕВ (ВЕЧНЫЕ ССЫЛКИ ИЗ VERCEL BLOB) ===
 const wallpapers = [
-    { 
-        id: "classic", 
-        name: "Классический", 
-        url: "none", 
-        isClassic: true 
-    },
-    { 
-        id: "requiem", 
-        name: "Requiem for a Dream", 
-        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/Requiem%20for%20a%20Dream%2C%202000%20-%20Darren%20Aronofsky%20%281%29.gif" 
-    },
-    { 
-        id: "Register", 
-        name: "Register", 
-        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/Register%20-%20Login.gif" 
-    }
+    { id: "classic", name: "Классический", url: "none", isClassic: true }
 ];
 
 let currentIndex = 0;
@@ -47,14 +30,24 @@ const favoritesList = document.getElementById('favorites-list');
 const wallpaperGrid = document.getElementById('wallpaper-grid');
 const bgWallpaper = document.getElementById('bg-wallpaper');
 const bgGlowLayer = document.getElementById('bg-glow-layer');
+const coverParent = document.getElementById('cover-parent');
 
 function loadTrack() {
+    if (tracks.length === 0) return;
     const current = tracks[currentIndex];
     audio.src = current.audio;
-    cover.src = current.cover;
     title.textContent = current.title;
     artist.textContent = current.artist;
     progress.value = 0;
+
+    // Умная маскировка пустой обложки: убираем надпись "Обложка" и ставим стильный тёмный градиент
+    if (!current.cover || current.cover === "") {
+        cover.style.display = "none";
+        coverParent.style.background = "linear-gradient(135deg, #1e1b4b, #0f172a)";
+    } else {
+        cover.style.display = "block";
+        cover.src = current.cover;
+    }
 
     document.querySelectorAll('.track-row').forEach((row, i) => {
         row.classList.toggle('playing-now', i === currentIndex);
@@ -175,8 +168,13 @@ function buildFavoritesUI() {
     tracks.forEach((track, i) => {
         const row = document.createElement('div');
         row.className = `track-row ${i === currentIndex ? 'playing-now' : ''}`;
+        
+        // Маскировка мелкой картинки в списке
+        const imgStyle = (!track.cover || track.cover === "") ? 'background: linear-gradient(135deg, #1e1b4b, #0f172a);' : '';
+        const imgSrc = (!track.cover || track.cover === "") ? '' : track.cover;
+
         row.innerHTML = `
-            <img src="${track.cover}" alt="">
+            <img src="${imgSrc}" style="${imgStyle}" alt="">
             <div class="track-row-info">
                 <div class="track-row-title">${track.title}</div>
                 <div class="track-row-artist">${track.artist}</div>
@@ -194,26 +192,23 @@ function buildFavoritesUI() {
     });
 }
 
-// === УМНАЯ ЛОГИКА ЗАГРУЗКИ С ПАМЯТИ ТЕЛЕФОНА ===
+// === ЛОГИКА ЗАГРУЗКИ С ПАМЯТИ ТЕЛЕФОНА ===
+
+// 1. Добавление песни
 document.getElementById('local-audio-input').addEventListener('change', function(e) {
-    const file = e.target.files[0]; // Исправлено чтение одного файла
+    const file = e.target.files[0];
     if (!file) return;
 
-    // Временный адрес трека в памяти смартфона
     const blobUrl = URL.createObjectURL(file);
-    
-    // ИСПРАВЛЕНО: Извлекаем чистое название файла (убираем .mp3)
     const cleanFileName = file.name.replace(/\.[^/.]+$/, "");
 
-    // Добавляем песню в список со своим родным именем
     tracks.push({
         title: cleanFileName,
         artist: "С телефона",
         audio: blobUrl,
-        cover: "https://vercel-storage.com" // Базовая обложка
+        cover: "" // Изначально пустая обложка (включит красивый фон)
     });
 
-    // Обновляем список, включаем песню и перекидываем на главный экран
     buildFavoritesUI();
     currentIndex = tracks.length - 1;
     loadTrack();
@@ -223,7 +218,22 @@ document.getElementById('local-audio-input').addEventListener('change', function
     switchTab('main');
 });
 
-// Добавление кастомных обоев из галереи
+// 2. ИСПРАВЛЕНО: Привязка обложки конкретно к выбранному сейчас треку!
+document.getElementById('local-cover-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file || tracks.length === 0) return;
+
+    const imgBlobUrl = URL.createObjectURL(file);
+    
+    // Перезаписываем обложку у текущей активной песни
+    tracks[currentIndex].cover = imgBlobUrl;
+
+    // Обновляем плеер и списки
+    loadTrack();
+    buildFavoritesUI();
+});
+
+// 3. Добавление обоев
 document.getElementById('local-bg-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
