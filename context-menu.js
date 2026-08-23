@@ -11,7 +11,6 @@ if (!tgMenu) {
     document.body.appendChild(tgMenu);
 }
 
-// Уменьшили ширину окна до 120px, так как осталась одна кнопка
 tgMenu.style.cssText = `
     position: fixed;
     display: none;
@@ -26,7 +25,6 @@ tgMenu.style.cssText = `
     padding: 4px;
 `;
 
-// ИСПРАВЛЕНО: Убрали кнопку «Поделиться»
 tgMenu.innerHTML = `
     <div class="tg-menu-item delete" id="tg-menu-delete" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: #ff4d6d; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s; white-space: nowrap; width: 100%;">
         <i data-lucide="trash-2" style="width: 16px; height: 16px; color: #ff4d6d;"></i> Удалить
@@ -57,8 +55,6 @@ function openContextMenu(e, type, id) {
     tgMenu.style.display = 'block';
     
     const rect = e.currentTarget.getBoundingClientRect();
-    
-    // ИСПРАВЛЕНО: Сдвинули блок далеко влево (на 135px от края кнопки трех точек), чтобы он гарантированно помещался на экране
     tgMenu.style.left = `${rect.right - 135}px`;
     tgMenu.style.top = `${rect.bottom + 6}px`;
 }
@@ -105,12 +101,13 @@ function buildWallpaperUI() {
         card.className = `wallpaper-card-item ${wp.id === currentWallpaperId ? 'active' : ''}`;
         const bgStyle = wp.isClassic ? 'background: #0d0d11;' : `background-image: url('${wp.url}');`;
         
+        // ИСПРАВЛЕНО: Заменили тег иконки Lucide на яркие текстовые три точки •••
         card.innerHTML = `
             <div class="wallpaper-preview" style="${bgStyle}"></div>
             <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 4px; gap: 8px;">
                 <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;">${wp.name}</span>
-                <button class="more-actions-btn" onclick="openContextMenu(event, 'wallpaper', '${wp.id}')" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                    <i data-lucide="more-horizontal" style="width: 18px; height: 18px;"></i>
+                <button class="more-actions-btn" onclick="openContextMenu(event, 'wallpaper', '${wp.id}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; cursor: pointer; padding: 2px 10px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 1px;">
+                    •••
                 </button>
             </div>
         `;
@@ -130,14 +127,15 @@ function buildFavoritesUI() {
         const imgStyle = (!track.cover || track.cover === "") ? 'background: linear-gradient(135deg, #1e1b4b, #0f172a)' : '';
         const imgSrc = (!track.cover || track.cover === "") ? '' : track.cover;
 
+        // ИСПРАВЛЕНО: Заменили тег иконки Lucide на яркие текстовые три точки •••
         row.innerHTML = `
             <img src="${imgSrc}" style="${imgStyle}" alt="">
             <div class="track-row-info">
                 <div class="track-row-title">${track.title}</div>
                 <div class="track-row-artist">${track.artist}</div>
             </div>
-            <button class="more-actions-btn" onclick="openContextMenu(event, 'track', ${track.id})" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                <i data-lucide="more-horizontal" style="width: 18px; height: 18px;"></i>
+            <button class="more-actions-btn" onclick="openContextMenu(event, 'track', ${track.id})" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; cursor: pointer; padding: 2px 10px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 1px;">
+                •••
             </button>
         `;
         row.addEventListener('click', () => {
