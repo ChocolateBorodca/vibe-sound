@@ -59,6 +59,24 @@ function updateTrackInDB(currentTrack) {
     tx.objectStore("tracks").put(currentTrack);
 }
 
+// Новая функция удаления трека из памяти смартфона
+function deleteTrackFromDB(id, callback) {
+    if (!db) return;
+    const tx = db.transaction("tracks", "readwrite");
+    tx.objectStore("tracks").delete(id).onsuccess = function() {
+        callback();
+    };
+}
+
+// Новая функция удаления обоев из памяти смартфона
+function deleteWallpaperFromDB(id, callback) {
+    if (!db) return;
+    const tx = db.transaction("wallpapers", "readwrite");
+    tx.objectStore("wallpapers").delete(id).onsuccess = function() {
+        callback();
+    };
+}
+
 function saveWallpaperToDB(newWallpaper, callback) {
     if (!db) return;
     const tx = db.transaction("wallpapers", "readwrite");
