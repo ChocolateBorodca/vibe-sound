@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nextmove Music</title>
+    <!-- Подключаем шрифт Inter для максимального сходства с макетом -->
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Подключаем иконки Lucide для бокового меню и кнопок -->
+    <script src="https://unpkg.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Переливающийся анимированный фон на заднем плане -->
+    <div class="bg-glow"></div>
+
+    <div class="app-container">
+        
+        <!-- БОКОВАЯ ПАНЕЛЬ -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo">
+                    <i data-lucide="move-right" style="transform: rotate(135deg);"></i>
+                    <span>Nextmove</span>
+                </div>
+                <button class="collapse-btn"><i data-lucide="sidebar"></i></button>
+            </div>
+
+            <div class="workspace-selector">
+                <div class="workspace-avatar">N</div>
+                <span class="workspace-name">Nimbus</span>
+                <i data-lucide="chevron-down" class="chevron"></i>
+            </div>
+
+            <nav class="menu">
+                <div id="menu-main" class="menu-item active">
+                    <i data-lucide="home"></i>
+                    <span>Главная</span>
+                </div>
+                <div id="menu-favorites" class="menu-item">
+                    <i data-lucide="heart"></i>
+                    <span>Любимое</span>
+                </div>
+                <div class="menu-item">
+                    <i data-lucide="music-4"></i>
+                    <span>Плейлисты</span>
+                </div>
+                <div class="menu-item">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Статистика</span>
+                </div>
+                <div class="menu-item">
+                    <i data-lucide="sliders"></i>
+                    <span>Настройки</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- ОСНОВНОЙ КОНТЕНТ -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="page-title">Главная</h1>
+            </header>
+
+            <!-- ЭКРАН 1: ГЛАВНАЯ (ПЛЕЕР) -->
+            <section id="tab-main" class="tab-content active">
+                <div class="player-card">
+                    <div class="player-cover">
+                        <img id="cover" src="cover1.jpg" alt="Обложка">
+                    </div>
+                    <div class="player-info">
+                        <h2 id="title">Загрузка...</h2>
+                        <p id="artist">Исполнитель</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ЭКРАН 2: ЛЮБИМОЕ (СПИСОК ТРЕКОВ) -->
+            <section id="tab-favorites" class="tab-content">
+                <div class="playlist-container">
+                    <div class="playlist-header-text">Ваши любимые треки</div>
+                    <div class="tracks-list" id="favorites-list">
+                        <!-- Сюда JS добавит список любимых песен -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ТЕГ АУДИО -->
+            <audio id="audio"></audio>
+
+            <!-- НИЖНЯЯ ПАНЕЛЬ УПРАВЛЕНИЯ -->
+            <footer class="player-controls-bar">
+                <!-- Прогресс-бар сверху панели -->
+                <div class="timeline-container">
+                    <span id="current-time" class="time-label">0:00</span>
+                    <div class="slider-wrapper">
+                        <input type="range" id="progress" class="progress-slider" value="0" max="100">
+                    </div>
+                    <span id="duration" class="time-label">0:00</span>
+                </div>
+
+                <!-- Блок с кнопками переключения и Play/Pause -->
+                <div class="controls-buttons">
+                    <button class="ctrl-btn" id="prev"><i data-lucide="skip-back"></i></button>
+                    <button class="play-pause-btn" id="play">
+                        <i data-lucide="play" id="play-icon"></i>
+                    </button>
+                    <button class="ctrl-btn" id="next"><i data-lucide="skip-forward"></i></button>
+                </div>
+            </footer>
+        </main>
+
+    </div>
+
+    <!-- Инициализация иконок Lucide -->
+    <script>lucide.createIcons();</script>
+    <script src="script.js"></script>
+</body>
+</html>
