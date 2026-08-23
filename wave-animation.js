@@ -3,7 +3,7 @@ function initWaveLiveAnimation() {
     if (!container) return;
 
     // Ссылка на твою GIF-анимацию волны из хранилища Vercel
-    const gifUrl = "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/LIB6492.gif";
+    const gifUrl = "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/fmahalem.gif";
 
     let waveImg = document.getElementById('wave-gif-element');
     if (!waveImg) {
