@@ -73,7 +73,7 @@ function renderStatsHTML(container, totalTime, timeVibe, userStatus, playData) {
 
             <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 20px; padding: 16px 20px; width: 100%;">
                 <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">📊 График прослушиваний треков (листайте влево-вправо)</div>
-                <div style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
+                <div class="stats-chart-scroll-area">
                     ${chartBarsHtml}
                 </div>
             </div>
