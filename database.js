@@ -1,92 +1,80 @@
-let db;
-const dbRequest = indexedDB.open("MusicPlayerDB", 1);
+// ВСТАВЬТЕ ЭТОТ ОБНОВЛЕННЫЙ БЛОК В САМЫЙ КОНЕЦ ФАЙЛА database.js ВМЕСТО СТАРЫХ СТРОК С SHARE
 
-dbRequest.onupgradeneeded = function(e) {
-    db = e.target.result;
-    if (!db.objectStoreNames.contains("tracks")) db.createObjectStore("tracks", { keyPath: "id", autoIncrement: true });
-    if (!db.objectStoreNames.contains("wallpapers")) db.createObjectStore("wallpapers", { keyPath: "id" });
-    if (!db.objectStoreNames.contains("settings")) db.createObjectStore("settings");
-};
+// Автоматический перехват короткой интернет-ссылки при запуске плеера другом
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shareType = urlParams.get('shareType');
 
-dbRequest.onsuccess = function(e) {
-    db = e.target.result;
-    loadDataFromStorage();
-};
+    if (!shareType) return;
 
-function loadDataFromStorage() {
-    const transaction = db.transaction(["tracks", "wallpapers", "settings"], "readonly");
-    
-    transaction.objectStore("tracks").getAll().onsuccess = function(e) {
-        const savedTracks = e.target.result;
-        savedTracks.forEach(t => {
-            t.audio = URL.createObjectURL(t.audioFile);
-            if (t.coverFile) t.cover = URL.createObjectURL(t.coverFile);
-            tracks.push(t);
-        });
-        if (typeof buildFavoritesUI === "function") buildFavoritesUI();
-        if (typeof loadTrack === "function") loadTrack();
-    };
+    window.history.replaceState({}, document.title, window.location.pathname);
 
-    transaction.objectStore("wallpapers").getAll().onsuccess = function(e) {
-        const savedWps = e.target.result;
-        savedWps.forEach(wp => {
-            wp.url = URL.createObjectURL(wp.gifFile);
-            wallpapers.push(wp);
-        });
-        if (typeof buildWallpaperUI === "function") buildWallpaperUI();
-        
-        db.transaction("settings", "readonly").objectStore("settings").get("currentWallpaper").onsuccess = function(e) {
-            if (e.target.result) {
-                currentWallpaperId = e.target.result;
+    setTimeout(async () => {
+        try {
+            if (shareType === 'track') {
+                const title = urlParams.get('title') || "Принятый трек";
+                const audioUrl = urlParams.get('audioUrl');
+                const coverUrl = urlParams.get('coverUrl');
+
+                if (!audioUrl) return;
+
+                // Скачиваем аудиофайл по короткой ссылке с Vercel Blob
+                const audioRes = await fetch(audioUrl);
+                const audioBlob = await audioRes.blob();
+                const audioFile = new File([audioBlob], `${title}.mp3`, { type: "audio/mp3" });
+                
+                const newTrack = {
+                    title: title,
+                    artist: "Добавлено по ссылке",
+                    audio: URL.createObjectURL(audioFile),
+                    cover: "",
+                    audioFile: audioFile
+                };
+
+                if (coverUrl) {
+                    const coverRes = await fetch(coverUrl);
+                    const coverBlob = await coverRes.blob();
+                    const coverFile = new File([coverBlob], "cover.jpg", { type: "image/jpeg" });
+                    newTrack.cover = URL.createObjectURL(coverFile);
+                    newTrack.coverFile = coverFile;
+                }
+
+                saveTrackToDB(newTrack, function(insertedId) {
+                    newTrack.id = insertedId;
+                    tracks.push(newTrack);
+                    if (typeof buildFavoritesUI === "function") buildFavoritesUI();
+                    currentIndex = tracks.length - 1;
+                    if (typeof loadTrack === "function") loadTrack();
+                    alert(`Успешно принят трек: ${title}! Он сохранен в вашу медиатеку.`);
+                });
+
+            } else if (shareType === 'wp') {
+                const wpId = urlParams.get('wpId') || "custom-" + Date.now();
+                const url = urlParams.get('url');
+
+                if (!url) return;
+
+                // Скачиваем GIF обоев по короткой ссылке с Vercel Blob
+                const wpRes = await fetch(url);
+                const gifBlob = await wpRes.blob();
+                const gifFile = new File([gifBlob], "wallpaper.gif", { type: "image/gif" });
+
+                const newWallpaper = {
+                    id: wpId,
+                    name: "Принятые обои",
+                    url: URL.createObjectURL(gifFile),
+                    gifFile: gifFile
+                };
+
+                saveWallpaperToDB(newWallpaper, function() {
+                    wallpapers.push(newWallpaper);
+                    if (typeof buildWallpaperUI === "function") buildWallpaperUI();
+                    if (typeof setWallpaper === "function") setWallpaper(wpId);
+                    alert("Успешно приняты новые живые обои!");
+                });
             }
-            if (typeof setWallpaper === "function") setWallpaper(currentWallpaperId);
-        };
-    };
-}
-
-function saveTrackToDB(newTrack, callback) {
-    if (!db) return;
-    const tx = db.transaction("tracks", "readwrite");
-    const request = tx.objectStore("tracks").add(newTrack);
-    request.onsuccess = function(e) {
-        callback(e.target.result);
-    };
-}
-
-function updateTrackInDB(currentTrack) {
-    if (!db || !currentTrack.id) return;
-    const tx = db.transaction("tracks", "readwrite");
-    tx.objectStore("tracks").put(currentTrack);
-}
-
-// Новая функция удаления трека из памяти смартфона
-function deleteTrackFromDB(id, callback) {
-    if (!db) return;
-    const tx = db.transaction("tracks", "readwrite");
-    tx.objectStore("tracks").delete(id).onsuccess = function() {
-        callback();
-    };
-}
-
-// Новая функция удаления обоев из памяти смартфона
-function deleteWallpaperFromDB(id, callback) {
-    if (!db) return;
-    const tx = db.transaction("wallpapers", "readwrite");
-    tx.objectStore("wallpapers").delete(id).onsuccess = function() {
-        callback();
-    };
-}
-
-function saveWallpaperToDB(newWallpaper, callback) {
-    if (!db) return;
-    const tx = db.transaction("wallpapers", "readwrite");
-    const request = tx.objectStore("wallpapers").add(newWallpaper);
-    request.onsuccess = function() {
-        callback();
-    };
-}
-
-function saveSettingToDB(key, value) {
-    if (!db) return;
-    db.transaction("settings", "readwrite").objectStore("settings").put(value, key);
-}
+        } catch (err) {
+            alert("Не удалось автоматически установить файл по ссылке.");
+        }
+    }, 1200);
+});
