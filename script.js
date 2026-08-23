@@ -1,8 +1,8 @@
 // === БАЗОВЫЙ ПЛЕЕР ===
 const tracks = [
     {
-        title: "Night , Blooming Jasmine",
-        artist: "fakemink",
+        title: "",
+        artist: "",
         audio: "https://vercel-storage.com",
         cover: "" // Сделали пустой, чтобы сразу сработал наш красивый матовый фон-заглушка!
     }
