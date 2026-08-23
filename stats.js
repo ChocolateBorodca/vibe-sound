@@ -4,15 +4,18 @@ function recordPlayEvent(trackId) {
     totalListens++;
     localStorage.setItem('vibe_total_plays', totalListens);
 
+    // Читаем детальную историю прослушиваний треков
     let playData = JSON.parse(localStorage.getItem('vibe_detailed_plays') || "{}");
     playData[trackId] = (playData[trackId] || 0) + 1;
     localStorage.setItem('vibe_detailed_plays', JSON.stringify(playData));
 
+    // Читаем почасовую историю для вычисления вайба
     const currentHour = new Date().getHours();
     let hourlyData = JSON.parse(localStorage.getItem('vibe_hourly_plays') || "{}");
     hourlyData[currentHour] = (hourlyData[currentHour] || 0) + 1;
     localStorage.setItem('vibe_hourly_plays', JSON.stringify(hourlyData));
 
+    // Если сейчас открыта вкладка статистики — мгновенно обновляем цифры на экране
     const activeTab = document.querySelector('.tab-content.active');
     if (activeTab && activeTab.id === 'tab-stats') {
         buildAdvancedStatsUI();
@@ -26,6 +29,7 @@ function buildAdvancedStatsUI() {
     let playData = JSON.parse(localStorage.getItem('vibe_detailed_plays') || "{}");
     let hourlyData = JSON.parse(localStorage.getItem('vibe_hourly_plays') || "{}");
 
+    // Вычисляем Дневной/Ночной вайб
     let dayPlays = 0, nightPlays = 0;
     Object.keys(hourlyData).forEach(h => {
         let hour = parseInt(h, 10);
@@ -38,10 +42,11 @@ function buildAdvancedStatsUI() {
         timeVibe = dayPlays >= nightPlays ? "☀️ Дневной Меломан" : "🌙 Полуночный Вайбер";
     }
 
+    // Вычисляем текстовый статус
     let userStatus = "Новичок";
-    if (totalListens >= 50) userStatus = "👑 Легенда Звука";
+    if (totalListens >= 50) userStatus = "👑 Легенда Вайба";
     else if (totalListens >= 15) userStatus = "🎧 Аудио-Зависимый";
-    else if (totalListens > 0) userStatus = "🎵 Ценитель Вайба";
+    else if (totalListens > 0) userStatus = "🎵 Ценитель Звука";
 
     let totalSeconds = 0;
     let loadedCount = 0;
