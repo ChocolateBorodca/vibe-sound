@@ -4,7 +4,7 @@ const tracks = [
         title: "Night , Blooming Jasmine",
         artist: "fakemink",
         audio: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/fakemink%20-%20Night%2C%20Blooming%20Jasmine.mp3",
-        cover: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/images%20%282%29.png"
+        cover: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/images%20%282%29.jpg"
     }
 ];
 
@@ -19,7 +19,7 @@ const wallpapers = [
     {
         id: "requiem", // ИСПРАВЛЕНО: Теперь тут обычная строка без лишних кавычек
         name: "Requiem for a Dream",
-        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/Requiem%20for%20a%20Dream%2C%202000%20-%20Darren%20Aronofsky%20%281%29.gif"
+        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/ezgif-3591c7aa9e627762.gif"
     },
     {
         id: "Register",
