@@ -1,266 +1,80 @@
-const tracks = [];
+/* Вставьте этот блок в самый конец вашего файла style.css */
 
-const wallpapers = [
-    { id: "classic", name: "Классический", url: "none", isClassic: true }
-];
-
-let currentIndex = 0;
-let currentWallpaperId = "classic";
-
-const audio = document.getElementById('audio');
-const playBtn = document.getElementById('play');
-const playIcon = document.getElementById('play-icon');
-const prevBtn = document.getElementById('prev');
-const nextBtn = document.getElementById('next');
-const progress = document.getElementById('progress');
-const currentTimeEl = document.getElementById('current-time');
-const durationEl = document.getElementById('duration');
-const cover = document.getElementById('cover');
-const title = document.getElementById('title');
-const artist = document.getElementById('artist');
-const favoritesList = document.getElementById('favorites-list');
-const wallpaperGrid = document.getElementById('wallpaper-grid');
-const bgWallpaper = document.getElementById('bg-wallpaper');
-const bgGlowLayer = document.getElementById('bg-glow-layer');
-const coverParent = document.getElementById('cover-parent');
-
-function loadTrack() {
-    if (tracks.length === 0) {
-        title.textContent = "Нет треков";
-        artist.textContent = "Загрузите музыку во вкладке Любимое";
-        cover.style.display = "none";
-        coverParent.style.background = "linear-gradient(135deg, #1e1b4b, #0f172a)";
-        return;
-    }
-    const current = tracks[currentIndex];
-    audio.src = current.audio;
-    title.textContent = current.title;
-    artist.textContent = current.artist;
-    progress.value = 0;
-
-    if (!current.cover || current.cover === "") {
-        cover.style.display = "none";
-        coverParent.style.background = "linear-gradient(135deg, #1e1b4b, #0f172a)";
-    } else {
-        cover.style.display = "block";
-        cover.src = current.cover;
-    }
-
-    document.querySelectorAll('.track-row').forEach((row, i) => {
-        row.classList.toggle('playing-now', i === currentIndex);
-    });
+.track-row, .wallpaper-card-item {
+    position: relative;
 }
 
-function togglePlay() {
-    if (tracks.length === 0) return;
-    if (audio.paused) {
-        audio.play();
-        playIcon.setAttribute('data-lucide', 'pause');
-    } else {
-        audio.pause();
-        playIcon.setAttribute('data-lucide', 'play');
-    }
-    lucide.createIcons();
+/* Кнопка трех точек */
+.more-actions-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    z-index: 5;
 }
 
-function nextTrack() {
-    if (tracks.length === 0) return;
-    currentIndex = (currentIndex + 1) % tracks.length;
-    loadTrack();
-    audio.play();
-    playIcon.setAttribute('data-lucide', 'pause');
-    lucide.createIcons();
+.more-actions-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
 }
 
-function prevTrack() {
-    if (tracks.length === 0) return;
-    currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-    loadTrack();
-    audio.play();
-    playIcon.setAttribute('data-lucide', 'pause');
-    lucide.createIcons();
+.more-actions-btn i {
+    width: 18px;
+    height: 18px;
 }
 
-playBtn.addEventListener('click', togglePlay);
-nextBtn.addEventListener('click', nextTrack);
-prevBtn.addEventListener('click', prevTrack);
-
-function formatTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
-    let min = Math.floor(seconds / 60);
-    let sec = Math.floor(seconds % 60);
-    return min + ':' + (sec < 10 ? '0' : '') + sec;
+/* Контекстное меню в стиле Telegram (размытый матовый пластик) */
+.tg-menu {
+    position: fixed;
+    display: none;
+    background: rgba(23, 23, 30, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    min-width: 160px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    padding: 6px;
 }
 
-audio.addEventListener('timeupdate', () => {
-    if (audio.duration) {
-        progress.value = (audio.currentTime / audio.duration) * 100;
-        currentTimeEl.textContent = formatTime(audio.currentTime);
-    }
-});
-
-audio.addEventListener('loadedmetadata', () => {
-    durationEl.textContent = formatTime(audio.duration);
-});
-
-progress.addEventListener('input', () => {
-    if (audio.duration) {
-        audio.currentTime = (progress.value / 100) * audio.duration;
-    }
-});
-
-audio.addEventListener('ended', nextTrack);
-
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-    document.getElementById(`menu-${tabName}`).classList.add('active');
-
-    document.getElementById('page-title').textContent = 
-        tabName === 'main' ? 'Главная' : (tabName === 'favorites' ? 'Медиатека' : 'Обои');
+.tg-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: #e2e2e8;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s;
 }
 
-document.getElementById('menu-main').addEventListener('click', () => switchTab('main'));
-document.getElementById('menu-favorites').addEventListener('click', () => switchTab('favorites'));
-document.getElementById('menu-wallpaper').addEventListener('click', () => switchTab('wallpaper'));
-
-function setWallpaper(wpId) {
-    currentWallpaperId = wpId;
-    const wp = wallpapers.find(w => w.id === wpId);
-    
-    if (wp) {
-        if (wp.isClassic) {
-            bgWallpaper.style.backgroundImage = "none";
-            bgGlowLayer.style.display = "block";
-        } else {
-            bgWallpaper.style.backgroundImage = `url('${wp.url}')`;
-            bgGlowLayer.style.display = "none";
-        }
-        if (typeof saveSettingToDB === "function") saveSettingToDB("currentWallpaper", wpId);
-    }
-
-    document.querySelectorAll('.wallpaper-card-item').forEach((card, i) => {
-        card.classList.toggle('active', wallpapers[i].id === wpId);
-    });
+.tg-menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
-function buildWallpaperUI() {
-    wallpaperGrid.innerHTML = '';
-    wallpapers.forEach((wp) => {
-        const card = document.createElement('div');
-        card.className = `wallpaper-card-item ${wp.id === currentWallpaperId ? 'active' : ''}`;
-        const bgStyle = wp.isClassic ? 'background: #0d0d11;' : `background-image: url('${wp.url}');`;
-        
-        card.innerHTML = `
-            <div class="wallpaper-preview" style="${bgStyle}"></div>
-            <span>${wp.name}</span>
-        `;
-        card.addEventListener('click', () => setWallpaper(wp.id));
-        wallpaperGrid.appendChild(card);
-    });
+.tg-menu-item i {
+    width: 16px;
+    height: 16px;
+    color: #a3a3b3;
 }
 
-function buildFavoritesUI() {
-    favoritesList.innerHTML = '';
-    tracks.forEach((track, i) => {
-        const row = document.createElement('div');
-        row.className = `track-row ${i === currentIndex ? 'playing-now' : ''}`;
-        
-        const imgStyle = (!track.cover || track.cover === "") ? 'background: linear-gradient(135deg, #1e1b4b, #0f172a);' : '';
-        const imgSrc = (!track.cover || track.cover === "") ? '' : track.cover;
-
-        row.innerHTML = `
-            <img src="${imgSrc}" style="${imgStyle}" alt="">
-            <div class="track-row-info">
-                <div class="track-row-title">${track.title}</div>
-                <div class="track-row-artist">${track.artist}</div>
-            </div>
-        `;
-        row.addEventListener('click', () => {
-            currentIndex = i;
-            loadTrack();
-            audio.play();
-            playIcon.setAttribute('data-lucide', 'pause');
-            lucide.createIcons();
-            switchTab('main');
-        });
-        favoritesList.appendChild(row);
-    });
+.tg-menu-item.delete {
+    color: #ff4d6d;
 }
 
-document.getElementById('local-audio-input').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+.tg-menu-item.delete i {
+    color: #ff4d6d;
+}
 
-    const blobUrl = URL.createObjectURL(file);
-    const cleanFileName = file.name.replace(/\.[^/.]+$/, "");
-
-    const newTrack = {
-        title: cleanFileName,
-        artist: "С телефона",
-        audio: blobUrl,
-        cover: "",
-        audioFile: file
-    };
-
-    if (typeof saveTrackToDB === "function") {
-        saveTrackToDB(newTrack, function(insertedId) {
-            newTrack.id = insertedId;
-            tracks.push(newTrack);
-            buildFavoritesUI();
-            currentIndex = tracks.length - 1;
-            loadTrack();
-            audio.play();
-            playIcon.setAttribute('data-lucide', 'pause');
-            lucide.createIcons();
-            switchTab('main');
-        });
-    }
-});
-
-document.getElementById('local-cover-input').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file || tracks.length === 0) return;
-
-    const imgBlobUrl = URL.createObjectURL(file);
-    const currentTrack = tracks[currentIndex];
-    
-    currentTrack.cover = imgBlobUrl;
-    currentTrack.coverFile = file;
-
-    if (typeof updateTrackInDB === "function") {
-        updateTrackInDB(currentTrack);
-    }
-
-    loadTrack();
-    buildFavoritesUI();
-});
-
-document.getElementById('local-bg-input').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const blobUrl = URL.createObjectURL(file);
-    const customId = "custom-" + Date.now();
-
-    const newWallpaper = {
-        id: customId,
-        name: "Мои обои",
-        url: blobUrl,
-        gifFile: file
-    };
-
-    if (typeof saveWallpaperToDB === "function") {
-        saveWallpaperToDB(newWallpaper, function() {
-            wallpapers.push(newWallpaper);
-            buildWallpaperUI();
-            setWallpaper(customId);
-        });
-    }
-});
-
-buildFavoritesUI();
-buildWallpaperUI();
-loadTrack();
+.tg-menu-item.delete:hover {
+    background: rgba(255, 77, 109, 0.1);
+}
