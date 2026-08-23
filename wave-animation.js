@@ -1,23 +1,16 @@
-let audioCtx = null;
-let analyser = null;
-let source = null;
-let dataArray = null;
-let isAudioContextInitialized = false;
 let animationFrameId = null;
-let phase = 0;
+let wavePhase = 0;
 
 function initWaveLiveAnimation() {
     const waveTabSection = document.getElementById('tab-wave');
     const mainContent = document.querySelector('.main-content');
     const audio = document.getElementById('audio');
-    
-    // Берем твой новый контейнер напрямую из HTML
     const waveContainer = document.getElementById('wave-container');
 
     const isWaveTabActive = waveTabSection && waveTabSection.classList.contains('active');
 
     if (isWaveTabActive) {
-        // Делаем весь экран вокруг контейнера чисто черным, чтобы подчеркнуть неон
+        // Окрашиваем вкладку и контент строго в черный цвет
         if (mainContent) {
             mainContent.style.setProperty('background', '#000000', 'important');
             mainContent.style.setProperty('background-color', '#000000', 'important');
@@ -30,7 +23,7 @@ function initWaveLiveAnimation() {
             waveTabSection.style.setProperty('border', 'none', 'important');
         }
     } else {
-        // Возвращаем стандартное стекло плеера, когда уходим на Главную или Любимое
+        // Возвращаем родное матовое стекло плеера на Главной
         if (mainContent) {
             mainContent.style.removeProperty('background');
             mainContent.style.removeProperty('background-color');
@@ -51,10 +44,10 @@ function initWaveLiveAnimation() {
 
     if (!waveContainer) return;
 
-    // Инжектируем Canvas внутрь твоего контейнера
+    // Внедряем холст Canvas строго внутрь твоего wave-container
     let canvas = document.getElementById('wave-visual-canvas');
     if (!canvas) {
-        waveContainer.innerHTML = ''; // Очищаем от старых тестов
+        waveContainer.innerHTML = ''; 
         canvas = document.createElement('canvas');
         canvas.id = 'wave-visual-canvas';
         canvas.width = 600;
@@ -63,97 +56,78 @@ function initWaveLiveAnimation() {
             display: block !important;
             max-width: 100% !important;
             height: auto !important;
-            box-shadow: 0 0 50px rgba(255, 40, 100, 0.25);
+            box-shadow: 0 0 50px rgba(255, 42, 116, 0.15);
             border-radius: 20px !important;
         `;
         waveContainer.appendChild(canvas);
     }
 
-    // Инициализация Web Audio API частот
-    if (!isAudioContextInitialized && audio) {
-        try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioCtx.createAnalyser();
-            
-            audio.crossOrigin = "anonymous";
-            
-            source = audioCtx.createMediaElementSource(audio);
-            source.connect(analyser);
-            analyser.connect(audioCtx.destination);
-            analyser.fftSize = 256;
-            
-            dataArray = new Uint8Array(analyser.frequencyBinCount);
-            isAudioContextInitialized = true;
-        } catch (e) {
-            console.log("AudioContext ожидает старта песни");
-        }
-    }
-
-    // Запускаем отрисовку частот
-    if (audio && !audio.paused && !animationFrameId && isAudioContextInitialized) {
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        drawAdvancedRhythmWave();
+    // Запускаем бесконечный цикл анимации нитей
+    if (!animationFrameId) {
+        drawPureMathematicalWave();
     }
 }
 
-function drawAdvancedRhythmWave() {
+// Автономный рендеринг неоновых нитей Liquid Glass
+function drawPureMathematicalWave() {
     const canvas = document.getElementById('wave-visual-canvas');
     const audio = document.getElementById('audio');
-    if (!canvas || !audio || audio.paused) {
+    
+    if (!canvas) {
         animationFrameId = null;
         return;
     }
 
-    animationFrameId = requestAnimationFrame(drawAdvancedRhythmWave);
+    animationFrameId = requestAnimationFrame(drawPureMathematicalWave);
     const ctx = canvas.getContext('2d');
-
-    if (analyser && dataArray) {
-        analyser.getByteFrequencyData(dataArray);
-    } else {
-        return;
-    }
-    
-    let sum = dataArray.reduce((a, b) => a + b, 0);
-    let avg = sum / dataArray.length;
+    const isPlaying = audio && !audio.paused;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Отрисовка 3-х наложенных неоновых линий из твоего примера кода
+    // В тишине нити едва дышат (сила 2), при старте музыки — раскачиваются неоновыми волнами (сила 35)
+    let globalPower = isPlaying ? 35 : 2;
+    
+    // Если включена Моя Волна, добавляем еще больше амплитуды (сила 50)
+    if (typeof isWaveActive !== 'undefined' && isWaveActive && isPlaying) {
+        globalPower = 50;
+    }
+
+    // Наращиваем фазу (скорость бега волны зависит от того, поет ли трек)
+    wavePhase += isPlaying ? 0.04 : 0.005;
+
+    // Рисуем 3 независимых переплетающихся неоновых слоя из твоего примера
     for (let j = 0; j < 3; j++) {
         ctx.beginPath();
         ctx.lineWidth = 3 - j;
         
-        ctx.strokeStyle = `rgba(255, ${40 + j * 60}, ${100 + j * 50}, ${0.8 - j * 0.2})`;
-        ctx.shadowBlur = j === 0 ? 25 : 0;
-        ctx.shadowColor = `rgba(255, 40, 100, 0.6)`;
+        // Палитра Яндекс Вайб: Розовый, Фиолетовый, Бирюзовый
+        ctx.strokeStyle = j === 0 ? 'rgba(255, 42, 116, 0.8)' : (j === 1 ? 'rgba(138, 43, 226, 0.6)' : 'rgba(0, 245, 255, 0.5)');
+        ctx.shadowBlur = j === 0 ? 20 : 0;
+        ctx.shadowColor = '#ff2a74';
 
-        let sliceWidth = canvas.width / dataArray.length;
+        const totalPoints = 40;
+        const sliceWidth = canvas.width / totalPoints;
         let x = 0;
 
-        phase += 0.02; // Скорость бега нитей
-
-        for (let i = 0; i < dataArray.length; i++) {
-            let v = dataArray[i] / 128.0;
+        for (let i = 0; i <= totalPoints; i++) {
+            // Математическая синусоида, создающая холмы и переплетения нитей
+            let sineValue = Math.sin(i * 0.15 + wavePhase + j * 1.5);
+            let cosModifier = Math.cos(i * 0.05 - wavePhase * 0.5);
             
-            // Расчет плавного синусоидального изгиба
-            let y = (canvas.height / 2) + (v * (avg * 0.38) * Math.sin(i * 0.06 + phase + j));
+            let y = (canvas.height / 2) + (sineValue * cosModifier * globalPower);
 
-            // Органическое сужение краев к краям холста
+            // Мягкое сужение краев к центру (как в оригинале Моей Волны)
             let edgeFade = Math.sin((x / canvas.width) * Math.PI);
             y = (canvas.height / 2) + (y - (canvas.height / 2)) * edgeFade;
 
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+
             x += sliceWidth;
         }
         ctx.stroke();
     }
 }
 
-// Запускаем цикл проверки
+// Запускаем бесконечный триггер отслеживания
 setInterval(initWaveLiveAnimation, 300);
