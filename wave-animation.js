@@ -1,8 +1,15 @@
-let waveIntervalId = null;
+let audioCtx = null;
+let analyser = null;
+let source = null;
+let dataArray = null;
+let isAudioContextInitialized = false;
+let animationFrameId = null;
+let phase = 0;
 
 function initWaveLiveAnimation() {
     const waveTabSection = document.getElementById('tab-wave');
     const mainContent = document.querySelector('.main-content');
+    const audio = document.getElementById('audio');
 
     const isWaveTabActive = waveTabSection && waveTabSection.classList.contains('active');
 
@@ -32,10 +39,9 @@ function initWaveLiveAnimation() {
             waveTabSection.style.removeProperty('-webkit-backdrop-filter');
             waveTabSection.style.removeProperty('border');
         }
-        // Если ушли с вкладки — останавливаем анимацию, чтобы не грузить телефон
-        if (waveIntervalId) {
-            clearInterval(waveIntervalId);
-            waveIntervalId = null;
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
         }
         return;
     }
@@ -51,46 +57,26 @@ function initWaveLiveAnimation() {
 
     if (!container) return;
 
-    // Вместо картинки создаем внутренний блок для полос эквалайзера
-    let barsWrapper = document.getElementById('wave-bars-wrapper');
-    if (!barsWrapper) {
-        container.innerHTML = ''; // Стираем старые остатки картинок
-        
-        barsWrapper = document.createElement('div');
-        barsWrapper.id = 'wave-bars-wrapper';
-        
-        // Стилизуем контейнер под горизонтальную линию звука по центру
-        barsWrapper.style.cssText = `
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 3px !important;
-            width: 100% !important;
-            max-width: 450px !important;
-            height: 160px !important;
+    let canvas = document.getElementById('wave-visual-canvas');
+    if (!canvas) {
+        container.innerHTML = '';
+        canvas = document.createElement('canvas');
+        canvas.id = 'wave-visual-canvas';
+        canvas.width = 600;
+        canvas.height = 300;
+        canvas.style.cssText = `
+            display: block !important;
             margin: 0 auto !important;
+            max-width: 100% !important;
+            height: auto !important;
+            box-shadow: 0 0 50px rgba(255, 40, 100, 0.2);
+            border-radius: 20px !important;
         `;
-
-        // Создаем 65 аккуратных вертикальных полос, как на фото
-        for (let i = 0; i < 65; i++) {
-            const bar = document.createElement('div');
-            bar.className = 'vibe-wave-bar';
-            bar.style.cssText = `
-                width: 3px !important;
-                height: 4px !important;
-                background-color: #ffffff !important;
-                border-radius: 2px !important;
-                transition: height 0.1s ease, background-color 0.2s ease !important;
-                box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
-            `;
-            barsWrapper.appendChild(bar);
-        }
-        
-        container.appendChild(barsWrapper);
+        container.appendChild(canvas);
 
         container.style.cssText = `
             width: 100% !important;
-            max-width: 450px !important;
+            max-width: 600px !important;
             height: auto !important;
             display: flex !important;
             justify-content: center !important;
@@ -109,56 +95,94 @@ function initWaveLiveAnimation() {
         }
     }
 
-    // Запускаем постоянный цикл прыжков эквалайзера, если он еще не запущен
-    if (!waveIntervalId) {
-        waveIntervalId = setInterval(updateWaveBarsRhythm, 100);
+    // Инициализируем анализатор частот Web Audio API, привязываясь к плееру
+    if (!isAudioContextInitialized && audio) {
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            
+            // Задаем важный параметр CORS, чтобы браузер разрешал читать частоты трека
+            audio.crossOrigin = "anonymous";
+            
+            source = audioCtx.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            analyser.fftSize = 256;
+            
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            isAudioContextInitialized = true;
+        } catch (e) {
+            console.log("AudioContext инициализируется после старта трека");
+        }
+    }
+
+    // Запускаем перерисовку волны, если плеер играет и вкладка открыта
+    if (audio && !audio.paused && !animationFrameId && isAudioContextInitialized) {
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        drawAdvancedRhythmWave();
     }
 }
 
-// Математическая функция генерации плавных волн и прыжков под ритм
-function updateWaveBarsRhythm() {
-    const bars = document.querySelectorAll('.vibe-wave-bar');
-    if (bars.length === 0) return;
-
+// Перенос математического алгоритма Яндекса и твоего примера
+function drawAdvancedRhythmWave() {
+    const canvas = document.getElementById('wave-visual-canvas');
     const audio = document.getElementById('audio');
-    const isPlaying = audio && !audio.paused;
+    if (!canvas || !audio || audio.paused) {
+        animationFrameId = null;
+        return;
+    }
 
-    // Сила прыжка: если музыка на паузе — полосы превращаются в ровную тонкую линию
-    let maxBaseHeight = isPlaying ? 110 : 4;
-    let waveModifier = isPlaying ? 25 : 0;
+    animationFrameId = requestAnimationFrame(drawAdvancedRhythmWave);
+    const ctx = canvas.getContext('2d');
 
-    // Включаем хаотичную синусоиду, чтобы полосы собирались в красивые холмики, как на твоем фото
-    const time = Date.now() * 0.004;
+    if (analyser && dataArray) {
+        analyser.getByteFrequencyData(dataArray);
+    } else {
+        return;
+    }
+    
+    let sum = dataArray.reduce((a, b) => a + b, 0);
+    let avg = sum / dataArray.length;
 
-    bars.forEach((bar, index) => {
-        let height = 4;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (isPlaying) {
-            // Формула создает три независимых бугорка, которые плавают по всей длине эквалайзера
-            let hill1 = Math.sin(index * 0.15 - time) * 0.5 + 0.5;
-            let hill2 = Math.cos(index * 0.08 + time * 1.3) * 0.3 + 0.3;
-            let randomJitter = Math.random() * 0.4; // Легкое дрожание для эффекта живого звука
+    // Отрисовка трех наложенных неоновых линий из твоего примера
+    for (let j = 0; j < 3; j++) {
+        ctx.beginPath();
+        ctx.lineWidth = 4 - j;
+        
+        // Красивое неоновое свечение струн
+        ctx.strokeStyle = `rgba(255, ${40 + j * 60}, ${100 + j * 50}, ${0.8 - j * 0.2})`;
+        ctx.shadowBlur = j === 0 ? 15 : 0;
+        ctx.shadowColor = `rgba(255, 40, 100, 0.5)`;
 
-            height = (hill1 * 0.6 + hill2 * 0.4 + randomJitter) * maxBaseHeight;
-            if (height < 4) height = 4;
+        let sliceWidth = canvas.width / dataArray.length;
+        let x = 0;
 
-            // Накручиваем неоновую подсветку: центральные пики окрашиваются в фирменный розовый неон
-            if (height > 50) {
-                bar.style.setProperty('background-color', '#ff2a74', 'important');
-                bar.style.setProperty('box-shadow', '0 0 12px rgba(255, 42, 116, 0.7)', 'important');
+        phase += 0.015; // базовая скорость движения волн
+
+        for (let i = 0; i < dataArray.length; i++) {
+            let v = dataArray[i] / 128.0;
+            
+            // Расчет высоты волны по частотам твоего примера
+            let y = (canvas.height / 2) + (v * (avg * 0.4) * Math.sin(i * 0.08 + phase + j));
+
+            // Плавное сужение краев к центру (как у оригинальной Моей Волны)
+            let edgeFade = Math.sin((x / canvas.width) * Math.PI);
+            y = (canvas.height / 2) + (y - (canvas.height / 2)) * edgeFade;
+
+            if (i === 0) {
+                ctx.moveTo(x, y);
             } else {
-                bar.style.setProperty('background-color', '#ffffff', 'important');
-                bar.style.setProperty('box-shadow', '0 0 8px rgba(255, 255, 255, 0.3)', 'important');
+                ctx.lineTo(x, y);
             }
-        } else {
-            // Если пауза — возвращаем всё в дефолтную белую линию
-            bar.style.setProperty('background-color', '#ffffff', 'important');
-            bar.style.setProperty('box-shadow', '0 0 4px rgba(255, 255, 255, 0.2)', 'important');
+            x += sliceWidth;
         }
-
-        bar.style.setProperty('height', `${height}px`, 'important');
-    });
+        ctx.stroke();
+    }
 }
 
-// Запускаем постоянную проверку активности вкладки
+// Интервал проверки активности
 setInterval(initWaveLiveAnimation, 300);
