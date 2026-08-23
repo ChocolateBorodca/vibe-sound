@@ -1,6 +1,23 @@
 let isWaveActive = false;
 let activeWaveGenre = null;
 
+// Внедряем плавную анимацию разлета кнопок из центра
+if (!document.getElementById('wave-animation-styles')) {
+    const style = document.createElement('style');
+    style.id = 'wave-animation-styles';
+    style.textContent = `
+        @keyframes wavePopIn {
+            0% { transform: scale(0) translate(0, 0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .vibe-orbit-node-btn {
+            animation: wavePopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 function initVibeWaveMap() {
     const waveTabSection = document.getElementById('tab-wave');
     if (!waveTabSection) return;
