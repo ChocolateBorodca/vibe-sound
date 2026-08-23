@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nextmove Music</title>
+    <!-- ИСПРАВЛЕНО: Теперь вкладка в браузере называется Vibe Sound -->
+    <title>Vibe Sound</title>
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
     <link href="https://googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,22 +18,17 @@
 
     <div class="app-container">
         
+        <!-- БОКОВАЯ ПАНЕЛЬ -->
         <aside class="sidebar">
             <div class="brand">
                 <div class="logo">
-                    <i data-lucide="move-right" style="transform: rotate(135deg);"></i>
-                    <span>Nextmove</span>
+                    <i data-lucide="music" style="color: #ff2a74;"></i>
+                    <span>Vibe Sound</span>
                 </div>
                 <button class="collapse-btn"><i data-lucide="sidebar"></i></button>
             </div>
 
-            <div class="workspace-selector">
-                <div class="workspace-avatar">N</div>
-                <span class="workspace-name">Nimbus</span>
-                <i data-lucide="chevron-down" class="chevron"></i>
-            </div>
-
-            <nav class="menu">
+            <nav class="menu" style="margin-top: 25px;">
                 <div id="menu-main" class="menu-item active">
                     <i data-lucide="home"></i>
                     <span>Главная</span>
@@ -60,6 +56,7 @@
             </nav>
         </aside>
 
+        <!-- ОСНОВНОЙ КОНТЕНТ -->
         <main class="main-content">
             <header class="content-header">
                 <h1 id="page-title">Главная</h1>
@@ -108,6 +105,16 @@
                     <div class="wallpaper-grid" id="wallpaper-grid"></div>
                 </div>
             </section>
+
+            <!-- КОНТЕКСТНОЕ МЕНЮ В СТИЛЕ ТЕЛЕГРАМ -->
+            <div id="tg-context-menu" class="tg-menu">
+                <div class="tg-menu-item" id="tg-menu-share">
+                    <i data-lucide="share-2"></i> Поделиться
+                </div>
+                <div class="tg-menu-item delete" id="tg-menu-delete">
+                    <i data-lucide="trash-2"></i> Удалить
+                </div>
+            </div>
 
             <audio id="audio"></audio>
 
