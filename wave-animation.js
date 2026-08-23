@@ -2,68 +2,82 @@ function initWaveLiveAnimation() {
     const container = document.getElementById('wave-animation-container');
     if (!container) return;
 
-    // Делаем саму вкладку "Моя Волна" полностью глубокого черного цвета
+    // Ссылка на твою GIF-анимацию волны из хранилища Vercel
+    const gifUrl = "https://vercel-storage.com";
+
+    // ПРИНУДИТЕЛЬНО: Делаем саму вкладку и ВСЁ пространство вокруг неё абсолютно угольно-черным
     const waveTabSection = container.closest('#tab-wave');
     if (waveTabSection) {
-        waveTabSection.style.backgroundColor = '#000000';
-        waveTabSection.style.backgroundImage = 'none';
-        waveTabSection.style.backdropFilter = 'none';
-        waveTabSection.style.webkitBackdropFilter = 'none';
-        // Убираем внутренние границы, если они накладывались поверх
-        waveTabSection.style.border = 'none';
+        waveTabSection.style.setProperty('background', '#000000', 'important');
+        waveTabSection.style.setProperty('background-color', '#000000', 'important');
+        waveTabSection.style.setProperty('background-image', 'none', 'important');
+        waveTabSection.style.setProperty('backdrop-filter', 'none', 'important');
+        waveTabSection.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+        waveTabSection.style.setProperty('border', 'none', 'important');
     }
 
-    // Ссылка на твою GIF-анимацию волны из хранилища Vercel
-    const gifUrl = "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/fmahalem.gif";
+    // Очищаем фоновый контейнер всего плеера, если мы находимся на этой вкладке
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent && waveTabSection && waveTabSection.classList.contains('active')) {
+        mainContent.style.setProperty('background', '#000000', 'important');
+        mainContent.style.setProperty('background-color', '#000000', 'important');
+    }
 
     let waveImg = document.getElementById('wave-gif-element');
     if (!waveImg) {
-        container.innerHTML = ''; // Полностью очищаем контейнер от старых тестов
+        container.innerHTML = ''; // Стираем старые остатки
         
         waveImg = document.createElement('img');
         waveImg.id = 'wave-gif-element';
         waveImg.src = gifUrl;
         
-        // ИСПРАВЛЕНО: Задали средний аккуратный размер (max-width: 380px) и центрирование
+        // ЧЁТКИЙ СРЕДНИЙ РАЗМЕР: max-width: 320px для идеального баланса по центру экрана
         waveImg.style.cssText = `
-            width: 100%;
-            max-width: 380px;
-            height: auto;
-            object-fit: contain;
+            width: 100% !important;
+            max-width: 320px !important;
+            height: auto !important;
+            object-fit: contain !important;
+            display: block !important;
+            margin: 0 auto !important;
             filter: drop-shadow(0 0 20px rgba(255, 42, 116, 0.4));
             transition: filter 0.3s ease;
         `;
         container.appendChild(waveImg);
         
-        // Подгоняем контейнер строго по центру
-        container.style.width = '100%';
-        container.style.maxWidth = '380px';
-        container.style.height = 'auto';
-        container.style.display = 'flex';
-        container.style.justifyContent = 'center';
-        container.style.alignItems = 'center';
+        // ВЫРАВНИВАНИЕ ПО ЦЕНТРУ: Располагаем контейнер ровно по центру черного экрана
+        container.style.cssText = `
+            width: 100% !important;
+            max-width: 320px !important;
+            height: auto !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            margin: auto !important;
+        `;
         
-        // Гарантируем, что кнопка включения под гифкой не сдвинется криво
+        // Центрируем родительский блок для ровного положения кнопки и гифки
         if (container.parentElement) {
-            container.parentElement.style.justifyContent = 'center';
+            container.parentElement.style.cssText = `
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                height: 100% !important;
+                gap: 30px !important;
+                background: #000000 !important;
+            `;
         }
     }
 
-    // Умное управление воспроизведением GIF в зависимости от статуса плеера
+    // Умное управление анимацией при клике на Play/Pause
     const audio = document.getElementById('audio');
     if (audio) {
         if (!audio.paused) {
-            // Если музыка играет — включаем анимацию (убираем заморозку)
             waveImg.style.filter = "drop-shadow(0 0 25px rgba(255, 42, 116, 0.6))";
-            
-            // Перезаписываем src той же ссылкой ТОЛЬКО если она была пустой, 
-            // чтобы запустить анимацию, не вызывая постоянного мерцания картинки
             if (waveImg.src.includes('#paused')) {
                 waveImg.src = gifUrl + "?t=" + Date.now();
             }
         } else {
-            // Если пауза — "замораживаем" GIF, добавляя хэш к ссылке. 
-            // Браузер воспримет её как статичный кадр и остановит движение
             if (!waveImg.src.includes('#paused')) {
                 waveImg.src = gifUrl + "#paused";
                 waveImg.style.filter = "drop-shadow(0 0 10px rgba(255, 42, 116, 0.15)) opacity(0.7)";
@@ -72,5 +86,5 @@ function initWaveLiveAnimation() {
     }
 }
 
-// Запускаем проверку состояния плеера каждые 300 миллисекунд для мгновенного отклика на клик Play/Pause
-setInterval(initWaveLiveAnimation, 300);
+// Повысили скорость отклика до 200мс, чтобы изменения применялись мгновенно
+setInterval(initWaveLiveAnimation, 200);
