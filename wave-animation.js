@@ -1,37 +1,69 @@
 function initWaveLiveAnimation() {
-    const container = document.getElementById('wave-animation-container');
-    if (!container) return;
-
     // Ссылка на твою GIF-анимацию волны из хранилища Vercel
     const gifUrl = "https://vercel-storage.com";
-
-    // ПРИНУДИТЕЛЬНО: Делаем саму вкладку и ВСЁ пространство вокруг неё абсолютно угольно-черным
-    const waveTabSection = container.closest('#tab-wave');
-    if (waveTabSection) {
-        waveTabSection.style.setProperty('background', '#000000', 'important');
-        waveTabSection.style.setProperty('background-color', '#000000', 'important');
-        waveTabSection.style.setProperty('background-image', 'none', 'important');
-        waveTabSection.style.setProperty('backdrop-filter', 'none', 'important');
-        waveTabSection.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-        waveTabSection.style.setProperty('border', 'none', 'important');
-    }
-
-    // Очищаем фоновый контейнер всего плеера, если мы находимся на этой вкладке
+    
+    const waveTabSection = document.getElementById('tab-wave');
     const mainContent = document.querySelector('.main-content');
-    if (mainContent && waveTabSection && waveTabSection.classList.contains('active')) {
-        mainContent.style.setProperty('background', '#000000', 'important');
-        mainContent.style.setProperty('background-color', '#000000', 'important');
+
+    // Проверяем, открыта ли сейчас вкладка "Моя Волна"
+    const isWaveTabActive = waveTabSection && waveTabSection.classList.contains('active');
+
+    if (isWaveTabActive) {
+        // ИСПРАВЛЕНО: Красим в чёрный цвет ТОЛЬКО когда открыта вкладка Моя Волна
+        if (mainContent) {
+            mainContent.style.setProperty('background', '#000000', 'important');
+            mainContent.style.setProperty('background-color', '#000000', 'important');
+        }
+        if (waveTabSection) {
+            waveTabSection.style.setProperty('background', '#000000', 'important');
+            waveTabSection.style.setProperty('background-color', '#000000', 'important');
+            waveTabSection.style.setProperty('background-image', 'none', 'important');
+            waveTabSection.style.setProperty('backdrop-filter', 'none', 'important');
+            waveTabSection.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+            waveTabSection.style.setProperty('border', 'none', 'important');
+        }
+    } else {
+        // ИСПРАВЛЕНО: Если ушли на другую вкладку — полностью возвращаем стандартный прозрачный стиль
+        if (mainContent) {
+            mainContent.style.removeProperty('background');
+            mainContent.style.removeProperty('background-color');
+        }
+        if (waveTabSection) {
+            waveTabSection.style.removeProperty('background');
+            waveTabSection.style.removeProperty('background-color');
+            waveTabSection.style.removeProperty('background-image');
+            waveTabSection.style.removeProperty('backdrop-filter');
+            waveTabSection.style.removeProperty('-webkit-backdrop-filter');
+            waveTabSection.style.removeProperty('border');
+        }
+        return; // Если вкладка закрыта, дальше код гифки не выполняем
     }
+
+    // ИСПРАВЛЕНО: Если контейнера для анимации ещё нет в HTML, создаем его принудительно прямо сейчас
+    let container = document.getElementById('wave-animation-container');
+    if (!container && waveTabSection) {
+        container = document.createElement('div');
+        container.id = 'wave-animation-container';
+        // Вставляем перед кнопкой включения волны
+        const centerBtn = document.getElementById('wave-center-toggle-btn');
+        if (centerBtn) {
+            waveTabSection.insertBefore(container, centerBtn);
+        } else {
+            waveTabSection.appendChild(container);
+        }
+    }
+
+    if (!container) return;
 
     let waveImg = document.getElementById('wave-gif-element');
     if (!waveImg) {
-        container.innerHTML = ''; // Стираем старые остатки
+        container.innerHTML = ''; 
         
         waveImg = document.createElement('img');
         waveImg.id = 'wave-gif-element';
         waveImg.src = gifUrl;
         
-        // ЧЁТКИЙ СРЕДНИЙ РАЗМЕР: max-width: 320px для идеального баланса по центру экрана
+        // ЧЁТКИЙ СРЕДНИЙ РАЗМЕР И ЦЕНТРИРОВАНИЕ
         waveImg.style.cssText = `
             width: 100% !important;
             max-width: 320px !important;
@@ -44,7 +76,6 @@ function initWaveLiveAnimation() {
         `;
         container.appendChild(waveImg);
         
-        // ВЫРАВНИВАНИЕ ПО ЦЕНТРУ: Располагаем контейнер ровно по центру черного экрана
         container.style.cssText = `
             width: 100% !important;
             max-width: 320px !important;
@@ -55,21 +86,18 @@ function initWaveLiveAnimation() {
             margin: auto !important;
         `;
         
-        // Центрируем родительский блок для ровного положения кнопки и гифки
         if (container.parentElement) {
-            container.parentElement.style.cssText = `
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                justify-content: center !important;
-                height: 100% !important;
-                gap: 30px !important;
-                background: #000000 !important;
-            `;
+            container.parentElement.style.setProperty('display', 'flex', 'important');
+            container.parentElement.style.setProperty('flex-direction', 'column', 'important');
+            container.parentElement.style.setProperty('align-items', 'center', 'important');
+            container.parentElement.style.setProperty('justify-content', 'center', 'important');
+            container.parentElement.style.setProperty('height', '100%', 'important');
+            container.parentElement.style.setProperty('gap', '30px', 'important');
+            container.parentElement.style.setProperty('background', '#000000', 'important');
         }
     }
 
-    // Умное управление анимацией при клике на Play/Pause
+    // Управление воспроизведением гифки при клике на Play/Pause
     const audio = document.getElementById('audio');
     if (audio) {
         if (!audio.paused) {
@@ -86,5 +114,5 @@ function initWaveLiveAnimation() {
     }
 }
 
-// Повысили скорость отклика до 200мс, чтобы изменения применялись мгновенно
+// Запускаем постоянную проверку вкладок и анимации
 setInterval(initWaveLiveAnimation, 200);
