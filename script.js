@@ -18,9 +18,9 @@ const wallpapers = [
         isClassic: true
     },
     {
-        id: "cyberpunk",
-        name: "Киберпанк",
-        url: "ССЫЛКА_НА_ВАШ_ПЕРВЫЙ_GIF_ИЗ_BLOB"
+        id: "blackcaplya",
+        name: "микроб",
+        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/23_gif%20325%C3%97325%20pixels.gif"
     },
     {
         id: "anime-rain",
