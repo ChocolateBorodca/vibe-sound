@@ -1,102 +1,39 @@
-let activeMenuType = null;
-let activeTargetId = null;
-
 const favoritesList = document.getElementById('favorites-list');
 const wallpaperGrid = document.getElementById('wallpaper-grid');
 
-let tgMenu = document.getElementById('tg-context-menu');
-if (!tgMenu) {
-    tgMenu = document.createElement('div');
-    tgMenu.id = 'tg-context-menu';
-    document.body.appendChild(tgMenu);
+// Функция удаления трека, которая вызывается по клику на встроенную кнопку
+function deleteTrackAction(e, id) {
+    e.stopPropagation();
+    if (typeof deleteTrackFromDB === 'function') {
+        deleteTrackFromDB(id, () => {
+            const trackIdx = tracks.findIndex(t => t.id === id);
+            if (trackIdx !== -1) {
+                tracks.splice(trackIdx, 1);
+                buildFavoritesUI();
+                if (currentIndex >= tracks.length) currentIndex = 0;
+                loadTrack();
+            }
+        });
+    }
 }
 
-tgMenu.style.cssText = `
-    position: fixed;
-    display: none;
-    background: rgba(15, 15, 22, 0.7);
-    backdrop-filter: blur(35px) saturate(150%);
-    -webkit-backdrop-filter: blur(35px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 14px;
-    width: 120px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    z-index: 999999;
-    padding: 4px;
-`;
-
-tgMenu.innerHTML = `
-    <div class="tg-menu-item delete" id="tg-menu-delete" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; color: #ff4d6d; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s; white-space: nowrap; width: 100%;">
-        <i data-lucide="trash-2" style="width: 16px; height: 16px; color: #ff4d6d;"></i> Удалить
-    </div>
-`;
-
-tgMenu.addEventListener('mouseover', (e) => {
-    const item = e.target.closest('.tg-menu-item');
-    if (item && item.classList.contains('delete')) {
-        item.style.background = 'rgba(255, 77, 109, 0.15)';
-    }
-});
-tgMenu.addEventListener('mouseout', (e) => {
-    const item = e.target.closest('.tg-menu-item');
-    if (item) item.style.background = 'none';
-});
-
-// ИСПРАВЛЕНО: Расчет координат строго по центру под кнопкой трех точек
-function openContextMenu(e, type, id) {
+// Функция удаления обоев, которая вызывается по клику на встроенную кнопку
+function deleteWallpaperAction(e, id) {
     e.stopPropagation();
-    activeMenuType = type;
-    activeTargetId = id;
-    
-    if (id === "classic") {
-        alert("Это базовое оформление плеера, его нельзя удалить.");
-        return;
+    if (id === "classic") return;
+    if (typeof deleteWallpaperFromDB === 'function') {
+        deleteWallpaperFromDB(id, () => {
+            const wpIdx = wallpapers.findIndex(w => w.id === id);
+            if (wpIdx !== -1) {
+                wallpapers.splice(wpIdx, 1);
+                buildWallpaperUI();
+                if (currentWallpaperId === id) setWallpaper("classic");
+            }
+        });
     }
-    
-    tgMenu.style.display = 'block';
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const menuWidth = 120; // Фиксированная ширина нашего окна
-    
-    // Находим центр кнопки трех точек и вычитаем половину ширины меню
-    tgMenu.style.left = `${rect.left + (rect.width / 2) - (menuWidth / 2)}px`;
-    tgMenu.style.top = `${rect.bottom + 6}px`;
 }
 
-document.addEventListener('click', () => {
-    if (tgMenu) tgMenu.style.display = 'none';
-});
-
-document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
-    e.stopPropagation();
-    tgMenu.style.display = 'none';
-
-    if (activeMenuType === 'track') {
-        if (typeof deleteTrackFromDB === 'function') {
-            deleteTrackFromDB(activeTargetId, () => {
-                const trackIdx = tracks.findIndex(t => t.id === activeTargetId);
-                if (trackIdx !== -1) {
-                    tracks.splice(trackIdx, 1);
-                    buildFavoritesUI();
-                    if (currentIndex >= tracks.length) currentIndex = 0;
-                    loadTrack();
-                }
-            });
-        }
-    } else if (activeMenuType === 'wallpaper') {
-        if (typeof deleteWallpaperFromDB === 'function') {
-            deleteWallpaperFromDB(activeTargetId, () => {
-                const wpIdx = wallpapers.findIndex(w => w.id === activeTargetId);
-                if (wpIdx !== -1) {
-                    wallpapers.splice(wpIdx, 1);
-                    buildWallpaperUI();
-                    if (currentWallpaperId === activeTargetId) setWallpaper("classic");
-                }
-            });
-        }
-    }
-});
-
+// Отрисовка сетки обоев со встроенной кнопкой "Удалить" слева от точек
 function buildWallpaperUI() {
     if (!wallpaperGrid) return;
     wallpaperGrid.innerHTML = '';
@@ -105,21 +42,39 @@ function buildWallpaperUI() {
         card.className = `wallpaper-card-item ${wp.id === currentWallpaperId ? 'active' : ''}`;
         const bgStyle = wp.isClassic ? 'background: #0d0d11;' : `background-image: url('${wp.url}');`;
         
+        // Кнопка удалить отображается только для кастомных обоев (для классики прячем)
+        const deleteBtnHtml = wp.isClassic ? '' : `
+            <button onclick="deleteWallpaperAction(event, '${wp.id}')" style="background: rgba(255, 77, 109, 0.1); border: 1px solid rgba(255, 77, 109, 0.2); color: #ff4d6d; cursor: pointer; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; transition: all 0.2s;">
+                Удалить
+            </button>
+        `;
+
         card.innerHTML = `
             <div class="wallpaper-preview" style="${bgStyle}"></div>
             <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 4px; gap: 8px;">
-                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;">${wp.name}</span>
-                <button class="more-actions-btn" onclick="openContextMenu(event, 'wallpaper', '${wp.id}')" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; cursor: pointer; padding: 2px 10px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 1px;">
-                    •••
-                </button>
+                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:70px;">${wp.name}</span>
+                <div style="display:flex; align-items:center; gap: 6px;">
+                    ${deleteBtnHtml}
+                    <button style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; cursor: pointer; padding: 2px 10px; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 1px; pointer-events: none;">
+                        •••
+                    </button>
+                </div>
             </div>
         `;
+        
+        // Эффект наведения на встроенную кнопку удаления обоев
+        const delBtnElement = card.querySelector('button[onclick*="deleteWallpaperAction"]');
+        if (delBtnElement) {
+            delBtnElement.addEventListener('mouseover', () => { delBtnElement.style.background = 'rgba(255, 77, 109, 0.25)'; });
+            delBtnElement.addEventListener('mouseout', () => { delBtnElement.style.background = 'rgba(255, 77, 109, 0.1)'; });
+        }
+
         card.addEventListener('click', () => setWallpaper(wp.id));
         wallpaperGrid.appendChild(card);
     });
-    if (window.lucide) lucide.createIcons();
 }
 
+// Отрисовка списка треков со встроенной кнопкой "Удалить" слева от точек
 function buildFavoritesUI() {
     if (!favoritesList) return;
     favoritesList.innerHTML = '';
@@ -136,10 +91,23 @@ function buildFavoritesUI() {
                 <div class="track-row-title">${track.title}</div>
                 <div class="track-row-artist">${track.artist}</div>
             </div>
-            <button class="more-actions-btn" onclick="openContextMenu(event, 'track', ${track.id})" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; cursor: pointer; padding: 2px 10px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 1px;">
-                •••
-            </button>
+            <div style="display:flex; align-items:center; gap: 8px; z-index: 10;">
+                <button onclick="deleteTrackAction(event, ${track.id})" style="background: rgba(255, 77, 109, 0.1); border: 1px solid rgba(255, 77, 109, 0.2); color: #ff4d6d; cursor: pointer; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: all 0.2s;">
+                    Удалить
+                </button>
+                <button style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; cursor: pointer; padding: 2px 10px; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 1px; pointer-events: none;">
+                    •••
+                </button>
+            </div>
         `;
+
+        // Эффект наведения на встроенную кнопку удаления трека
+        const delBtnElement = row.querySelector('button[onclick*="deleteTrackAction"]');
+        if (delBtnElement) {
+            delBtnElement.addEventListener('mouseover', () => { delBtnElement.style.background = 'rgba(255, 77, 109, 0.25)'; });
+            delBtnElement.addEventListener('mouseout', () => { delBtnElement.style.background = 'rgba(255, 77, 109, 0.1)'; });
+        }
+
         row.addEventListener('click', () => {
             currentIndex = i;
             loadTrack();
@@ -150,5 +118,4 @@ function buildFavoritesUI() {
         });
         favoritesList.appendChild(row);
     });
-    if (window.lucide) lucide.createIcons();
 }
