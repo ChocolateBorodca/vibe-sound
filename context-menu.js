@@ -26,7 +26,7 @@ tgMenu.style.cssText = `
 `;
 
 tgMenu.innerHTML = `
-    <div class="tg-menu-item delete" id="tg-menu-delete" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: #ff4d6d; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s; white-space: nowrap; width: 100%;">
+    <div class="tg-menu-item delete" id="tg-menu-delete" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; color: #ff4d6d; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s; white-space: nowrap; width: 100%;">
         <i data-lucide="trash-2" style="width: 16px; height: 16px; color: #ff4d6d;"></i> Удалить
     </div>
 `;
@@ -42,7 +42,7 @@ tgMenu.addEventListener('mouseout', (e) => {
     if (item) item.style.background = 'none';
 });
 
-// ИСПРАВЛЕНО: Сдвигаем координаты влево под саму карточку
+// ИСПРАВЛЕНО: Расчет координат строго по центру под кнопкой трех точек
 function openContextMenu(e, type, id) {
     e.stopPropagation();
     activeMenuType = type;
@@ -56,9 +56,10 @@ function openContextMenu(e, type, id) {
     tgMenu.style.display = 'block';
     
     const rect = e.currentTarget.getBoundingClientRect();
+    const menuWidth = 120; // Фиксированная ширина нашего окна
     
-    // Вычитаем 130 пикселей, чтобы окошко вылетало влево и оставалось в границах сайта
-    tgMenu.style.left = `${rect.left - 130}px`;
+    // Находим центр кнопки трех точек и вычитаем половину ширины меню
+    tgMenu.style.left = `${rect.left + (rect.width / 2) - (menuWidth / 2)}px`;
     tgMenu.style.top = `${rect.bottom + 6}px`;
 }
 
