@@ -50,7 +50,6 @@ function openContextMenu(e, type, id) {
     activeMenuType = type;
     activeTargetId = id;
     
-    // ИСПРАВЛЕНО: Если это базовые классические обои, вообще не открываем меню действий
     if (id === "classic") {
         alert("Это базовое оформление плеера, его нельзя удалить или переслать.");
         return;
@@ -96,7 +95,7 @@ document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
     }
 });
 
-// ИСПРАВЛЕНО: Логика генерации аккуратной и короткой ссылки через облако Vercel Blob
+// ИСПРАВЛЕНО: Безопасная отправка через бесплатный быстрый внешний хостинг file.io
 document.getElementById('tg-menu-share').addEventListener('click', async (e) => {
     e.stopPropagation();
     tgMenu.style.display = 'none';
@@ -108,41 +107,50 @@ document.getElementById('tg-menu-share').addEventListener('click', async (e) => 
         if (activeMenuType === 'track') {
             const track = tracks.find(t => t.id === activeTargetId);
             
-            // Отправляем файл в твое облако Vercel Blob
-            const response = await fetch(`/api/blob/upload?filename=${encodeURIComponent(track.title)}.mp3`, {
+            // Отправляем mp3 файл
+            const formData = new FormData();
+            formData.append('file', track.audioFile);
+            
+            const response = await fetch('https://file.io', {
                 method: 'POST',
-                body: track.audioFile
+                body: formData
             });
-            const blobData = await response.json();
+            const audioResult = await response.json();
             
-            // Получаем чистую короткую ссылку на песню
-            let finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audioUrl=${encodeURIComponent(blobData.url)}`;
+            let finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audioUrl=${encodeURIComponent(audioResult.link)}`;
             
+            // Если есть обложка — отправляем и её отдельным файлом
             if (track.coverFile) {
-                const imgResponse = await fetch(`/api/blob/upload?filename=cover-${activeTargetId}.jpg`, {
+                const coverFormData = new FormData();
+                coverFormData.append('file', track.coverFile);
+                
+                const coverResponse = await fetch('https://file.io', {
                     method: 'POST',
-                    body: track.coverFile
+                    body: coverFormData
                 });
-                const imgBlobData = await imgResponse.json();
-                finalUrl += `&coverUrl=${encodeURIComponent(imgBlobData.url)}`;
+                const coverResult = await coverResponse.json();
+                finalUrl += `&coverUrl=${encodeURIComponent(coverResult.link)}`;
             }
 
-            copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Перейди по ссылке, и он сам установится у тебя: ${finalUrl}`);
+            copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Перейди по ссылке, и он сам автоматически запишется к тебе на сайт: ${finalUrl}`);
             
         } else if (activeMenuType === 'wallpaper') {
             const wp = wallpapers.find(w => w.id === activeTargetId);
             
-            const response = await fetch(`/api/blob/upload?filename=wp-${activeTargetId}.gif`, {
-                method: 'POST',
-                body: wp.gifFile
-            });
-            const blobData = await response.json();
+            const formData = new FormData();
+            formData.append('file', wp.gifFile);
             
-            const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${encodeURIComponent(blobData.url)}`;
-            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы сразу поставить их себе на фон: ${finalUrl}`);
+            const response = await fetch('https://file.io', {
+                method: 'POST',
+                body: formData
+            });
+            const wpResult = await response.json();
+            
+            const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${encodeURIComponent(wpResult.link)}`;
+            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы они сразу установились у тебя на фон: ${finalUrl}`);
         }
     } catch (err) {
-        alert("Ошибка облака. Проверьте, активен ли Vercel Blob.");
+        alert("Не удалось сгенерировать ссылку. Попробуйте еще раз.");
     }
 });
 
@@ -153,7 +161,7 @@ function copyTextToClipboard(text) {
     textarea.select();
     try {
         document.execCommand("copy");
-        alert("Короткая ссылка скопирована! Отправь её другу в ЛС, при клике медиафайл сам автоматически скачается к нему на сайт.");
+        alert("Короткая ссылка скопирована! Отправь её другу, при клике медиафайл сам установится у него в плеере.");
     } catch (err) {
         alert("Не удалось скопировать.");
     }
