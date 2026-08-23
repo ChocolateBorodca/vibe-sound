@@ -1,30 +1,12 @@
 let isWaveActive = false;
 
-// Проверяем, открыта ли вкладка "Моя Волна" для принудительного перекрашивания фонов
-setInterval(() => {
-    const waveTabSection = document.getElementById('tab-wave');
-    const mainContent = document.querySelector('.main-content');
-    if (!waveTabSection || !mainContent) return;
-
-    if (waveTabSection.classList.contains('active')) {
-        mainContent.style.setProperty('background', '#000000', 'important');
-        mainContent.style.setProperty('background-color', '#000000', 'important');
-        waveTabSection.style.setProperty('background', '#000000', 'important');
-        waveTabSection.style.setProperty('background-color', '#000000', 'important');
-    } else {
-        mainContent.style.removeProperty('background');
-        mainContent.style.removeProperty('background-color');
-        waveTabSection.style.removeProperty('background');
-        waveTabSection.style.removeProperty('background-color');
-    }
-}, 300);
-
 // Инициализация карты Моей Волны и орбиты кнопок
 function initVibeWaveMap() {
     const waveTabSection = document.getElementById('tab-wave');
     if (!waveTabSection) return;
 
     waveTabSection.innerHTML = '';
+    // ИСПРАВЛЕНО: Убрали принудительный черный цвет, вернули родное стекло и центрирование
     waveTabSection.style.cssText = 'padding: 30px 40px; height: calc(88vh - 180px); display: flex; align-items: center; justify-content: center; position: relative; width: 100%;';
 
     // Создаем контейнер-основу для круга
@@ -60,7 +42,7 @@ function initVibeWaveMap() {
     uniqueGenres.forEach(g => allNodes.push({ name: g, isSmart: false }));
 
     if (allNodes.length === 0) {
-        waveTabSection.innerHTML = '<div style="color: rgba(255,255,255,0.4); font-size: 14px; text-align: center;">Загрузите треки во вкладке Любимое и укажите им жанры, чтобы запустить Мою Волну!</div>';
+        waveTabSection.innerHTML = '<div style="color: rgba(255,255,255,0.4); font-size: 14px; text-align: center; backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.02);">Загрузите треки во вкладке Любимое и укажите им жанры, чтобы запустить Мою Волну!</div>';
         return;
     }
 
@@ -90,13 +72,13 @@ function initVibeWaveMap() {
         btn.innerHTML = node.name;
         
         if (node.isSmart) {
-            btn.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; width: 130px; height: 40px; background: rgba(0, 245, 255, 0.08); border: 1px solid rgba(0, 245, 255, 0.3); color: #00f5ff; font-size: 12px; font-weight: 600; border-radius: 20px; cursor: pointer; transition: all 0.2s ease; z-index: 10; text-shadow: 0 0 8px rgba(0, 245, 255, 0.4); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); backdrop-filter: blur(5px);`;
-            btn.addEventListener('mouseover', () => { btn.style.background = 'rgba(0, 245, 255, 0.2)'; btn.style.boxShadow = '0 0 15px rgba(0, 245, 255, 0.4)'; });
-            btn.addEventListener('mouseout', () => { btn.style.background = 'rgba(0, 245, 255, 0.08)'; btn.style.boxShadow = 'none'; });
+            btn.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; width: 130px; height: 40px; background: rgba(0, 245, 255, 0.12); border: 1px solid rgba(0, 245, 255, 0.4); color: #00f5ff; font-size: 12px; font-weight: 600; border-radius: 20px; cursor: pointer; transition: all 0.2s ease; z-index: 10; text-shadow: 0 0 8px rgba(0, 245, 255, 0.4); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);`;
+            btn.addEventListener('mouseover', () => { btn.style.background = 'rgba(0, 245, 255, 0.25)'; btn.style.boxShadow = '0 0 15px rgba(0, 245, 255, 0.5)'; });
+            btn.addEventListener('mouseout', () => { btn.style.background = 'rgba(0, 245, 255, 0.12)'; btn.style.boxShadow = 'none'; });
         } else {
-            btn.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; width: 130px; height: 40px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 12px; font-weight: 500; border-radius: 20px; cursor: pointer; transition: all 0.2s ease; z-index: 10; backdrop-filter: blur(5px);`;
-            btn.addEventListener('mouseover', () => { btn.style.background = 'rgba(255, 255, 255, 0.1)'; btn.style.borderColor = '#ff2a74'; btn.style.color = '#ff2a74'; btn.style.boxShadow = '0 0 15px rgba(255, 42, 116, 0.3)'; });
-            btn.addEventListener('mouseout', () => { btn.style.background = 'rgba(255, 255, 255, 0.03)'; btn.style.borderColor = 'rgba(255, 255, 255, 0.1)'; btn.style.color = '#ffffff'; btn.style.boxShadow = 'none'; });
+            btn.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; width: 130px; height: 40px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; font-size: 12px; font-weight: 500; border-radius: 20px; cursor: pointer; transition: all 0.2s ease; z-index: 10; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);`;
+            btn.addEventListener('mouseover', () => { btn.style.background = 'rgba(255, 255, 255, 0.12)'; btn.style.borderColor = '#ff2a74'; btn.style.color = '#ff2a74'; btn.style.boxShadow = '0 0 15px rgba(255, 42, 116, 0.4)'; });
+            btn.addEventListener('mouseout', () => { btn.style.background = 'rgba(255, 255, 255, 0.04)'; btn.style.borderColor = 'rgba(255, 255, 255, 0.15)'; btn.style.color = '#ffffff'; btn.style.boxShadow = 'none'; });
         }
 
         btn.addEventListener('click', (e) => {
@@ -147,7 +129,7 @@ function startWavePlayback() {
     }
 }
 
-// Принудительное связывание событий клика левого меню
+// Принудительное связывание событий клика левого меню без ломающих интервалов
 setTimeout(() => {
     const waveMenuBtn = document.getElementById('menu-wave');
     if (!waveMenuBtn) return;
