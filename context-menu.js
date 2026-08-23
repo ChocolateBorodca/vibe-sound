@@ -1,3 +1,9 @@
+// Автоматически подгружаем новые файлы статистики, не ломая index.html
+if (!document.querySelector('script[src="stats.js"]')) {
+    const s1 = document.createElement('script'); s1.src = 'stats.js'; document.head.appendChild(s1);
+    const s2 = document.createElement('script'); s2.src = 'stats-ui.js'; document.head.appendChild(s2);
+}
+
 const favoritesList = document.getElementById('favorites-list');
 const wallpaperGrid = document.getElementById('wallpaper-grid');
 
@@ -35,11 +41,16 @@ function deleteTrackAction(e, id) {
         deleteTrackFromDB(id, () => {
             const trackIdx = tracks.findIndex(t => t.id === id);
             if (trackIdx !== -1) {
+                // Чистим историю прослушиваний трека перед удалением
+                let playData = JSON.parse(localStorage.getItem('vibe_detailed_plays') || "{}");
+                delete playData[id];
+                localStorage.setItem('vibe_detailed_plays', JSON.stringify(playData));
+
                 tracks.splice(trackIdx, 1);
                 buildFavoritesUI();
                 if (currentIndex >= tracks.length) currentIndex = 0;
                 loadTrack();
-                if (typeof updateStatistics === 'function') updateStatistics();
+                if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI();
             }
         });
     }
@@ -55,13 +66,13 @@ function deleteWallpaperAction(e, id) {
                 wallpapers.splice(wpIdx, 1);
                 buildWallpaperUI();
                 if (currentWallpaperId === id) setWallpaper("classic");
-                if (typeof updateStatistics === 'function') updateStatistics();
+                if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI();
             }
         });
     }
 }
 
-// Отрисовка обоев с кнопкой "Удалить", которая появляется только после клика на три точки
+// Отрисовка обоев со встроенной скрытой кнопкой удаления по клику на точки
 function buildWallpaperUI() {
     if (!wallpaperGrid) return;
     wallpaperGrid.innerHTML = '';
@@ -70,7 +81,6 @@ function buildWallpaperUI() {
         card.className = `wallpaper-card-item ${wp.id === currentWallpaperId ? 'active' : ''}`;
         const bgStyle = wp.isClassic ? 'background: #0d0d11;' : `background-image: url('${wp.url}');`;
         
-        // ИСПРАВЛЕНО: Кнопка скрыта (display: none) по умолчанию
         const deleteBtnHtml = wp.isClassic ? '' : `
             <button id="del-wp-${wp.id}" class="inline-delete-btn" onclick="deleteWallpaperAction(event, '${wp.id}')" style="display: none; background: rgba(255, 77, 109, 0.15); border: 1px solid rgba(255, 77, 109, 0.3); color: #ff4d6d; cursor: pointer; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; transition: all 0.2s;">
                 Удалить
@@ -101,7 +111,7 @@ function buildWallpaperUI() {
     });
 }
 
-// Отрисовка треков с кнопкой "Удалить", которая появляется только после клика на три точки
+// Отрисовка треков со встроенной скрытой кнопкой удаления по клику на точки
 function buildFavoritesUI() {
     if (!favoritesList) return;
     favoritesList.innerHTML = '';
@@ -112,7 +122,6 @@ function buildFavoritesUI() {
         const imgStyle = (!track.cover || track.cover === "") ? 'background: linear-gradient(135deg, #1e1b4b, #0f172a)' : '';
         const imgSrc = (!track.cover || track.cover === "") ? '' : track.cover;
 
-        // ИСПРАВЛЕНО: Кнопка скрыта (display: none) по умолчанию
         const deleteBtnHtml = `
             <button id="del-track-${track.id}" class="inline-delete-btn" onclick="deleteTrackAction(event, ${track.id})" style="display: none; background: rgba(255, 77, 109, 0.15); border: 1px solid rgba(255, 77, 109, 0.3); color: #ff4d6d; cursor: pointer; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: all 0.2s;">
                 Удалить
