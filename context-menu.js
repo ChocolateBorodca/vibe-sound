@@ -42,6 +42,7 @@ tgMenu.addEventListener('mouseout', (e) => {
     if (item) item.style.background = 'none';
 });
 
+// ИСПРАВЛЕНО: Сдвигаем координаты влево под саму карточку
 function openContextMenu(e, type, id) {
     e.stopPropagation();
     activeMenuType = type;
@@ -55,12 +56,14 @@ function openContextMenu(e, type, id) {
     tgMenu.style.display = 'block';
     
     const rect = e.currentTarget.getBoundingClientRect();
-    tgMenu.style.left = `${rect.right - 135}px`;
+    
+    // Вычитаем 130 пикселей, чтобы окошко вылетало влево и оставалось в границах сайта
+    tgMenu.style.left = `${rect.left - 130}px`;
     tgMenu.style.top = `${rect.bottom + 6}px`;
 }
 
 document.addEventListener('click', () => {
-    tgMenu.style.display = 'none';
+    if (tgMenu) tgMenu.style.display = 'none';
 });
 
 document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
@@ -101,7 +104,6 @@ function buildWallpaperUI() {
         card.className = `wallpaper-card-item ${wp.id === currentWallpaperId ? 'active' : ''}`;
         const bgStyle = wp.isClassic ? 'background: #0d0d11;' : `background-image: url('${wp.url}');`;
         
-        // ИСПРАВЛЕНО: Заменили тег иконки Lucide на яркие текстовые три точки •••
         card.innerHTML = `
             <div class="wallpaper-preview" style="${bgStyle}"></div>
             <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 4px; gap: 8px;">
@@ -127,7 +129,6 @@ function buildFavoritesUI() {
         const imgStyle = (!track.cover || track.cover === "") ? 'background: linear-gradient(135deg, #1e1b4b, #0f172a)' : '';
         const imgSrc = (!track.cover || track.cover === "") ? '' : track.cover;
 
-        // ИСПРАВЛЕНО: Заменили тег иконки Lucide на яркие текстовые три точки •••
         row.innerHTML = `
             <img src="${imgSrc}" style="${imgStyle}" alt="">
             <div class="track-row-info">
