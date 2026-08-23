@@ -1,11 +1,4 @@
-const tracks = [
-    {
-        title: "",
-        artist: "",
-        audio: "https://vercel-storage.com",
-        cover: "" 
-    }
-];
+const tracks = [];
 
 const wallpapers = [
     { id: "classic", name: "Классический", url: "none", isClassic: true }
@@ -32,7 +25,13 @@ const bgGlowLayer = document.getElementById('bg-glow-layer');
 const coverParent = document.getElementById('cover-parent');
 
 function loadTrack() {
-    if (tracks.length === 0) return;
+    if (tracks.length === 0) {
+        title.textContent = "Нет треков";
+        artist.textContent = "Загрузите музыку во вкладке Любимое";
+        cover.style.display = "none";
+        coverParent.style.background = "linear-gradient(135deg, #1e1b4b, #0f172a)";
+        return;
+    }
     const current = tracks[currentIndex];
     audio.src = current.audio;
     title.textContent = current.title;
@@ -53,6 +52,7 @@ function loadTrack() {
 }
 
 function togglePlay() {
+    if (tracks.length === 0) return;
     if (audio.paused) {
         audio.play();
         playIcon.setAttribute('data-lucide', 'pause');
