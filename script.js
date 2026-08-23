@@ -1,10 +1,9 @@
-// === БАЗОВЫЙ ПЛЕЕР ===
 const tracks = [
     {
         title: "",
         artist: "",
         audio: "https://vercel-storage.com",
-        cover: "" // Сделали пустой, чтобы сразу сработал наш красивый матовый фон-заглушка!
+        cover: "" 
     }
 ];
 
@@ -40,7 +39,6 @@ function loadTrack() {
     artist.textContent = current.artist;
     progress.value = 0;
 
-    // Умная маскировка пустой обложки: убираем надпись "Обложка" и ставим стильный тёмный градиент
     if (!current.cover || current.cover === "") {
         cover.style.display = "none";
         coverParent.style.background = "linear-gradient(135deg, #1e1b4b, #0f172a)";
@@ -140,6 +138,7 @@ function setWallpaper(wpId) {
             bgWallpaper.style.backgroundImage = `url('${wp.url}')`;
             bgGlowLayer.style.display = "none";
         }
+        if (typeof saveSettingToDB === "function") saveSettingToDB("currentWallpaper", wpId);
     }
 
     document.querySelectorAll('.wallpaper-card-item').forEach((card, i) => {
@@ -169,7 +168,6 @@ function buildFavoritesUI() {
         const row = document.createElement('div');
         row.className = `track-row ${i === currentIndex ? 'playing-now' : ''}`;
         
-        // Маскировка мелкой картинки в списке
         const imgStyle = (!track.cover || track.cover === "") ? 'background: linear-gradient(135deg, #1e1b4b, #0f172a);' : '';
         const imgSrc = (!track.cover || track.cover === "") ? '' : track.cover;
 
@@ -192,9 +190,6 @@ function buildFavoritesUI() {
     });
 }
 
-// === ЛОГИКА ЗАГРУЗКИ С ПАМЯТИ ТЕЛЕФОНА ===
-
-// 1. Добавление песни
 document.getElementById('local-audio-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -202,38 +197,47 @@ document.getElementById('local-audio-input').addEventListener('change', function
     const blobUrl = URL.createObjectURL(file);
     const cleanFileName = file.name.replace(/\.[^/.]+$/, "");
 
-    tracks.push({
+    const newTrack = {
         title: cleanFileName,
         artist: "С телефона",
         audio: blobUrl,
-        cover: "" // Изначально пустая обложка (включит красивый фон)
-    });
+        cover: "",
+        audioFile: file
+    };
 
-    buildFavoritesUI();
-    currentIndex = tracks.length - 1;
-    loadTrack();
-    audio.play();
-    playIcon.setAttribute('data-lucide', 'pause');
-    lucide.createIcons();
-    switchTab('main');
+    if (typeof saveTrackToDB === "function") {
+        saveTrackToDB(newTrack, function(insertedId) {
+            newTrack.id = insertedId;
+            tracks.push(newTrack);
+            buildFavoritesUI();
+            currentIndex = tracks.length - 1;
+            loadTrack();
+            audio.play();
+            playIcon.setAttribute('data-lucide', 'pause');
+            lucide.createIcons();
+            switchTab('main');
+        });
+    }
 });
 
-// 2. ИСПРАВЛЕНО: Привязка обложки конкретно к выбранному сейчас треку!
 document.getElementById('local-cover-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file || tracks.length === 0) return;
 
     const imgBlobUrl = URL.createObjectURL(file);
+    const currentTrack = tracks[currentIndex];
     
-    // Перезаписываем обложку у текущей активной песни
-    tracks[currentIndex].cover = imgBlobUrl;
+    currentTrack.cover = imgBlobUrl;
+    currentTrack.coverFile = file;
 
-    // Обновляем плеер и списки
+    if (typeof updateTrackInDB === "function") {
+        updateTrackInDB(currentTrack);
+    }
+
     loadTrack();
     buildFavoritesUI();
 });
 
-// 3. Добавление обоев
 document.getElementById('local-bg-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -241,18 +245,22 @@ document.getElementById('local-bg-input').addEventListener('change', function(e)
     const blobUrl = URL.createObjectURL(file);
     const customId = "custom-" + Date.now();
 
-    wallpapers.push({
+    const newWallpaper = {
         id: customId,
         name: "Мои обои",
-        url: blobUrl
-    });
+        url: blobUrl,
+        gifFile: file
+    };
 
-    buildWallpaperUI();
-    setWallpaper(customId);
+    if (typeof saveWallpaperToDB === "function") {
+        saveWallpaperToDB(newWallpaper, function() {
+            wallpapers.push(newWallpaper);
+            buildWallpaperUI();
+            setWallpaper(customId);
+        });
+    }
 });
 
-// Старт приложения
 buildFavoritesUI();
 buildWallpaperUI();
 loadTrack();
-setWallpaper("classic");
