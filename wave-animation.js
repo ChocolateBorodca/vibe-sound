@@ -1,75 +1,97 @@
-// Генерация живой пульсирующей неоновой фигуры Яндекса в центре экрана
 function initWaveLiveAnimation() {
     const container = document.getElementById('wave-animation-container');
-    if (!container || document.getElementById('wave-visual-canvas')) return;
+    if (!container) return;
 
-    container.innerHTML = '';
-    
-    // Создаем холст для плавной 2D-анимации жидкой сферы
-    const canvas = document.createElement('canvas');
-    canvas.id = 'wave-visual-canvas';
-    canvas.width = 240;
-    canvas.height = 240;
-    canvas.style.position = 'absolute';
-    container.appendChild(canvas);
-
-    const ctx = canvas.getContext('2d');
-    let angle = 0;
-
-    function drawAnimation() {
-        requestAnimationFrame(drawAnimation);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Получаем громкость из прогресс-бара, если музыка играет
-        let isPlaying = audio && !audio.paused;
-        let volumeFactor = isPlaying ? 1.0 + Math.sin(angle * 5) * 0.12 : 1.0;
+    // Проверяем, создана ли уже наша большая волна, чтобы не дублировать
+    let canvas = document.getElementById('wave-visual-canvas');
+    if (!canvas) {
+        container.innerHTML = ''; // Очищаем старые круги
+        canvas = document.createElement('canvas');
+        canvas.id = 'wave-visual-canvas';
         
-        if (typeof isWaveActive !== 'undefined' && isWaveActive && isPlaying) {
-            volumeFactor = 1.0 + Math.sin(angle * 8) * 0.25; // Делаем пульсацию мощнее в режиме Волны
-        }
-
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const baseRadius = 65 * volumeFactor;
-
-        // Рисуем внешнее неоновое свечение (жидкое стекло)
-        ctx.save();
-        let glowGrad = ctx.createRadialGradient(centerX, centerY, baseRadius * 0.3, centerX, centerY, baseRadius * 1.5);
-        glowGrad.addColorStop(0, 'rgba(255, 42, 116, 0.2)');
-        glowGrad.addColorStop(0.5, 'rgba(138, 43, 226, 0.08)');
-        glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = glowGrad;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, baseRadius * 1.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        // Рисуем 3 пересекающихся плавающих круга как в Яндекс Музыке
-        for (let i = 0; i < 3; i++) {
-            ctx.beginPath();
-            let currentAngle = angle + (i * Math.PI / 1.5);
-            
-            // Смещение центра кругов для эффекта перетекания жидкости
-            let offsetX = Math.cos(currentAngle * 2) * (isPlaying ? 12 : 3);
-            let offsetY = Math.sin(currentAngle * 1.5) * (isPlaying ? 12 : 3);
-
-            ctx.arc(centerX + offsetX, centerY + offsetY, baseRadius, 0, Math.PI * 2);
-            
-            ctx.lineWidth = 3;
-            if (i === 0) ctx.strokeStyle = '#ff2a74'; // Розовый блик
-            else if (i === 1) ctx.strokeStyle = '#8a2be2'; // Фиолетовый блик
-            else ctx.strokeStyle = '#00f5ff'; // Бирюзовый блик
-
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = ctx.strokeStyle;
-            ctx.stroke();
-        }
-
-        angle += isPlaying ? 0.03 : 0.008; // Скорость вращения зависит от того, поет ли трек
+        // Делаем холст широким во весь экран вкладки для панорамной волны
+        canvas.width = container.parentElement.clientWidth || 500;
+        canvas.height = 260;
+        canvas.style.cssText = 'position: absolute; width: 100%; height: 100%; cursor: pointer;';
+        container.appendChild(canvas);
+        
+        // Подгоняем контейнер под широкий формат волны
+        container.style.width = '100%';
+        container.style.height = '260px';
     }
 
-    drawAnimation();
+    const ctx = canvas.getContext('2d');
+    let time = 0;
+
+    // Генерируем фиксированные настройки для 12 переплетающихся струн
+    const strands = [];
+    for (let i = 0; i < 12; i++) {
+        strands.push({
+            amplitudeFactor: 0.3 + (i * 0.06), // Насколько сильно гнется струна
+            frequencyFactor: 0.005 + (i * 0.002), // Плотность витков волны
+            speed: 0.02 + (i * 0.005), // Скорость бега волны влево-вправо
+            // Подбираем неоновые оттенки: от ярко-розового до фиолетового и белого глянца
+            color: i % 3 === 0 ? 'rgba(255, 42, 116, ' : (i % 3 === 1 ? 'rgba(138, 43, 226, ' : 'rgba(255, 255, 255, ')
+        });
+    }
+
+    function drawStrandWave() {
+        if (!document.getElementById('wave-visual-canvas')) return; // Тормозим, если ушли с вкладки
+        requestAnimationFrame(drawStrandWave);
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let isPlaying = audio && !audio.paused;
+        
+        // Коэффициент прыжка волны: в тишине она едва дышит, при музыке — взрывается
+        let globalPower = isPlaying ? 35 : 3;
+        
+        // Если активирована Моя Волна и музыка играет, даем максимальный напор басов
+        if (typeof isWaveActive !== 'undefined' && isWaveActive && isPlaying) {
+            globalPower = 65; 
+        }
+
+        const centerY = canvas.height / 2;
+
+        // Отрисовываем каждую нить паутины попиксельно
+        strands.forEach((strand, index) => {
+            ctx.beginPath();
+            ctx.lineWidth = index % 2 === 0 ? 1.5 : 0.8; // Чередуем толщину для объема
+            
+            // Задаем прозрачность: крайние нити блеклые, центральные — горят неоном
+            let alpha = 0.08 + (index * 0.03);
+            ctx.strokeStyle = strand.color + alpha + ')';
+            
+            // Включаем сильное неоновое свечение для белых и розовых нитей
+            ctx.shadowBlur = index % 4 === 0 ? 12 : 0;
+            ctx.shadowColor = index % 4 === 0 ? '#ff2a74' : 'transparent';
+
+            for (let x = 0; x < canvas.width; x++) {
+                // Математическая формула трех синусоид для создания хаотичных переплетений
+                let wave1 = Math.sin(x * strand.frequencyFactor + time * strand.speed);
+                let wave2 = Math.cos(x * 0.015 - time * 0.02);
+                let wave3 = Math.sin(x * 0.003 + time * 0.01) * 1.5;
+
+                // Суммируем волны и умножаем на силу музыки
+                let y = centerY + (wave1 * wave2 + wave3) * globalPower * strand.amplitudeFactor;
+
+                // Плавное затухание волны по краям холста (fade out по бокам), как на твоем фото
+                let edgeFade = Math.sin((x / canvas.width) * Math.PI);
+                y = centerY + (y - centerY) * edgeFade;
+
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        });
+
+        // Скорость течения времени (движения волны)
+        time += isPlaying ? 1.2 : 0.2;
+    }
+
+    // Запускаем бесконечный цикл рендеринга
+    drawStrandWave();
 }
 
-// Запускаем анимацию сразу, как только контейнер появится в разметке
+// Следим за тем, чтобы холст перестраивался, если контейнер готов
 setInterval(initWaveLiveAnimation, 1000);
