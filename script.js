@@ -1,30 +1,31 @@
-// === ВАШ МЕДИАПЛЕЕР С ФАЙЛАМИ ===
+// === БАЗОВЫЙ ПЛЕЕР ===
+// Сюда можно дописывать вечные треки из Vercel Blob, если захотите
 const tracks = [
     {
         title: "Night , Blooming Jasmine",
         artist: "fakemink",
-        audio: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/fakemink%20-%20Night%2C%20Blooming%20Jasmine.mp3",
-        cover: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/images%20%282%29.jpg"
+        audio: "https://vercel-storage.com",
+        cover: "https://vercel-storage.com"
     }
 ];
 
-// === СПИСОК ОБОЕВ (GIF И КЛАССИКА) ===
+// === СПИСОК ОБОЕВ (ВЕЧНЫЕ ССЫЛКИ ИЗ VERCEL BLOB) ===
 const wallpapers = [
-    {
-        id: "classic",
-        name: "Классический",
-        url: "none", // Без GIF (просто черный с неоновым свечением)
-        isClassic: true
+    { 
+        id: "classic", 
+        name: "Классический", 
+        url: "none", 
+        isClassic: true 
     },
-    {
-        id: "requiem", // ИСПРАВЛЕНО: Теперь синтаксис полностью чистый
-        name: "Requiem for a Dream",
-        url: "https://vercel-storage.com"
+    { 
+        id: "requiem", 
+        name: "Requiem for a Dream", 
+        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/Requiem%20for%20a%20Dream%2C%202000%20-%20Darren%20Aronofsky%20%281%29.gif" 
     },
-    {
-        id: "Register",
-        name: "Register",
-        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/Register%20-%20Login.gif"
+    { 
+        id: "Register", 
+        name: "Register", 
+        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/Register%20-%20Login.gif" 
     }
 ];
 
@@ -72,6 +73,7 @@ function togglePlay() {
 }
 
 function nextTrack() {
+    if (tracks.length === 0) return;
     currentIndex = (currentIndex + 1) % tracks.length;
     loadTrack();
     audio.play();
@@ -80,6 +82,7 @@ function nextTrack() {
 }
 
 function prevTrack() {
+    if (tracks.length === 0) return;
     currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
     loadTrack();
     audio.play();
@@ -125,7 +128,7 @@ function switchTab(tabName) {
     document.getElementById(`menu-${tabName}`).classList.add('active');
 
     document.getElementById('page-title').textContent = 
-        tabName === 'main' ? 'Главная' : (tabName === 'favorites' ? 'Любимое' : 'Обои');
+        tabName === 'main' ? 'Главная' : (tabName === 'favorites' ? 'Медиатека' : 'Обои');
 }
 
 document.getElementById('menu-main').addEventListener('click', () => switchTab('main'));
@@ -156,14 +159,12 @@ function buildWallpaperUI() {
     wallpapers.forEach((wp) => {
         const card = document.createElement('div');
         card.className = `wallpaper-card-item ${wp.id === currentWallpaperId ? 'active' : ''}`;
-        
         const bgStyle = wp.isClassic ? 'background: #0d0d11;' : `background-image: url('${wp.url}');`;
         
         card.innerHTML = `
             <div class="wallpaper-preview" style="${bgStyle}"></div>
             <span>${wp.name}</span>
         `;
-        
         card.addEventListener('click', () => setWallpaper(wp.id));
         wallpaperGrid.appendChild(card);
     });
@@ -193,6 +194,54 @@ function buildFavoritesUI() {
     });
 }
 
+// === УМНАЯ ЛОГИКА ЗАГРУЗКИ С ПАМЯТИ ТЕЛЕФОНА ===
+document.getElementById('local-audio-input').addEventListener('change', function(e) {
+    const file = e.target.files[0]; // Исправлено чтение одного файла
+    if (!file) return;
+
+    // Временный адрес трека в памяти смартфона
+    const blobUrl = URL.createObjectURL(file);
+    
+    // ИСПРАВЛЕНО: Извлекаем чистое название файла (убираем .mp3)
+    const cleanFileName = file.name.replace(/\.[^/.]+$/, "");
+
+    // Добавляем песню в список со своим родным именем
+    tracks.push({
+        title: cleanFileName,
+        artist: "С телефона",
+        audio: blobUrl,
+        cover: "https://vercel-storage.com" // Базовая обложка
+    });
+
+    // Обновляем список, включаем песню и перекидываем на главный экран
+    buildFavoritesUI();
+    currentIndex = tracks.length - 1;
+    loadTrack();
+    audio.play();
+    playIcon.setAttribute('data-lucide', 'pause');
+    lucide.createIcons();
+    switchTab('main');
+});
+
+// Добавление кастомных обоев из галереи
+document.getElementById('local-bg-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const blobUrl = URL.createObjectURL(file);
+    const customId = "custom-" + Date.now();
+
+    wallpapers.push({
+        id: customId,
+        name: "Мои обои",
+        url: blobUrl
+    });
+
+    buildWallpaperUI();
+    setWallpaper(customId);
+});
+
+// Старт приложения
 buildFavoritesUI();
 buildWallpaperUI();
 loadTrack();
