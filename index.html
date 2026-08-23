@@ -39,7 +39,6 @@
                     <i data-lucide="home"></i>
                     <span>Главная</span>
                 </div>
-                <!-- ДОБАВЛЕНО ЖЕСТКО: Пункт меню Моя Волна -->
                 <div id="menu-wave" class="menu-item">
                     <i data-lucide="waves" style="color: #ff2a74;"></i>
                     <span>Моя Волна</span>
@@ -52,7 +51,7 @@
                     <i data-lucide="image"></i>
                     <span>Обои</span>
                 </div>
-                <div class="menu-item">
+                <div id="menu-playlists" class="menu-item">
                     <i data-lucide="music-4"></i>
                     <span>Плейлисты</span>
                 </div>
@@ -60,7 +59,7 @@
                     <i data-lucide="bar-chart-3"></i>
                     <span>Статистика</span>
                 </div>
-                <div class="menu-item">
+                <div id="menu-settings" class="menu-item">
                     <i data-lucide="sliders"></i>
                     <span>Настройки</span>
                 </div>
@@ -86,9 +85,9 @@
                 </div>
             </section>
 
-            <!-- ДОБАВЛЕНО ЖЕСТКО: Контейнер экрана Моей Волны -->
+            <!-- ВКЛАДКА: МОЯ ВОЛНА -->
             <section id="tab-wave" class="tab-content" style="display: none; padding: 20px 40px; height: calc(88vh - 180px); background: #000000 !important;">
-                <!-- Карту интерактивных кнопок сюда подгрузит файл vibe-wave-map.js -->
+                <!-- vibe-wave-map.js -->
             </section>
 
             <!-- ВКЛАДКА: ЛЮБИМОЕ (МЕДИАТЕКА) -->
@@ -125,9 +124,19 @@
                 </div>
             </section>
 
-            <!-- ВКЛАДКА: СТАТИСТИКА -->
-            <section id="tab-stats" class="tab-content">
-                <!-- Контент генерируется динамически через stats-ui.js -->
+            <!-- ЖЕСТКИЙ КОНТЕЙНЕР: ПЛЕЙЛИСТЫ -->
+            <section id="tab-playlists" class="tab-content" style="display: none;">
+                <!-- vibe-playlists.js -->
+            </section>
+
+            <!-- ЖЕСТКИЙ КОНТЕЙНЕР: СТАТИСТИКА -->
+            <section id="tab-stats" class="tab-content" style="display: none;">
+                <!-- stats-ui.js -->
+            </section>
+
+            <!-- ЖЕСТКИЙ КОНТЕЙНЕР: НАСТРОЙКИ -->
+            <section id="tab-settings" class="tab-content" style="display: none;">
+                <!-- vibe-settings.js -->
             </section>
 
             <audio id="audio"></audio>
