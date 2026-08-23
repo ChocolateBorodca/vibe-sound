@@ -18,14 +18,14 @@ const wallpapers = [
         isClassic: true
     },
     {
-        id: "blackcaplya",
-        name: "микроб",
-        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/23_gif%20325%C3%97325%20pixels.gif"
+        id: ""Requiem for a Dream,
+        name: "Requiem for a Dream",
+        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/Requiem%20for%20a%20Dream%2C%202000%20-%20Darren%20Aronofsky%20%281%29.gif"
     },
     {
-        id: "anime-rain",
-        name: "Аниме Дождь",
-        url: "ССЫЛКА_НА_ВАШ_ВТОРОЙ_GIF_ИЗ_BLOB"
+        id: "Register",
+        name: "Register",
+        url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/Register%20-%20Login.gif"
     }
 ];
 
