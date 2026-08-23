@@ -4,7 +4,6 @@ let activeTargetId = null;
 const favoritesList = document.getElementById('favorites-list');
 const wallpaperGrid = document.getElementById('wallpaper-grid');
 
-// Создаем компактное стеклянное окошко Telegram-меню прямо через JS
 let tgMenu = document.getElementById('tg-context-menu');
 if (!tgMenu) {
     tgMenu = document.createElement('div');
@@ -12,7 +11,6 @@ if (!tgMenu) {
     document.body.appendChild(tgMenu);
 }
 
-// Принудительно задаем стиль жидкого стекла (Liquid Glass)
 tgMenu.style.cssText = `
     position: fixed;
     display: none;
@@ -27,7 +25,6 @@ tgMenu.style.cssText = `
     padding: 6px;
 `;
 
-// Наполняем меню кнопками в стиле Telegram
 tgMenu.innerHTML = `
     <div class="tg-menu-item" id="tg-menu-share" style="display: flex; align-items: center; gap: 10px; padding: 10px; color: #ffffff; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 10px; transition: background 0.15s;">
         <i data-lucide="share-2" style="width: 16px; height: 16px; color: rgba(255,255,255,0.7);"></i> Поделиться
@@ -37,43 +34,38 @@ tgMenu.innerHTML = `
     </div>
 `;
 
-// Стили для эффекта наведения (hover) на пункты меню
 tgMenu.addEventListener('mouseover', (e) => {
     const item = e.target.closest('.tg-menu-item');
     if (!item) return;
-    if (item.classList.contains('delete')) {
-        item.style.background = 'rgba(255, 77, 109, 0.15)';
-    } else {
-        item.style.background = 'rgba(255, 255, 255, 0.1)';
-    }
+    if (item.classList.contains('delete')) item.style.background = 'rgba(255, 77, 109, 0.15)';
+    else item.style.background = 'rgba(255, 255, 255, 0.1)';
 });
 tgMenu.addEventListener('mouseout', (e) => {
     const item = e.target.closest('.tg-menu-item');
     if (item) item.style.background = 'none';
 });
 
-// Логика привязки меню строго справа от нажатой кнопки трех точек
 function openContextMenu(e, type, id) {
     e.stopPropagation();
     activeMenuType = type;
     activeTargetId = id;
     
-    tgMenu.style.display = 'block';
+    // ИСПРАВЛЕНО: Если это базовые классические обои, вообще не открываем меню действий
+    if (id === "classic") {
+        alert("Это базовое оформление плеера, его нельзя удалить или переслать.");
+        return;
+    }
     
+    tgMenu.style.display = 'block';
     const rect = e.currentTarget.getBoundingClientRect();
     tgMenu.style.left = `${rect.right - 165}px`;
     tgMenu.style.top = `${rect.bottom + 8}px`;
-
-    const delBtn = document.getElementById('tg-menu-delete');
-    if (id === "classic") delBtn.style.style.display = 'none';
-    else delBtn.style.display = 'flex';
 }
 
 document.addEventListener('click', () => {
     tgMenu.style.display = 'none';
 });
 
-// Кнопка удаления файла из IndexedDB
 document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
     e.stopPropagation();
     tgMenu.style.display = 'none';
@@ -104,42 +96,53 @@ document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
     }
 });
 
-// Умная упаковка медиафайла в ссылку-установщик для друга
-document.getElementById('tg-menu-share').addEventListener('click', (e) => {
+// ИСПРАВЛЕНО: Логика генерации аккуратной и короткой ссылки через облако Vercel Blob
+document.getElementById('tg-menu-share').addEventListener('click', async (e) => {
     e.stopPropagation();
     tgMenu.style.display = 'none';
 
     const siteUrl = window.location.origin + window.location.pathname;
-    alert("Упаковываем файл в ссылку, подождите секунду...");
+    alert("Генерируем короткую ссылку для друга, подождите пару секунд...");
 
-    if (activeMenuType === 'track') {
-        const track = tracks.find(t => t.id === activeTargetId);
-        const reader = new FileReader();
-        reader.readAsDataURL(track.audioFile);
-        reader.onloadend = function() {
-            const base64Audio = reader.result.split(',')[1];
+    try {
+        if (activeMenuType === 'track') {
+            const track = tracks.find(t => t.id === activeTargetId);
+            
+            // Отправляем файл в твое облако Vercel Blob
+            const response = await fetch(`/api/blob/upload?filename=${encodeURIComponent(track.title)}.mp3`, {
+                method: 'POST',
+                body: track.audioFile
+            });
+            const blobData = await response.json();
+            
+            // Получаем чистую короткую ссылку на песню
+            let finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audioUrl=${encodeURIComponent(blobData.url)}`;
+            
             if (track.coverFile) {
-                const coverReader = new FileReader();
-                coverReader.readAsDataURL(track.coverFile);
-                coverReader.onloadend = function() {
-                    const base64Cover = coverReader.result.split(',')[1];
-                    const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}&cover=${base64Cover}`;
-                    copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Перейди по ссылке, и он сам автоматически запишется к тебе на сайт: ${finalUrl}`);
-                };
-            } else {
-                const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}`;
-                copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Перейди по ссылке, и он сам автоматически запишется к тебе на сайт: ${finalUrl}`);
+                const imgResponse = await fetch(`/api/blob/upload?filename=cover-${activeTargetId}.jpg`, {
+                    method: 'POST',
+                    body: track.coverFile
+                });
+                const imgBlobData = await imgResponse.json();
+                finalUrl += `&coverUrl=${encodeURIComponent(imgBlobData.url)}`;
             }
-        };
-    } else if (activeMenuType === 'wallpaper') {
-        const wp = wallpapers.find(w => w.id === activeTargetId);
-        const reader = new FileReader();
-        reader.readAsDataURL(wp.gifFile);
-        reader.onloadend = function() {
-            const base64Gif = reader.result.split(',')[1];
-            const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${base64Gif}`;
-            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы они сразу установились у тебя на фон: ${finalUrl}`);
-        };
+
+            copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Перейди по ссылке, и он сам установится у тебя: ${finalUrl}`);
+            
+        } else if (activeMenuType === 'wallpaper') {
+            const wp = wallpapers.find(w => w.id === activeTargetId);
+            
+            const response = await fetch(`/api/blob/upload?filename=wp-${activeTargetId}.gif`, {
+                method: 'POST',
+                body: wp.gifFile
+            });
+            const blobData = await response.json();
+            
+            const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${encodeURIComponent(blobData.url)}`;
+            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы сразу поставить их себе на фон: ${finalUrl}`);
+        }
+    } catch (err) {
+        alert("Ошибка облака. Проверьте, активен ли Vercel Blob.");
     }
 });
 
@@ -150,14 +153,13 @@ function copyTextToClipboard(text) {
     textarea.select();
     try {
         document.execCommand("copy");
-        alert("Умная ссылка скопирована! Отправь её другу в ЛС, при клике медиафайл сам установится у него на сайте.");
+        alert("Короткая ссылка скопирована! Отправь её другу в ЛС, при клике медиафайл сам автоматически скачается к нему на сайт.");
     } catch (err) {
         alert("Не удалось скопировать.");
     }
     document.body.removeChild(textarea);
 }
 
-// Отрисовка сетки обоев с крупной кнопкой трех точек
 function buildWallpaperUI() {
     if (!wallpaperGrid) return;
     wallpaperGrid.innerHTML = '';
@@ -181,7 +183,6 @@ function buildWallpaperUI() {
     if (window.lucide) lucide.createIcons();
 }
 
-// Отрисовка списка треков с крупной кнопкой трех точек
 function buildFavoritesUI() {
     if (!favoritesList) return;
     favoritesList.innerHTML = '';
