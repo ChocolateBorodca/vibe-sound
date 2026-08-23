@@ -1,21 +1,37 @@
 // === ВАШ МЕДИАПЛЕЕР С ФАЙЛАМИ ===
-// При необходимости измените названия на ваши реальные файлы mp3 и jpg!
 const tracks = [
     {
         title: "Night , Blooming Jasmine",
         artist: "fakemink",
         audio: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/fakemink%20-%20Night%2C%20Blooming%20Jasmine.mp3",
         cover: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/images%20%282%29.png"
+    }
+];
+
+// === СПИСОК ОБОЕВ (GIF И КЛАССИКА) ===
+// Загрузите любые GIF в Vercel Blob и вставьте ссылки сюда!
+const wallpapers = [
+    {
+        id: "classic",
+        name: "Классический",
+        url: "none", // Без GIF (просто черный с неоновым свечением)
+        isClassic: true
     },
     {
-        title: "Любимый Хит",
-        artist: "Популярный Артист",
-        audio: "music2.mp3",
-        cover: "cover2.jpg"
+        id: "cyberpunk",
+        name: "Киберпанк",
+        url: "ССЫЛКА_НА_ВАШ_ПЕРВЫЙ_GIF_ИЗ_BLOB"
+    },
+    {
+        id: "anime-rain",
+        name: "Аниме Дождь",
+        url: "ССЫЛКА_НА_ВАШ_ВТОРОЙ_GIF_ИЗ_BLOB"
     }
 ];
 
 let currentIndex = 0;
+let currentWallpaperId = "classic";
+
 const audio = document.getElementById('audio');
 const playBtn = document.getElementById('play');
 const playIcon = document.getElementById('play-icon');
@@ -24,13 +40,14 @@ const nextBtn = document.getElementById('next');
 const progress = document.getElementById('progress');
 const currentTimeEl = document.getElementById('current-time');
 const durationEl = document.getElementById('duration');
-
 const cover = document.getElementById('cover');
 const title = document.getElementById('title');
 const artist = document.getElementById('artist');
 const favoritesList = document.getElementById('favorites-list');
+const wallpaperGrid = document.getElementById('wallpaper-grid');
+const bgWallpaper = document.getElementById('bg-wallpaper');
+const bgGlowLayer = document.getElementById('bg-glow-layer');
 
-// Загрузка информации о треке
 function loadTrack() {
     const current = tracks[currentIndex];
     audio.src = current.audio;
@@ -39,13 +56,11 @@ function loadTrack() {
     artist.textContent = current.artist;
     progress.value = 0;
 
-    // Обновляем маркер играющего трека в плейлисте Любимого
     document.querySelectorAll('.track-row').forEach((row, i) => {
         row.classList.toggle('playing-now', i === currentIndex);
     });
 }
 
-// Функция включить / выключить
 function togglePlay() {
     if (audio.paused) {
         audio.play();
@@ -54,7 +69,7 @@ function togglePlay() {
         audio.pause();
         playIcon.setAttribute('data-lucide', 'play');
     }
-    lucide.createIcons(); // Перерисовываем иконку play/pause
+    lucide.createIcons();
 }
 
 function nextTrack() {
@@ -73,12 +88,10 @@ function prevTrack() {
     lucide.createIcons();
 }
 
-// Слушатели событий управления
 playBtn.addEventListener('click', togglePlay);
 nextBtn.addEventListener('click', nextTrack);
 prevBtn.addEventListener('click', prevTrack);
 
-// Логика работы таймлайна (перемотка)
 function formatTime(seconds) {
     if (isNaN(seconds)) return '0:00';
     let min = Math.floor(seconds / 60);
@@ -105,7 +118,7 @@ progress.addEventListener('input', () => {
 
 audio.addEventListener('ended', nextTrack);
 
-// Переключение вкладок меню (Главная / Любимое)
+// Управление вкладками меню (Главная / Любимое / Обои)
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -113,15 +126,53 @@ function switchTab(tabName) {
     document.getElementById(`tab-${tabName}`).classList.add('active');
     document.getElementById(`menu-${tabName}`).classList.add('active');
 
-    // Меняем заголовок страницы сверху
-    document.getElementById('page-title').textContent = tabName === 'main' ? 'Главная' : 'Любимое';
+    document.getElementById('page-title').textContent = 
+        tabName === 'main' ? 'Главная' : (tabName === 'favorites' ? 'Любимое' : 'Обои');
 }
 
-// Назначаем обработчики клика на вкладки бокового меню
 document.getElementById('menu-main').addEventListener('click', () => switchTab('main'));
 document.getElementById('menu-favorites').addEventListener('click', () => switchTab('favorites'));
+document.getElementById('menu-wallpaper').addEventListener('click', () => switchTab('wallpaper'));
 
-// Генерация списка треков на странице Любимое
+// Функция смены обоев
+function setWallpaper(wpId) {
+    currentWallpaperId = wpId;
+    const wp = wallpapers.find(w => w.id === wpId);
+    
+    if (wp.isClassic) {
+        bgWallpaper.style.backgroundImage = "none";
+        bgGlowLayer.style.display = "block"; // Показываем неоновые круги
+    } else {
+        bgWallpaper.style.backgroundImage = `url('${wp.url}')`;
+        bgGlowLayer.style.display = "none"; // Прячем неоновые круги, чтобы не мешать GIF
+    }
+
+    // Обновляем активную карточку в сетке
+    document.querySelectorAll('.wallpaper-card-item').forEach((card, i) => {
+        card.classList.toggle('active', wallpapers[i].id === wpId);
+    });
+}
+
+// Генерация сетки обоев
+function buildWallpaperUI() {
+    wallpaperGrid.innerHTML = '';
+    wallpapers.forEach((wp) => {
+        const card = document.createElement('div');
+        card.className = `wallpaper-card-item ${wp.id === currentWallpaperId ? 'active' : ''}`;
+        
+        // Превью карточки
+        const bgStyle = wp.isClassic ? 'background: #0d0d11;' : `background-image: url('${wp.url}');`;
+        
+        card.innerHTML = `
+            <div class="wallpaper-preview" style="${bgStyle}"></div>
+            <span>${wp.name}</span>
+        `;
+        
+        card.addEventListener('click', () => setWallpaper(wp.id));
+        wallpaperGrid.appendChild(card);
+    });
+}
+
 function buildFavoritesUI() {
     favoritesList.innerHTML = '';
     tracks.forEach((track, i) => {
@@ -140,12 +191,14 @@ function buildFavoritesUI() {
             audio.play();
             playIcon.setAttribute('data-lucide', 'pause');
             lucide.createIcons();
-            switchTab('main'); // Возвращаемся на главный экран плеера при выборе трека
+            switchTab('main');
         });
         favoritesList.appendChild(row);
     });
 }
 
-// Запуск приложения
+// Старт приложения
 buildFavoritesUI();
+buildWallpaperUI();
 loadTrack();
+setWallpaper("classic"); // По умолчанию классический фон
