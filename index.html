@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>vibe sound</title>
-    <!-- Исправленные пути к шрифтам Google -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- ИСПРАВЛЕНО: Правильное подключение библиотеки иконок Lucide -->
+    <title>Nextmove Music</title>
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Анимированный задний фон -->
     <div class="bg-wallpaper" id="bg-wallpaper"></div>
     <div class="bg-glow" id="bg-glow-layer"></div>
 
@@ -25,14 +22,14 @@
             <div class="brand">
                 <div class="logo">
                     <i data-lucide="move-right" style="transform: rotate(135deg);"></i>
-                    <span>vibe sound</span>
+                    <span>Nextmove</span>
                 </div>
                 <button class="collapse-btn"><i data-lucide="sidebar"></i></button>
             </div>
 
             <div class="workspace-selector">
                 <div class="workspace-avatar">N</div>
-                <span class="workspace-name">sound</span>
+                <span class="workspace-name">Nimbus</span>
                 <i data-lucide="chevron-down" class="chevron"></i>
             </div>
 
@@ -83,21 +80,33 @@
                 </div>
             </section>
 
-            <!-- ЭКРАН 2: ЛЮБИМОЕ -->
+            <!-- ЭКРАН 2: ЛЮБИМОЕ (СПИСОК ТРЕКОВ + ЗАГРУЗКА) -->
             <section id="tab-favorites" class="tab-content">
                 <div class="playlist-container">
-                    <div class="playlist-header-text">Ваши любимые треки</div>
+                    <div class="playlist-top-bar">
+                        <div class="playlist-header-text">Ваша медиатека</div>
+                        <!-- Кнопка добавления музыки с телефона -->
+                        <button class="upload-action-btn" onclick="document.getElementById('local-audio-input').click()">
+                            <i data-lucide="plus"></i> Добавить песню
+                        </button>
+                        <input type="file" id="local-audio-input" accept="audio/mp3,audio/*" style="display: none;">
+                    </div>
                     <div class="tracks-list" id="favorites-list"></div>
                 </div>
             </section>
 
-            <!-- ЭКРАН 3: ОБОИ (WALLPAPER) -->
+            <!-- ЭКРАН 3: ОБОИ (+ ЗАГРУЗКА СВОИХ ГИФОК) -->
             <section id="tab-wallpaper" class="tab-content">
                 <div class="wallpaper-container">
-                    <div class="playlist-header-text">Выберите фоновое оформление</div>
-                    <div class="wallpaper-grid" id="wallpaper-grid">
-                        <!-- Сюда JS добавит карточки обоев -->
+                    <div class="playlist-top-bar">
+                        <div class="playlist-header-text">Фоновое оформление</div>
+                        <!-- Кнопка добавления обоев из галереи -->
+                        <button class="upload-action-btn" onclick="document.getElementById('local-bg-input').click()">
+                            <i data-lucide="upload"></i> Свои обои (GIF/Фото)
+                        </button>
+                        <input type="file" id="local-bg-input" accept="image/*" style="display: none;">
                     </div>
+                    <div class="wallpaper-grid" id="wallpaper-grid"></div>
                 </div>
             </section>
 
@@ -125,7 +134,6 @@
 
     </div>
 
-    <!-- Запуск иконок после полной загрузки DOM -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             if(window.lucide) lucide.createIcons();
