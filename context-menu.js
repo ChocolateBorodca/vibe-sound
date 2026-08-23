@@ -95,62 +95,41 @@ document.getElementById('tg-menu-delete').addEventListener('click', (e) => {
     }
 });
 
-// ИСПРАВЛЕНО: Безопасная отправка через бесплатный быстрый внешний хостинг file.io
-document.getElementById('tg-menu-share').addEventListener('click', async (e) => {
+document.getElementById('tg-menu-share').addEventListener('click', (e) => {
     e.stopPropagation();
     tgMenu.style.display = 'none';
 
     const siteUrl = window.location.origin + window.location.pathname;
-    alert("Генерируем короткую ссылку для друга, подождите пару секунд...");
+    alert("Готовим файл к отправке, подождите секунду...");
 
-    try {
-        if (activeMenuType === 'track') {
-            const track = tracks.find(t => t.id === activeTargetId);
-            
-            // Отправляем mp3 файл
-            const formData = new FormData();
-            formData.append('file', track.audioFile);
-            
-            const response = await fetch('https://file.io', {
-                method: 'POST',
-                body: formData
-            });
-            const audioResult = await response.json();
-            
-            let finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audioUrl=${encodeURIComponent(audioResult.link)}`;
-            
-            // Если есть обложка — отправляем и её отдельным файлом
+    if (activeMenuType === 'track') {
+        const track = tracks.find(t => t.id === activeTargetId);
+        const reader = new FileReader();
+        reader.readAsDataURL(track.audioFile);
+        reader.onloadend = function() {
+            const base64Audio = reader.result.split(',')[1];
             if (track.coverFile) {
-                const coverFormData = new FormData();
-                coverFormData.append('file', track.coverFile);
-                
-                const coverResponse = await fetch('https://file.io', {
-                    method: 'POST',
-                    body: coverFormData
-                });
-                const coverResult = await coverResponse.json();
-                finalUrl += `&coverUrl=${encodeURIComponent(coverResult.link)}`;
+                const coverReader = new FileReader();
+                coverReader.readAsDataURL(track.coverFile);
+                coverReader.onloadend = function() {
+                    const base64Cover = coverReader.result.split(',')[1];
+                    const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}&cover=${base64Cover}`;
+                    copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Кликни по ссылке, и он сам автоматически запишется к тебе: ${finalUrl}`);
+                };
+            } else {
+                const finalUrl = `${siteUrl}?shareType=track&title=${encodeURIComponent(track.title)}&audio=${base64Audio}`;
+                copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Кликни по ссылке, и он сам автоматически запишется к тебе: ${finalUrl}`);
             }
-
-            copyTextToClipboard(`🎵 Лови трек «${track.title}» в моем плеере Vibe Sound! Перейди по ссылке, и он сам автоматически запишется к тебе на сайт: ${finalUrl}`);
-            
-        } else if (activeMenuType === 'wallpaper') {
-            const wp = wallpapers.find(w => w.id === activeTargetId);
-            
-            const formData = new FormData();
-            formData.append('file', wp.gifFile);
-            
-            const response = await fetch('https://file.io', {
-                method: 'POST',
-                body: formData
-            });
-            const wpResult = await response.json();
-            
-            const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${encodeURIComponent(wpResult.link)}`;
-            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы они сразу установились у тебя на фон: ${finalUrl}`);
-        }
-    } catch (err) {
-        alert("Не удалось сгенерировать ссылку. Попробуйте еще раз.");
+        };
+    } else if (activeMenuType === 'wallpaper') {
+        const wp = wallpapers.find(w => w.id === activeTargetId);
+        const reader = new FileReader();
+        reader.readAsDataURL(wp.gifFile);
+        reader.onloadend = function() {
+            const base64Gif = reader.result.split(',')[1];
+            const finalUrl = `${siteUrl}?shareType=wp&wpId=${wp.id}&url=${base64Gif}`;
+            copyTextToClipboard(`🎨 Зацени эти анимированные обои в плеере Vibe Sound! Кликни по ссылке, чтобы сразу поставить их себе на фон: ${finalUrl}`);
+        };
     }
 });
 
@@ -161,7 +140,7 @@ function copyTextToClipboard(text) {
     textarea.select();
     try {
         document.execCommand("copy");
-        alert("Короткая ссылка скопирована! Отправь её другу, при клике медиафайл сам установится у него в плеере.");
+        alert("Ссылка скопирована! Отправь её другу в ЛС, при клике медиафайл сам установится у него на сайте.");
     } catch (err) {
         alert("Не удалось скопировать.");
     }
