@@ -17,9 +17,9 @@ const wallpapers = [
         isClassic: true
     },
     {
-        id: "requiem", // ИСПРАВЛЕНО: Теперь тут обычная строка без лишних кавычек
+        id: "requiem", // ИСПРАВЛЕНО: Теперь синтаксис полностью чистый
         name: "Requiem for a Dream",
-        url: "a"
+        url: "https://vercel-storage.com"
     },
     {
         id: "Register",
@@ -117,7 +117,6 @@ progress.addEventListener('input', () => {
 
 audio.addEventListener('ended', nextTrack);
 
-// Управление вкладками меню (Главная / Любимое / Обои)
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -133,7 +132,6 @@ document.getElementById('menu-main').addEventListener('click', () => switchTab('
 document.getElementById('menu-favorites').addEventListener('click', () => switchTab('favorites'));
 document.getElementById('menu-wallpaper').addEventListener('click', () => switchTab('wallpaper'));
 
-// Функция смены обоев
 function setWallpaper(wpId) {
     currentWallpaperId = wpId;
     const wp = wallpapers.find(w => w.id === wpId);
@@ -153,7 +151,6 @@ function setWallpaper(wpId) {
     });
 }
 
-// Генерация сетки обоев
 function buildWallpaperUI() {
     wallpaperGrid.innerHTML = '';
     wallpapers.forEach((wp) => {
@@ -196,7 +193,6 @@ function buildFavoritesUI() {
     });
 }
 
-// Старт приложения
 buildFavoritesUI();
 buildWallpaperUI();
 loadTrack();
