@@ -10,7 +10,6 @@
     <script src="https://unpkg.com"></script>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Дополнительные стили для экрана статистики */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -39,6 +38,11 @@
                 <div id="menu-main" class="menu-item active">
                     <i data-lucide="home"></i>
                     <span>Главная</span>
+                </div>
+                <!-- ДОБАВЛЕНО ЖЕСТКО: Пункт меню Моя Волна -->
+                <div id="menu-wave" class="menu-item">
+                    <i data-lucide="waves" style="color: #ff2a74;"></i>
+                    <span>Моя Волна</span>
                 </div>
                 <div id="menu-favorites" class="menu-item">
                     <i data-lucide="heart"></i>
@@ -82,6 +86,11 @@
                 </div>
             </section>
 
+            <!-- ДОБАВЛЕНО ЖЕСТКО: Контейнер экрана Моей Волны -->
+            <section id="tab-wave" class="tab-content" style="display: none; padding: 20px 40px; height: calc(88vh - 180px); background: #000000 !important;">
+                <!-- Карту интерактивных кнопок сюда подгрузит файл vibe-wave-map.js -->
+            </section>
+
             <!-- ВКЛАДКА: ЛЮБИМОЕ (МЕДИАТЕКА) -->
             <section id="tab-favorites" class="tab-content">
                 <div class="playlist-container">
@@ -121,22 +130,6 @@
                 <!-- Контент генерируется динамически через stats-ui.js -->
             </section>
 
-            <!-- ВКЛАДКА: МОЯ ВОЛНА -->
-            <section id="tab-wave" class="tab-content" style="display: none; padding: 20px 40px; height: calc(88vh - 180px); background: #000000 !important;">
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 30px; position: relative; width: 100%;">
-                    
-                    <!-- 1. Твой контейнер, где живет неоновая волна -->
-                    <div id="wave-container" style="width: 100%; height: 300px; background: #000000; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;"></div>
-
-                    <!-- Кнопка включения Волны -->
-                    <div style="display: flex; justify-content: center; width: 100%; margin-top: 20px;">
-                        <button id="wave-center-toggle-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; padding: 14px 45px; border-radius: 30px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px); z-index: 10;">
-                            🌊 Включить Мою Волну
-                        </button>
-                    </div>
-                </div>
-            </section>
-
             <audio id="audio"></audio>
 
             <!-- ПАНЕЛЬ УПРАВЛЕНИЯ ПЛЕЕРОМ -->
@@ -166,10 +159,8 @@
             if(window.lucide) lucide.createIcons();
         });
     </script>
-    <!-- ЦЕПОЧКА ПОДКЛЮЧЕНИЯ СКРИПТОВ -->
     <script src="database.js"></script>
     <script src="context-menu.js"></script>
-    <script src="wave-animation.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
