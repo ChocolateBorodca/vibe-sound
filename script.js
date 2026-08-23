@@ -9,7 +9,6 @@ const tracks = [
 ];
 
 // === СПИСОК ОБОЕВ (GIF И КЛАССИКА) ===
-// Загрузите любые GIF в Vercel Blob и вставьте ссылки сюда!
 const wallpapers = [
     {
         id: "classic",
@@ -18,7 +17,7 @@ const wallpapers = [
         isClassic: true
     },
     {
-        id: ""Requiem for a Dream,
+        id: "requiem", // ИСПРАВЛЕНО: Теперь тут обычная строка без лишних кавычек
         name: "Requiem for a Dream",
         url: "https://hlx6folrupjwnm6y.public.blob.vercel-storage.com/Requiem%20for%20a%20Dream%2C%202000%20-%20Darren%20Aronofsky%20%281%29.gif"
     },
@@ -139,15 +138,16 @@ function setWallpaper(wpId) {
     currentWallpaperId = wpId;
     const wp = wallpapers.find(w => w.id === wpId);
     
-    if (wp.isClassic) {
-        bgWallpaper.style.backgroundImage = "none";
-        bgGlowLayer.style.display = "block"; // Показываем неоновые круги
-    } else {
-        bgWallpaper.style.backgroundImage = `url('${wp.url}')`;
-        bgGlowLayer.style.display = "none"; // Прячем неоновые круги, чтобы не мешать GIF
+    if (wp) {
+        if (wp.isClassic) {
+            bgWallpaper.style.backgroundImage = "none";
+            bgGlowLayer.style.display = "block";
+        } else {
+            bgWallpaper.style.backgroundImage = `url('${wp.url}')`;
+            bgGlowLayer.style.display = "none";
+        }
     }
 
-    // Обновляем активную карточку в сетке
     document.querySelectorAll('.wallpaper-card-item').forEach((card, i) => {
         card.classList.toggle('active', wallpapers[i].id === wpId);
     });
@@ -160,7 +160,6 @@ function buildWallpaperUI() {
         const card = document.createElement('div');
         card.className = `wallpaper-card-item ${wp.id === currentWallpaperId ? 'active' : ''}`;
         
-        // Превью карточки
         const bgStyle = wp.isClassic ? 'background: #0d0d11;' : `background-image: url('${wp.url}');`;
         
         card.innerHTML = `
@@ -201,4 +200,4 @@ function buildFavoritesUI() {
 buildFavoritesUI();
 buildWallpaperUI();
 loadTrack();
-setWallpaper("classic"); // По умолчанию классический фон
+setWallpaper("classic");
