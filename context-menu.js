@@ -7,8 +7,8 @@ if (!document.querySelector('script[src="vibe-wave-map.js"]')) {
     const s6 = document.createElement('script'); s6.src = 'vibe-uploader.js'; document.head.appendChild(s6);
     const s7 = document.createElement('script'); s7.src = 'vibe-splitter-ui.js'; document.head.appendChild(s7);
     const s8 = document.createElement('script'); s8.src = 'vibe-splitter-logic.js'; document.head.appendChild(s8);
+    const s9 = document.createElement('script'); s9.src = 'vibe-splitter-audio.js'; document.head.appendChild(s9);
 }
-
 
 let activeMenuType = null;
 let activeTargetId = null;
