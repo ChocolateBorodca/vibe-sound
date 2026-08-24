@@ -4,7 +4,6 @@ setTimeout(() => {
     const coverInput = document.getElementById('local-cover-input');
     const bgInput = document.getElementById('local-bg-input');
 
-    // Создаем стильное стеклянное модальное окно для ввода тегов, если его еще нет
     let uploadModal = document.getElementById('vibe-upload-tags-modal');
     if (!uploadModal) {
         uploadModal = document.createElement('div');
@@ -16,12 +15,11 @@ setTimeout(() => {
     if (audioInput) {
         audioInput.addEventListener('change', function(e) {
             if (!e.target.files || e.target.files.length === 0) return;
-            const file = e.target.files[0];
+            const file = e.target.files[0]; // Берем конкретный выбранный файл
 
             const blobUrl = URL.createObjectURL(file);
             const cleanFileName = file.name.replace(/\.[^/.]+$/, "");
 
-            // Открываем стеклянное модальное окно для ввода данных трека перед добавлением
             uploadModal.innerHTML = `
                 <div style="font-size:16px; font-weight:600; color:#fff; margin-bottom:16px; letter-spacing:0.5px;">Параметры новой песни</div>
                 
@@ -44,7 +42,7 @@ setTimeout(() => {
 
             document.getElementById('vibe-upload-cancel').onclick = () => {
                 uploadModal.style.display = "none";
-                audioInput.value = ""; // Сбрасываем выбор файла
+                audioInput.value = "";
             };
 
             document.getElementById('vibe-upload-save').onclick = () => {
@@ -65,8 +63,11 @@ setTimeout(() => {
                     saveTrackToDB(newTrack, function(insertedId) {
                         newTrack.id = insertedId;
                         tracks.push(newTrack);
-                        if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
+                        
+                        // ИСПРАВЛЕНО: Жестко синхронизируем индекс с концом массива перед перерисовкой
                         currentIndex = tracks.length - 1;
+                        
+                        if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
                         if (typeof loadTrack === 'function') loadTrack();
                         
                         const audio = document.getElementById('audio');
@@ -77,9 +78,9 @@ setTimeout(() => {
                             if (window.lucide) lucide.createIcons();
                         }
                         
-                        // Прячем модальное окно и переключаем на Главную вкладку плеера
                         uploadModal.style.display = "none";
                         if (typeof switchTab === 'function') switchTab('main');
+                        audioInput.value = ""; // Очищаем инпут
                     });
                 }
             };
@@ -102,6 +103,7 @@ setTimeout(() => {
             }
             if (typeof loadTrack === 'function') loadTrack();
             if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
+            coverInput.value = ""; // Очищаем инпут
         });
     }
 
@@ -119,12 +121,9 @@ setTimeout(() => {
                     wallpapers.push(newWallpaper);
                     if (typeof buildWallpaperUI === 'function') buildWallpaperUI();
                     if (typeof setWallpaper === "function") setWallpaper(customId);
+                    bgInput.value = ""; // Очищаем инпут
                 });
             }
         });
     }
-
-    if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
-    if (typeof buildWallpaperUI === 'function') buildWallpaperUI();
-    if (typeof loadTrack === 'function') loadTrack();
 }, 1500);
