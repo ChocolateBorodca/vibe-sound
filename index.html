@@ -87,7 +87,7 @@
 
             <!-- ВКЛАДКА: МОЯ ВОЛНА -->
             <section id="tab-wave" class="tab-content" style="display: none; padding: 20px 40px; height: calc(88vh - 180px);">
-                <!-- vibe-wave-map.js -->
+                <!-- Наполнение генерируется через vibe-wave-map.js -->
             </section>
 
             <!-- ВКЛАДКА: ЛЮБИМОЕ (МЕДИАТЕКА) -->
@@ -126,17 +126,17 @@
 
             <!-- ВКЛАДКА: ПЛЕЙЛИСТЫ -->
             <section id="tab-playlists" class="tab-content" style="display: none;">
-                <!-- vibe-playlists.js -->
+                <!-- Наполнение генерируется через vibe-playlists.js -->
             </section>
 
             <!-- ВКЛАДКА: СТАТИСТИКА -->
             <section id="tab-stats" class="tab-content" style="display: none;">
-                <!-- stats.js -->
+                <!-- Наполнение генерируется через stats.js -->
             </section>
 
             <!-- ВКЛАДКА: НАСТРОЙКИ -->
             <section id="tab-settings" class="tab-content" style="display: none;">
-                <!-- vibe-settings.js -->
+                <!-- Наполнение генерируется через vibe-settings.js -->
             </section>
 
             <audio id="audio"></audio>
@@ -168,9 +168,9 @@
             if(window.lucide) lucide.createIcons();
         });
     </script>
+    
+    <!-- ИСПРАВЛЕНО: База данных теперь грузится СТРОГО ПЕРВОЙ, открывая доступ к музыке -->
     <script src="database.js"></script>
-    <script src="stats.js"></script>
-    <script src="vibe-wave-events.js"></script>
     <script src="context-menu.js"></script>
     <script src="script.js"></script>
 </body>
