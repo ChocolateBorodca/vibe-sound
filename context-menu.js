@@ -1,10 +1,11 @@
+// НАДЕЖНЫЙ ОРИГИНАЛЬНЫЙ БЛОК: Автоматически подгружаем только стабильные рабочие компоненты
 if (!document.querySelector('script[src="vibe-wave-map.js"]')) {
-    const s5 = document.createElement('script'); s5.src = 'stats-collector.js'; document.head.appendChild(s5);
-    const s6 = document.createElement('script'); s6.src = 'vibe-wave-map.js'; document.head.appendChild(s6);
-    const s8 = document.createElement('script'); s8.src = 'vibe-playlists.js'; document.head.appendChild(s8);
-    const s9 = document.createElement('script'); s9.src = 'vibe-settings.js'; document.head.appendChild(s9);
-    const s10 = document.createElement('script'); s10.src = 'vibe-uploader.js'; document.head.appendChild(s10);
-    const s11 = document.createElement('script'); s11.src = 'vibe-playlists-view.js'; document.head.appendChild(s11);
+    const s1 = document.createElement('script'); s1.src = 'vibe-wave-map.js'; document.head.appendChild(s1);
+    const s2 = document.createElement('script'); s2.src = 'vibe-wave-events.js'; document.head.appendChild(s2);
+    const s3 = document.createElement('script'); s3.src = 'vibe-playlists.js'; document.head.appendChild(s3);
+    const s4 = document.createElement('script'); s4.src = 'vibe-playlists-view.js'; document.head.appendChild(s4);
+    const s5 = document.createElement('script'); s5.src = 'vibe-settings.js'; document.head.appendChild(s5);
+    const s6 = document.createElement('script'); s6.src = 'vibe-uploader.js'; document.head.appendChild(s6);
 }
 
 let activeMenuType = null;
@@ -34,14 +35,10 @@ function deleteTrackAction(e, id) {
         deleteTrackFromDB(id, () => {
             const trackIdx = tracks.findIndex(t => t.id === id);
             if (trackIdx !== -1) {
-                let playData = JSON.parse(localStorage.getItem('vibe_detailed_plays') || "{}");
-                delete playData[id];
-                localStorage.setItem('vibe_detailed_plays', JSON.stringify(playData));
                 tracks.splice(trackIdx, 1);
                 if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
                 if (currentIndex >= tracks.length) currentIndex = 0;
                 if (typeof loadTrack === 'function') loadTrack();
-                if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI();
             }
         });
     }
@@ -57,7 +54,6 @@ function deleteWallpaperAction(e, id) {
                 wallpapers.splice(wpIdx, 1);
                 if (typeof buildWallpaperUI === 'function') buildWallpaperUI();
                 if (currentWallpaperId === id && typeof setWallpaper === 'function') setWallpaper("classic");
-                if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI();
             }
         });
     }
