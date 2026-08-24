@@ -56,17 +56,15 @@ function startWavePlayback() {
     }
 }
 
-// СВЕРХНАДЕЖНЫЙ СИСТЕМНЫЙ ПЕРЕКЛЮЧАТЕЛЬ ВСЕХ ВКЛАДОК
+// СВЕРХНАДЕЖНЫЙ СИСТЕМНЫЙ ПЕРЕКЛЮЧАТЕЛЬ ВСЕХ ВКЛАДОК С ХАРД-ЗАГРУЗКОЙ АНАЛИТИКИ
 setTimeout(() => {
     window.switchTab = function(tabName) {
-        // Гарантированно прячем абсолютно все вкладки на сайте
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.style.display = 'none';
             tab.classList.remove('active');
         });
         document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
 
-        // Активируем нужный контейнер по имени
         const targetTab = document.getElementById(`tab-${tabName}`);
         const targetMenu = document.getElementById(`menu-${tabName}`);
 
@@ -81,20 +79,34 @@ setTimeout(() => {
 
         if (targetMenu) targetMenu.classList.add('active');
 
-        // Управляем заголовками
         let titleText = "Главная";
         if (tabName === 'favorites') titleText = "Медиатека";
         if (tabName === 'wallpaper') titleText = "Обои";
         if (tabName === 'wave') { titleText = "Моя Волна"; if (typeof initVibeWaveMap === 'function') initVibeWaveMap(); }
-        if (tabName === 'playlists') { titleText = "Плейлисты"; if (typeof renderPlaylistsUI === 'function') renderPlaylistsUI(); }
-        if (tabName === 'stats') { titleText = "Статистика"; if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI(); }
+        if (tabName === 'playlists') { titleText = "Плейлисты"; currentOpenPlaylistIdx = null; if (typeof renderPlaylistsUI === 'function') renderPlaylistsUI(); }
         if (tabName === 'settings') { titleText = "Настройки"; if (typeof renderSettingsUI === 'function') renderSettingsUI(); }
+        
+        // ОСОБАЯ КРИТИЧЕСКАЯ ЛОГИКА ДЛЯ СТАТИСТИКИ: Принудительно инжектируем stats.js перед запуском экрана
+        if (tabName === 'stats') { 
+            titleText = "Статистика"; 
+            
+            if (typeof buildAdvancedStatsUI === 'function') {
+                buildAdvancedStatsUI();
+            } else {
+                // Если файл еще не успел дойти в память, принудительно подтягиваем его заново
+                const scriptCheck = document.createElement('script');
+                scriptCheck.src = 'stats.js?v=' + Date.now();
+                scriptCheck.onload = function() {
+                    if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI();
+                };
+                document.head.appendChild(scriptCheck);
+            }
+        }
 
         const pageTitle = document.getElementById('page-title');
         if (pageTitle) pageTitle.textContent = titleText;
     };
 
-    // Биндим чистые клики на боковое меню плеера
     document.getElementById('menu-main').addEventListener('click', () => switchTab('main'));
     document.getElementById('menu-favorites').addEventListener('click', () => switchTab('favorites'));
     document.getElementById('menu-wallpaper').addEventListener('click', () => switchTab('wallpaper'));
@@ -103,7 +115,6 @@ setTimeout(() => {
     document.getElementById('menu-stats').addEventListener('click', () => switchTab('stats'));
     document.getElementById('menu-settings').addEventListener('click', () => switchTab('settings'));
 
-    // Привязываем окончание аудиопотока
     const audio = document.getElementById('audio');
     if (audio) {
         audio.addEventListener('ended', () => {
