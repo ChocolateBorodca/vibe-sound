@@ -23,7 +23,7 @@ function renderStatsHTML(container, totalTime, timeVibe, userStatus, playData) {
     });
 
     if (chartBarsHtml === '') {
-        chartBarsHtml = '<div style="color: rgba(255,255,255,0.3); font-size: 13px; width: 100%; text-align: center; padding-top: 50px;">Загрузите и послушайте музыку, чтобы построить граф</div>';
+        chartBarsHtml = '<div style="color: rgba(255,255,255,0.3); font-size: 13px; width: 100%; text-align: center; padding-top: 50px;">Послушайте музыку, чтобы построить граф</div>';
     }
 
     let topTracksHtml = '';
@@ -38,14 +38,14 @@ function renderStatsHTML(container, totalTime, timeVibe, userStatus, playData) {
                     <span style="font-weight: 700; color: #ff2a74; font-size: 14px;">#${i+1}</span>
                     <img src="${t.cover || ''}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover; ${imgBg}">
                     <span style="font-size: 13px; font-weight: 500; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">${t.title}</span>
-                    <span style="font-size: 11px; color: #ff2a74; background: rgba(255,42,116,0.1); padding: 2px 8px; border-radius: 12px; font-weight: 600;">${t.listens} раз</span>
+                    <span style="font-size: 11px; color: #ff2a74; background: rgba(245,42,116,0.1); padding: 2px 8px; border-radius: 12px; font-weight: 600;">${t.listens} раз</span>
                 </div>
             `;
         });
     }
 
     container.innerHTML = `
-        <div style="max-height: calc(88vh - 150px); overflow-y: auto; padding-right: 6px; display: flex; flex-direction: column; gap: 20px;">
+        <div style="max-height: calc(88vh - 150px); overflow-y: auto; padding-right: 6px; display: flex; flex-direction: column; gap: 20px; width:100%;">
             <div style="font-size: 13px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Аналитика вашего звука</div>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
@@ -58,7 +58,7 @@ function renderStatsHTML(container, totalTime, timeVibe, userStatus, playData) {
                     <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px;">Время звучания</div>
                 </div>
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 14px; text-align: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
-                    <div style="font-size: 24px; font-weight: 700; color: #ff2a74; margin-bottom: 2px;">${totalListens}</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #ff2a74; margin-bottom: 2px;">${totalTime !== "0:00" ? totalListens : 0}</div>
                     <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px;">Всего запусков</div>
                 </div>
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 14px; text-align: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
@@ -87,3 +87,4 @@ function renderStatsHTML(container, totalTime, timeVibe, userStatus, playData) {
         </div>
     `;
 }
+window.renderStatsHTML = renderStatsHTML;
