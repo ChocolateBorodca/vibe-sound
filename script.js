@@ -5,6 +5,7 @@ const wallpapers = [
 
 let currentIndex = 0;
 let currentWallpaperId = "classic";
+let totalListens = parseInt(localStorage.getItem('vibe_total_plays') || "0", 10);
 
 const audio = document.getElementById('audio');
 const playBtn = document.getElementById('play');
@@ -21,6 +22,28 @@ const bgWallpaper = document.getElementById('bg-wallpaper');
 const bgGlowLayer = document.getElementById('bg-glow-layer');
 const coverParent = document.getElementById('cover-parent');
 
+if (!document.getElementById('stats-custom-styles')) {
+    const styleElement = document.createElement('style');
+    styleElement.id = 'stats-custom-styles';
+    styleElement.textContent = `
+        .stats-chart-scroll-area {
+            display: flex !important;
+            gap: 24px !important;
+            padding: 10px 10px 20px 10px !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(255, 42, 116, 0.3) transparent !important;
+            -webkit-overflow-scrolling: touch !important;
+            cursor: grab !important;
+        }
+        .stats-chart-scroll-area:active { cursor: grabbing !important; }
+        .stats-chart-scroll-area::-webkit-scrollbar { height: 4px !important; }
+        .stats-chart-scroll-area::-webkit-scrollbar-thumb { background-color: rgba(255, 42, 116, 0.3) !important; border-radius: 4px !important; }
+    `;
+    document.head.appendChild(styleElement);
+}
+
 function loadTrack() {
     if (tracks.length === 0) {
         title.textContent = "Нет треков";
@@ -31,8 +54,17 @@ function loadTrack() {
         return;
     }
     const current = tracks[currentIndex];
+    
+    const shouldHideNoCover = localStorage.getItem('set-hide') === 'true';
+    if (shouldHideNoCover && (!current.cover || current.cover === "")) {
+        setTimeout(nextTrack, 100);
+        return;
+    }
+
     audio.src = current.audio;
-    title.textContent = current.title;
+    
+    const trackGenreLabel = current.genre ? ` [${current.genre}]` : '';
+    title.textContent = current.title + trackGenreLabel;
     artist.textContent = current.artist;
     progress.value = 0;
 
@@ -49,11 +81,37 @@ function loadTrack() {
     });
 }
 
+function recordPlayEvent(trackId) {
+    totalListens++;
+    localStorage.setItem('vibe_total_plays', totalListens);
+
+    let playData = JSON.parse(localStorage.getItem('vibe_detailed_plays') || "{}");
+    playData[trackId] = (playData[trackId] || 0) + 1;
+    localStorage.setItem('vibe_detailed_plays', JSON.stringify(playData));
+
+    const currentHour = new Date().getHours();
+    let hourlyData = JSON.parse(localStorage.getItem('vibe_hourly_plays') || "{}");
+    hourlyData[currentHour] = (hourlyData[currentHour] || 0) + 1;
+    localStorage.setItem('vibe_hourly_plays', JSON.stringify(hourlyData));
+}
+
 function togglePlay() {
     if (tracks.length === 0) return;
     if (audio.paused) {
-        audio.play();
+        if (localStorage.getItem('set-fade') === 'true') {
+            audio.volume = 0;
+            audio.play();
+            let volInterval = setInterval(() => {
+                if (audio.volume < 0.9) audio.volume += 0.1;
+                else { audio.volume = 1; clearInterval(volInterval); }
+            }, 100);
+        } else {
+            audio.volume = 1;
+            audio.play();
+        }
+        
         playIcon.setAttribute('data-lucide', 'pause');
+        if (tracks[currentIndex]) recordPlayEvent(tracks[currentIndex].id);
     } else {
         audio.pause();
         playIcon.setAttribute('data-lucide', 'play');
@@ -63,11 +121,18 @@ function togglePlay() {
 
 function nextTrack() {
     if (tracks.length === 0) return;
+    
+    if (typeof isWaveActive !== 'undefined' && isWaveActive) {
+        if (typeof playNextWaveTrack === 'function') playNextWaveTrack();
+        return;
+    }
+
     currentIndex = (currentIndex + 1) % tracks.length;
     loadTrack();
     audio.play();
     playIcon.setAttribute('data-lucide', 'pause');
     lucide.createIcons();
+    recordPlayEvent(tracks[currentIndex].id);
 }
 
 function prevTrack() {
@@ -77,6 +142,7 @@ function prevTrack() {
     audio.play();
     playIcon.setAttribute('data-lucide', 'pause');
     lucide.createIcons();
+    recordPlayEvent(tracks[currentIndex].id);
 }
 
 playBtn.addEventListener('click', togglePlay);
@@ -107,17 +173,47 @@ progress.addEventListener('input', () => {
     }
 });
 
-audio.addEventListener('ended', nextTrack);
+audio.addEventListener('ended', () => {
+    if (tracks.length === 0) return;
+    
+    if (localStorage.getItem('set-loop') === 'true') {
+        audio.currentTime = 0;
+        audio.play();
+        return;
+    }
+
+    if (typeof isWaveActive !== 'undefined' && isWaveActive) {
+        if (typeof handleWaveTrackEnded === 'function') handleWaveTrackEnded();
+    } else {
+        nextTrack();
+    }
+});
 
 function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+        tab.classList.remove('active');
+    });
     document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
 
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-    document.getElementById(`menu-${tabName}`).classList.add('active');
+    const targetTab = document.getElementById(`tab-${tabName}`);
+    if (targetTab) {
+        targetTab.style.display = 'block';
+        targetTab.classList.add('active');
+    }
+    
+    document.querySelectorAll('.menu-item').forEach(item => {
+        if (tabName === 'main' && item.textContent.includes('Главная')) item.classList.add('active');
+        if (tabName === 'favorites' && item.textContent.includes('Любимое')) item.classList.add('active');
+        if (tabName === 'wallpaper' && item.textContent.includes('Обои')) item.classList.add('active');
+    });
 
-    document.getElementById('page-title').textContent = 
-        tabName === 'main' ? 'Главная' : (tabName === 'favorites' ? 'Медиатека' : 'Обои');
+    let titleText = "Главная";
+    if (tabName === 'favorites') titleText = "Медиатека";
+    if (tabName === 'wallpaper') titleText = "Обои";
+    
+    const pageTitle = document.getElementById('page-title');
+    if (pageTitle) pageTitle.textContent = titleText;
 }
 
 document.getElementById('menu-main').addEventListener('click', () => switchTab('main'));
@@ -127,95 +223,22 @@ document.getElementById('menu-wallpaper').addEventListener('click', () => switch
 function setWallpaper(wpId) {
     currentWallpaperId = wpId;
     const wp = wallpapers.find(w => w.id === wpId);
-    
     if (wp) {
         if (wp.isClassic) {
             bgWallpaper.style.backgroundImage = "none";
-            bgGlowLayer.style.display = "block";
+            const isGlowOn = localStorage.getItem('set-glow') !== 'false';
+            bgGlowLayer.style.display = isGlowOn ? "block" : "none";
         } else {
             bgWallpaper.style.backgroundImage = `url('${wp.url}')`;
             bgGlowLayer.style.display = "none";
         }
         if (typeof saveSettingToDB === "function") saveSettingToDB("currentWallpaper", wpId);
     }
-
     document.querySelectorAll('.wallpaper-card-item').forEach((card, i) => {
         card.classList.toggle('active', wallpapers[i].id === wpId);
     });
 }
 
-document.getElementById('local-audio-input').addEventListener('change', function(e) {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-
-    const blobUrl = URL.createObjectURL(file);
-    const cleanFileName = file.name.replace(/\.[^/.]+$/, "");
-
-    const newTrack = {
-        title: cleanFileName,
-        artist: "С телефона",
-        audio: blobUrl,
-        cover: "",
-        audioFile: file
-    };
-
-    if (typeof saveTrackToDB === "function") {
-        saveTrackToDB(newTrack, function(insertedId) {
-            newTrack.id = insertedId;
-            tracks.push(newTrack);
-            buildFavoritesUI();
-            currentIndex = tracks.length - 1;
-            loadTrack();
-            audio.play();
-            playIcon.setAttribute('data-lucide', 'pause');
-            lucide.createIcons();
-            switchTab('main');
-        });
-    }
-});
-
-document.getElementById('local-cover-input').addEventListener('change', function(e) {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    if (tracks.length === 0) return;
-
-    const imgBlobUrl = URL.createObjectURL(file);
-    const currentTrack = tracks[currentIndex];
-    
-    currentTrack.cover = imgBlobUrl;
-    currentTrack.coverFile = file;
-
-    if (typeof updateTrackInDB === "function") {
-        updateTrackInDB(currentTrack);
-    }
-
-    loadTrack();
-    buildFavoritesUI();
-});
-
-document.getElementById('local-bg-input').addEventListener('change', function(e) {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-
-    const blobUrl = URL.createObjectURL(file);
-    const customId = "custom-" + Date.now();
-
-    const newWallpaper = {
-        id: customId,
-        name: "Мои обои",
-        url: blobUrl,
-        gifFile: file
-    };
-
-    if (typeof saveWallpaperToDB === "function") {
-        saveWallpaperToDB(newWallpaper, function() {
-            wallpapers.push(newWallpaper);
-            buildWallpaperUI();
-            setWallpaper(customId);
-        });
-    }
-});
-
-buildFavoritesUI();
-buildWallpaperUI();
-loadTrack();
+if (localStorage.getItem('set-glow') === 'false') {
+    if (bgGlowLayer) bgGlowLayer.style.display = 'none';
+}
