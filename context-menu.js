@@ -8,6 +8,7 @@ if (!document.querySelector('script[src="stats.js"]')) {
     const s8 = document.createElement('script'); s8.src = 'vibe-playlists.js'; document.head.appendChild(s8);
     const s9 = document.createElement('script'); s9.src = 'vibe-settings.js'; document.head.appendChild(s9);
     const s10 = document.createElement('script'); s10.src = 'vibe-uploader.js'; document.head.appendChild(s10);
+    const s11 = document.createElement('script'); s11.src = 'vibe-playlists-view.js'; document.head.appendChild(s11);
 }
 
 const favoritesList = document.getElementById('favorites-list');
