@@ -1,71 +1,68 @@
-// Перехватываем отрисовку Медиатеки, чтобы аккуратно инжектировать кнопку Сплиттера в три точки
-function injectSplitterBtnToFavorites() {
-    if (typeof buildFavoritesUI === 'function') {
-        const originalBuildFavoritesUI = buildFavoritesUI;
+// Автономный ежесекундный сканер кнопок три точки
+function autoInjectSplitterTrigger() {
+    // Находим все открытые в данный момент кнопки удаления на экране
+    const deleteButtons = document.querySelectorAll('.inline-delete-btn');
+    
+    deleteButtons.forEach(delBtn => {
+        // Проверяем, что это кнопка удаления именно трека, а не обоев
+        if (!delBtn.id || !delBtn.id.startsWith('del-track-')) return;
         
-        window.buildFavoritesUI = function() {
-            // Вызываем стандартную рабочую отрисовку Медиатеки
-            originalBuildFavoritesUI();
-            
-            // Пробегаемся по каждой строчке трека в HTML
-            tracks.forEach(track => {
-                const trackRowElement = document.getElementById(`del-track-${track.id}`);
-                if (!trackRowElement) return;
+        const trackId = delBtn.id.replace('del-track-', '');
+        const parentNode = delBtn.parentElement;
+        
+        if (!parentNode) return;
 
-                const buttonParent = trackRowElement.parentElement;
-                if (!buttonParent || buttonParent.querySelector(`.splitter-trigger-btn-${track.id}`)) return;
+        // Если кнопка Сплиттера для этого трека уже создана — ничего не делаем
+        if (parentNode.querySelector('.vibe-custom-splitter-btn')) {
+            // Синхронизируем видимость Сплиттера с кнопкой Удалить
+            const splitterBtn = parentNode.querySelector('.vibe-custom-splitter-btn');
+            if (splitterBtn) {
+                splitterBtn.style.display = delBtn.style.display;
+            }
+            return;
+        }
 
-                // Создаем красивую кнопку Сплиттера слева от кнопки Удалить
-                const splitterBtn = document.createElement('button');
-                splitterBtn.className = `inline-delete-btn splitter-trigger-btn-${track.id}`;
-                splitterBtn.id = `split-btn-item-${track.id}`;
-                splitterBtn.innerHTML = '✂️ Сплиттер';
-                
-                // Стилизуем под матовое стекло, гармонирующее с плеером
-                splitterBtn.style.cssText = "display: none; background: rgba(0, 245, 255, 0.12); border: 1px solid rgba(0, 245, 255, 0.3); color: #00f5ff; cursor: pointer; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: all 0.2s; margin-right: 4px;";
-                
-                splitterBtn.addEventListener('mouseover', () => splitterBtn.style.background = 'rgba(0, 245, 255, 0.25)');
-                splitterBtn.addEventListener('mouseout', () => splitterBtn.style.background = 'rgba(0, 245, 255, 0.12)');
+        // Создаем новую кнопку Сплиттера строго по твоему маркеру на фото
+        const splitterBtn = document.createElement('button');
+        splitterBtn.className = 'inline-delete-btn vibe-custom-splitter-btn';
+        splitterBtn.innerHTML = '✂️ Сплиттер';
+        
+        // Матовый неоновый стиль Liquid Glass (Бирюзовый неон)
+        splitterBtn.style.cssText = `
+            background: rgba(0, 245, 255, 0.12) !important; 
+            border: 1px solid rgba(0, 245, 255, 0.3) !important; 
+            color: #00f5ff !important; 
+            cursor: pointer !important; 
+            padding: 5px 12px !important; 
+            border-radius: 8px !important; 
+            font-size: 13px !important; 
+            font-weight: 500 !important; 
+            transition: all 0.2s ease !important; 
+            margin-right: 6px !important;
+            display: ${delBtn.style.display} !important;
+        `;
 
-                // Клик по Сплиттеру открывает наш новый полноэкранный ИИ-модуль
-                splitterBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (typeof renderSplitterScreen === 'function') {
-                        renderSplitterScreen(track);
-                    }
-                });
+        // Эффекты наведения
+        splitterBtn.addEventListener('mouseover', () => splitterBtn.style.background = 'rgba(0, 245, 255, 0.25)');
+        splitterBtn.addEventListener('mouseout', () => splitterBtn.style.background = 'rgba(0, 245, 255, 0.12)');
 
-                // Вставляем кнопку Сплиттера строго перед кнопкой Удалить
-                buttonParent.insertBefore(splitterBtn, trackRowElement);
-
-                // Расширяем оригинальную функцию toggleDeleteBtn плеера, чтобы Сплиттер вылетал вместе с Удалить
-                const moreActionsBtn = buttonParent.querySelector('.more-actions-btn');
-                if (moreActionsBtn) {
-                    moreActionsBtn.onclick = function(e) {
-                        e.stopPropagation();
-                        
-                        // Прячем все остальные открытые кнопки на сайте
-                        document.querySelectorAll('.inline-delete-btn').forEach(btn => {
-                            if (btn.id !== `del-track-${track.id}` && btn.id !== `split-btn-item-${track.id}`) {
-                                btn.style.display = 'none';
-                            }
-                        });
-
-                        // Переключаем видимость кнопок текущего трека
-                        const delState = trackRowElement.style.display;
-                        if (delState === 'block' || delState === 'inline-block') {
-                            trackRowElement.style.display = 'none';
-                            splitterBtn.style.display = 'none';
-                        } else {
-                            trackRowElement.style.display = 'inline-block';
-                            splitterBtn.style.display = 'inline-block';
-                        }
-                    };
+        // Клик по Сплиттеру находит трек в базе и открывает полноэкранный ИИ-микшер
+        splitterBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (typeof tracks !== 'undefined') {
+                const targetTrack = tracks.find(t => t.id == trackId);
+                if (targetTrack && typeof renderSplitterScreen === 'function') {
+                    renderSplitterScreen(targetTrack);
+                } else if (targetTrack) {
+                    alert("Сплиттер для трека: " + targetTrack.title + "\n(Файл vibe-splitter-ui.js еще прогружается в память)");
                 }
-            });
-        };
-    }
+            }
+        });
+
+        // Вставляем Сплиттер слева от кнопки Удалить, как на картинке
+        parentNode.insertBefore(splitterBtn, delBtn);
+    });
 }
 
-// Запускаем перехват логики кнопок
-setTimeout(injectSplitterBtnToFavorites, 2000);
+// Запускаем бесконечный фоновый поток сканирования кликов каждые 300 миллисекунд
+setInterval(autoInjectSplitterTrigger, 300);
