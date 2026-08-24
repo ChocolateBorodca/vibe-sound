@@ -26,21 +26,22 @@ function buildAdvancedStatsUI() {
     let playData = JSON.parse(localStorage.getItem('vibe_detailed_plays') || "{}");
     let hourlyData = JSON.parse(localStorage.getItem('vibe_hourly_plays') || "{}");
 
+    // Вычисляем Дневной/Ночной вайб
     let dayPlays = 0, nightPlays = 0;
     Object.keys(hourlyData).forEach(h => {
         let hour = parseInt(h, 10);
         if (hour >= 6 && hour < 18) dayPlays += hourlyData[h];
         else nightPlays += hourlyData[h];
     });
-    
     let timeVibe = "Вайб не определен";
     if (dayPlays > 0 || nightPlays > 0) {
         timeVibe = dayPlays >= nightPlays ? "☀️ Дневной Меломан" : "🌙 Полуночный Вайбер";
     }
 
+    // Вычисляем текстовый статус меломана
     let userStatus = "Новичок";
     if (totalListens >= 50) userStatus = "👑 Легенда Вайба";
-    else if (totalListens >= 15) userStatus = "🎧  Аудио-Зависимый";
+    else if (totalListens >= 15) userStatus = "🎧 Аудио-Зависимый";
     else if (totalListens > 0) userStatus = "🎵 Ценитель Вайба";
 
     let totalSeconds = 0;
@@ -81,7 +82,6 @@ function formatTotalTime(seconds) {
     return `${min}:${sec < 10 ? '0' : ''}${sec}`;
 }
 
-// Экспортируем функцию наружу для системного переключателя вкладок
 window.buildAdvancedStatsUI = buildAdvancedStatsUI;
 
 setTimeout(() => {
