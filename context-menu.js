@@ -89,9 +89,13 @@ function buildWallpaperUI() {
 function buildFavoritesUI() {
     if (!favoritesList) return;
     favoritesList.innerHTML = '';
-    tracks.forEach((track, i) => {
+    tracks.forEach((track) => {
         const row = document.createElement('div');
-        row.className = `track-row ${i === currentIndex ? 'playing-now' : ''}`;
+        
+        // ИСПРАВЛЕНО: Ищем активный трек строго по его уникальному ID
+        const isPlayingNow = (tracks[currentIndex] && tracks[currentIndex].id === track.id);
+        row.className = `track-row ${isPlayingNow ? 'playing-now' : ''}`;
+        
         const imgStyle = (!track.cover || track.cover === "") ? 'background: linear-gradient(135deg, #1e1b4b, #0f172a)' : '';
         const imgSrc = (!track.cover || track.cover === "") ? '' : track.cover;
         const deleteBtnHtml = `<button id="del-track-${track.id}" class="inline-delete-btn" onclick="deleteTrackAction(event, ${track.id})" style="display: none; background: rgba(255, 77, 109, 0.15); border: 1px solid rgba(255, 77, 109, 0.3); color: #ff4d6d; cursor: pointer; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: all 0.2s;">Удалить</button>`;
@@ -107,11 +111,16 @@ function buildFavoritesUI() {
                 <button class="more-actions-btn" onclick="toggleDeleteBtn(event, 'track', ${track.id})" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; cursor: pointer; padding: 2px 10px; border-radius: 8px; font-weight: bold; font-size: 14px; letter-spacing: 1px;">•••</button>
             </div>
         `;
+        
         row.addEventListener('click', () => {
-            currentIndex = i;
-            if (typeof loadTrack === 'function') loadTrack();
-            if (audio) audio.play().catch(() => {});
-            if (typeof switchTab === 'function') switchTab('main');
+            // ИСПРАВЛЕНО: При клике находим точную позицию трека в массиве по его ID
+            let exactIdx = tracks.findIndex(t => t.id === track.id);
+            if (exactIdx !== -1) {
+                currentIndex = exactIdx;
+                if (typeof loadTrack === 'function') loadTrack();
+                if (audio) audio.play().catch(() => {});
+                if (typeof switchTab === 'function') switchTab('main');
+            }
         });
         favoritesList.appendChild(row);
     });
