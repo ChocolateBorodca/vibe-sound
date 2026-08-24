@@ -1,35 +1,31 @@
+if (!document.querySelector('script[src="vibe-wave-map.js"]')) {
+    const s5 = document.createElement('script'); s5.src = 'stats-collector.js'; document.head.appendChild(s5);
+    const s6 = document.createElement('script'); s6.src = 'vibe-wave-map.js'; document.head.appendChild(s6);
+    const s8 = document.createElement('script'); s8.src = 'vibe-playlists.js'; document.head.appendChild(s8);
+    const s9 = document.createElement('script'); s9.src = 'vibe-settings.js'; document.head.appendChild(s9);
+    const s10 = document.createElement('script'); s10.src = 'vibe-uploader.js'; document.head.appendChild(s10);
+    const s11 = document.createElement('script'); s11.src = 'vibe-playlists-view.js'; document.head.appendChild(s11);
+}
+
 let activeMenuType = null;
 let activeTargetId = null;
 
 const favoritesList = document.getElementById('favorites-list');
 const wallpaperGrid = document.getElementById('wallpaper-grid');
 
-// Переключатель видимости встроенной кнопки удаления
 function toggleDeleteBtn(e, type, id) {
     e.stopPropagation();
-    
-    // Закрываем все открытые ранее кнопки удаления, кроме текущей
     document.querySelectorAll('.inline-delete-btn').forEach(btn => {
-        if (btn.id !== `del-${type}-${id}`) {
-            btn.style.display = 'none';
-        }
+        if (btn.id !== `del-${type}-${id}`) btn.style.display = 'none';
     });
-
     const targetBtn = document.getElementById(`del-${type}-${id}`);
     if (targetBtn) {
-        if (targetBtn.style.display === 'block' || targetBtn.style.display === 'inline-block') {
-            targetBtn.style.display = 'none';
-        } else {
-            targetBtn.style.display = 'inline-block';
-        }
+        targetBtn.style.display = (targetBtn.style.display === 'block' || targetBtn.style.display === 'inline-block') ? 'none' : 'inline-block';
     }
 }
 
-// Прячем кнопку удаления при клике в пустую область экрана
 document.addEventListener('click', () => {
-    document.querySelectorAll('.inline-delete-btn').forEach(btn => {
-        btn.style.display = 'none';
-    });
+    document.querySelectorAll('.inline-delete-btn').forEach(btn => btn.style.display = 'none');
 });
 
 function deleteTrackAction(e, id) {
@@ -38,11 +34,9 @@ function deleteTrackAction(e, id) {
         deleteTrackFromDB(id, () => {
             const trackIdx = tracks.findIndex(t => t.id === id);
             if (trackIdx !== -1) {
-                // Чистим историю прослушиваний трека перед его удалением
                 let playData = JSON.parse(localStorage.getItem('vibe_detailed_plays') || "{}");
                 delete playData[id];
                 localStorage.setItem('vibe_detailed_plays', JSON.stringify(playData));
-
                 tracks.splice(trackIdx, 1);
                 if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
                 if (currentIndex >= tracks.length) currentIndex = 0;
@@ -62,16 +56,13 @@ function deleteWallpaperAction(e, id) {
             if (wpIdx !== -1) {
                 wallpapers.splice(wpIdx, 1);
                 if (typeof buildWallpaperUI === 'function') buildWallpaperUI();
-                if (currentWallpaperId === id && typeof setWallpaper === 'function') {
-                    setWallpaper("classic");
-                }
+                if (currentWallpaperId === id && typeof setWallpaper === 'function') setWallpaper("classic");
                 if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI();
             }
         });
     }
 }
 
-// Отрисовка обоев со скрытой кнопкой удаления по клику на три точки
 function buildWallpaperUI() {
     if (!wallpaperGrid) return;
     wallpaperGrid.innerHTML = '';
@@ -96,7 +87,6 @@ function buildWallpaperUI() {
     });
 }
 
-// Отрисовка треков со скрытой кнопкой удаления по клику на три точки
 function buildFavoritesUI() {
     if (!favoritesList) return;
     favoritesList.innerHTML = '';
