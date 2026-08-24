@@ -59,7 +59,7 @@
                     <i data-lucide="bar-chart-3"></i>
                     <span>Статистика</span>
                 </div>
-                <div id="menu-settings" class="menu-item">
+                <div class="menu-item" id="menu-settings">
                     <i data-lucide="sliders"></i>
                     <span>Настройки</span>
                 </div>
@@ -86,8 +86,8 @@
             </section>
 
             <!-- ВКЛАДКА: МОЯ ВОЛНА -->
-            <section id="tab-wave" class="tab-content" style="display: none; padding: 20px 40px; height: calc(88vh - 180px); background: #000000 !important;">
-                <!-- vibe-wave-map.js -->
+            <section id="tab-wave" class="tab-content" style="display: none; padding: 20px 40px; height: calc(88vh - 180px);">
+                <!-- Карту кнопок рендерит vibe-wave-map.js -->
             </section>
 
             <!-- ВКЛАДКА: ЛЮБИМОЕ (МЕДИАТЕКА) -->
@@ -124,17 +124,17 @@
                 </div>
             </section>
 
-            <!-- ЖЕСТКИЙ КОНТЕЙНЕР: ПЛЕЙЛИСТЫ -->
+            <!-- ВКЛАДКА: ПЛЕЙЛИСТЫ -->
             <section id="tab-playlists" class="tab-content" style="display: none;">
                 <!-- vibe-playlists.js -->
             </section>
 
-            <!-- ЖЕСТКИЙ КОНТЕЙНЕР: СТАТИСТИКА -->
+            <!-- ВКЛАДКА: СТАТИСТИКА -->
             <section id="tab-stats" class="tab-content" style="display: none;">
                 <!-- stats-ui.js -->
             </section>
 
-            <!-- ЖЕСТКИЙ КОНТЕЙНЕР: НАСТРОЙКИ -->
+            <!-- ВКЛАДКА: НАСТРОЙКИ -->
             <section id="tab-settings" class="tab-content" style="display: none;">
                 <!-- vibe-settings.js -->
             </section>
@@ -168,7 +168,19 @@
             if(window.lucide) lucide.createIcons();
         });
     </script>
+    
+    <!-- ИСПРАВЛЕНО: Полная железная цепочка подключения файлов плеера -->
     <script src="database.js"></script>
+    <script src="stats.js"></script>
+    <script src="stats-ui.js"></script>
+    <script src="stats-style.js"></script>
+    <script src="stats-collector.js"></script>
+    <script src="vibe-wave-map.js"></script>
+    <script src="vibe-wave-events.js"></script>
+    <script src="vibe-playlists.js"></script>
+    <script src="vibe-playlists-view.js"></script>
+    <script src="vibe-settings.js"></script>
+    <script src="vibe-uploader.js"></script>
     <script src="context-menu.js"></script>
     <script src="script.js"></script>
 </body>
