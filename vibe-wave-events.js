@@ -56,10 +56,9 @@ function startWavePlayback() {
     }
 }
 
-// СВЕРХНАДЕЖНЫЙ СИСТЕМНЫЙ ПЕРЕКЛЮЧАТЕЛЬ АБСОЛЮТНО ВСЕХ ВКЛАДОК ПЛЕЕРА
+// СИСТЕМНЫЙ ДИСПЕТЧЕР ВКЛАДОК ПЛЕЕРА
 setTimeout(() => {
     window.switchTab = function(tabName) {
-        // Прячем вообще все экраны плеера
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.style.display = 'none';
             tab.classList.remove('active');
@@ -70,7 +69,7 @@ setTimeout(() => {
         const targetMenu = document.getElementById(`menu-${tabName}`);
 
         if (targetTab) {
-            if (tabName === 'wave' || tabName === 'playlists' || tabName === 'settings' || tabName === 'stats') {
+            if (tabName === 'wave' || tabName === 'playlists' || tabName === 'settings') {
                 targetTab.style.setProperty('display', 'flex', 'important');
             } else {
                 targetTab.style.display = 'block';
@@ -80,7 +79,6 @@ setTimeout(() => {
 
         if (targetMenu) targetMenu.classList.add('active');
 
-        // Управляем заголовками и мгновенно вызываем отрисовку нужного нам файла
         let titleText = "Главная";
         if (tabName === 'favorites') titleText = "Медиатека";
         if (tabName === 'wallpaper') titleText = "Обои";
@@ -98,25 +96,25 @@ setTimeout(() => {
             titleText = "Настройки"; 
             if (typeof renderSettingsUI === 'function') renderSettingsUI(); 
         }
-        if (tabName === 'stats') { 
-            titleText = "Статистика"; 
-            if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI(); 
-        }
 
         const pageTitle = document.getElementById('page-title');
         if (pageTitle) pageTitle.textContent = titleText;
     };
 
-    // Биндим чистые клики на боковое меню плеера
     document.getElementById('menu-main').addEventListener('click', () => switchTab('main'));
     document.getElementById('menu-favorites').addEventListener('click', () => switchTab('favorites'));
     document.getElementById('menu-wallpaper').addEventListener('click', () => switchTab('wallpaper'));
-    document.getElementById('menu-wave').addEventListener('click', () => switchTab('wave'));
-    document.getElementById('menu-playlists').addEventListener('click', () => switchTab('playlists'));
-    document.getElementById('menu-stats').addEventListener('click', () => switchTab('stats'));
-    document.getElementById('menu-settings').addEventListener('click', () => switchTab('settings'));
+    
+    // Биндим клики для Волны и Плейлистов
+    const menuWave = document.getElementById('menu-wave');
+    if (menuWave) menuWave.addEventListener('click', () => switchTab('wave'));
+    
+    const menuPlaylists = document.getElementById('menu-playlists');
+    if (menuPlaylists) menuPlaylists.addEventListener('click', () => switchTab('playlists'));
+    
+    const menuSettings = document.getElementById('menu-settings');
+    if (menuSettings) menuSettings.addEventListener('click', () => switchTab('settings'));
 
-    // Привязываем окончание аудиопотока
     const audio = document.getElementById('audio');
     if (audio) {
         audio.addEventListener('ended', () => {
