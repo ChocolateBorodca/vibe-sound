@@ -1,15 +1,5 @@
-if (!document.querySelector('script[src="stats.js"]')) {
-    const s1 = document.createElement('script'); s1.src = 'stats.js'; document.head.appendChild(s1);
-    const s2 = document.createElement('script'); s2.src = 'stats-ui.js'; document.head.appendChild(s2);
-    const s3 = document.createElement('script'); s3.src = 'stats-style.js'; document.head.appendChild(s3);
-    const s5 = document.createElement('script'); s5.src = 'stats-collector.js'; document.head.appendChild(s5);
-    const s6 = document.createElement('script'); s6.src = 'vibe-wave-map.js'; document.head.appendChild(s6);
-    const s7 = document.createElement('script'); s7.src = 'vibe-wave-events.js'; document.head.appendChild(s7);
-    const s8 = document.createElement('script'); s8.src = 'vibe-playlists.js'; document.head.appendChild(s8);
-    const s9 = document.createElement('script'); s9.src = 'vibe-settings.js'; document.head.appendChild(s9);
-    const s10 = document.createElement('script'); s10.src = 'vibe-uploader.js'; document.head.appendChild(s10);
-    const s11 = document.createElement('script'); s11.src = 'vibe-playlists-view.js'; document.head.appendChild(s11);
-}
+let activeMenuType = null;
+let activeTargetId = null;
 
 const favoritesList = document.getElementById('favorites-list');
 const wallpaperGrid = document.getElementById('wallpaper-grid');
@@ -48,15 +38,15 @@ function deleteTrackAction(e, id) {
         deleteTrackFromDB(id, () => {
             const trackIdx = tracks.findIndex(t => t.id === id);
             if (trackIdx !== -1) {
-                // Чистим историю прослушиваний трека перед удалением
+                // Чистим историю прослушиваний трека перед его удалением
                 let playData = JSON.parse(localStorage.getItem('vibe_detailed_plays') || "{}");
                 delete playData[id];
                 localStorage.setItem('vibe_detailed_plays', JSON.stringify(playData));
 
                 tracks.splice(trackIdx, 1);
-                buildFavoritesUI();
+                if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
                 if (currentIndex >= tracks.length) currentIndex = 0;
-                loadTrack();
+                if (typeof loadTrack === 'function') loadTrack();
                 if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI();
             }
         });
@@ -71,15 +61,17 @@ function deleteWallpaperAction(e, id) {
             const wpIdx = wallpapers.findIndex(w => w.id === id);
             if (wpIdx !== -1) {
                 wallpapers.splice(wpIdx, 1);
-                buildWallpaperUI();
-                if (currentWallpaperId === id) setWallpaper("classic");
+                if (typeof buildWallpaperUI === 'function') buildWallpaperUI();
+                if (currentWallpaperId === id) {
+                    if (typeof setWallpaper === 'function') setWallpaper("classic");
+                }
                 if (typeof buildAdvancedStatsUI === 'function') buildAdvancedStatsUI();
             }
         });
     }
 }
 
-// Отрисовка обоев со встроенной скрытой кнопкой удаления по клику на точки
+// Отрисовка обоев со скрытой кнопкой удаления по клику на три точки
 function buildWallpaperUI() {
     if (!wallpaperGrid) return;
     wallpaperGrid.innerHTML = '';
@@ -113,12 +105,14 @@ function buildWallpaperUI() {
             delBtnElement.addEventListener('mouseout', () => { delBtnElement.style.background = 'rgba(255, 77, 109, 0.15)'; });
         }
 
-        card.addEventListener('click', () => setWallpaper(wp.id));
+        card.addEventListener('click', () => {
+            if (typeof setWallpaper === 'function') setWallpaper(wp.id);
+        });
         wallpaperGrid.appendChild(card);
     });
 }
 
-// Отрисовка треков со встроенной скрытой кнопкой удаления по клику на точки
+// Отрисовка треков со скрытой кнопкой удаления по клику на три точки
 function buildFavoritesUI() {
     if (!favoritesList) return;
     favoritesList.innerHTML = '';
@@ -157,12 +151,18 @@ function buildFavoritesUI() {
 
         row.addEventListener('click', () => {
             currentIndex = i;
-            loadTrack();
-            audio.play();
-            playIcon.setAttribute('data-lucide', 'pause');
-            lucide.createIcons();
-            switchTab('main');
+            if (typeof loadTrack === 'function') loadTrack();
+            if (audio) {
+                audio.play().catch(() => {});
+                if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
+                if (window.lucide) lucide.createIcons();
+            }
+            if (typeof switchTab === 'function') switchTab('main');
         });
         favoritesList.appendChild(row);
     });
 }
+
+// Регистрируем глобальные указатели на функции
+window.buildFavoritesUI = buildFavoritesUI;
+window.buildWallpaperUI = buildWallpaperUI;
