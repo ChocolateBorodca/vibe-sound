@@ -1,4 +1,7 @@
-// Отдельный чистый файл для вывода треков плейлиста (как в Любимых)
+// Переменная для хранения треков текущего активного плейлиста
+let currentPlaylistTracksPool = [];
+let playlistCurrentIndex = 0;
+
 function renderSinglePlaylistView(container, plIdx) {
     const pl = localPlaylists[plIdx];
     if (!pl) { currentOpenPlaylistIdx = null; if (typeof renderPlaylistsUI === 'function') renderPlaylistsUI(); return; }
@@ -32,7 +35,7 @@ function renderSinglePlaylistView(container, plIdx) {
     if (plTracks.length === 0) {
         tracksBox.innerHTML = '<div style="color:rgba(255,255,255,0.3); font-size:13px; text-align:center; padding:30px 0;">В этом плейлисте пока нет треков</div>';
     } else {
-        plTracks.forEach((track) => {
+        plTracks.forEach((track, i) => {
             const row = document.createElement('div');
             const isPlayingNow = (tracks[currentIndex] && tracks[currentIndex].id === track.id);
             row.className = `track-row ${isPlayingNow ? 'playing-now' : ''}`;
@@ -49,17 +52,15 @@ function renderSinglePlaylistView(container, plIdx) {
             `;
             
             row.addEventListener('click', () => {
+                // Запоминаем, что мы слушаем именно этот плейлист
+                currentPlaylistTracksPool = plTracks;
+                playlistCurrentIndex = i;
+                
                 let mainIdx = tracks.findIndex(t => t.id === track.id);
                 if (mainIdx !== -1) {
                     currentIndex = mainIdx;
                     if (typeof loadTrack === 'function') loadTrack();
-                    const audio = document.getElementById('audio');
-                    if (audio) {
-                        audio.play().catch(() => {});
-                        const playIcon = document.getElementById('play-icon');
-                        if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
-                        if (window.lucide) lucide.createIcons();
-                    }
+                    playPlaylistTrackIndex();
                     renderSinglePlaylistView(container, plIdx);
                 }
             });
@@ -75,19 +76,59 @@ function playEntirePlaylist(idx) {
     const pl = localPlaylists[idx];
     if (!pl || pl.trackIds.length === 0) return;
     
-    // Ищем первый трек из плейлиста в общем списке Медиатеки
-    let matchIdx = tracks.findIndex(t => t.id === pl.trackIds[0]);
+    let plTracks = [];
+    pl.trackIds.forEach(id => {
+        let found = tracks.find(t => t.id === id);
+        if (found) plTracks.push(found);
+    });
+
+    if (plTracks.length === 0) return;
+    
+    currentPlaylistTracksPool = plTracks;
+    playlistCurrentIndex = 0;
+    
+    let matchIdx = tracks.findIndex(t => t.id === plTracks[0].id);
     if (matchIdx !== -1) {
         currentIndex = matchIdx;
         if (typeof loadTrack === 'function') loadTrack();
-        const audio = document.getElementById('audio');
-        if (audio) {
-            audio.play().catch(() => {});
-            const playIcon = document.getElementById('play-icon');
-            if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
-            if (window.lucide) lucide.createIcons();
-        }
+        playPlaylistTrackIndex();
     }
+}
+
+function playPlaylistTrackIndex() {
+    const audio = document.getElementById('audio');
+    if (!audio) return;
+    audio.play().catch(() => {});
+    const playIcon = document.getElementById('play-icon');
+    if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
+    if (window.lucide) lucide.createIcons();
+}
+
+// Функция автоматического переключения на СЛЕДУЮЩИЙ трек внутри плейлиста
+function playNextTrackInPlaylist() {
+    if (currentPlaylistTracksPool.length === 0) return false;
+    
+    playlistCurrentIndex++;
+    // Если плейлист кончился — идем на круг
+    if (playlistCurrentIndex >= currentPlaylistTracksPool.length) {
+        playlistCurrentIndex = 0;
+    }
+    
+    const nextTrackObj = currentPlaylistTracksPool[playlistCurrentIndex];
+    let mainIdx = tracks.findIndex(t => t.id === nextTrackObj.id);
+    if (mainIdx !== -1) {
+        currentIndex = mainIdx;
+        if (typeof loadTrack === 'function') loadTrack();
+        playPlaylistTrackIndex();
+        
+        // Перерисовываем экран, если вкладка плейлиста сейчас перед глазами
+        const tabPL = document.getElementById('tab-playlists');
+        if (tabPL && tabPL.classList.contains('active') && currentOpenPlaylistIdx !== null) {
+            renderSinglePlaylistView(tabPL, currentOpenPlaylistIdx);
+        }
+        return true;
+    }
+    return false;
 }
 
 function deletePlaylistAction(idx) {
@@ -97,16 +138,27 @@ function deletePlaylistAction(idx) {
     if (typeof renderPlaylistsUI === 'function') renderPlaylistsUI();
 }
 
-// Связываем автоматическое переключение вкладок
+// Перехватываем стандартное окончание трека для бесшовного проигрывания плейлиста
 setTimeout(() => {
+    const audio = document.getElementById('audio');
+    if (audio) {
+        audio.addEventListener('ended', (e) => {
+            // Если включен зацикленный трек — автоплейлист не дергаем
+            if (localStorage.getItem('set-loop') === 'true') return;
+            
+            if (currentPlaylistTracksPool.length > 0) {
+                e.stopImmediatePropagation(); // Глушим глобальный переход script.js
+                playNextTrackInPlaylist();
+            }
+        });
+    }
+
     const menuItems = document.querySelectorAll('.sidebar .menu-item');
     menuItems.forEach(item => {
         if (item.textContent.includes('Плейлисты')) {
             item.id = 'menu-playlists';
             item.addEventListener('click', () => {
-                if (typeof switchTab === 'function') {
-                    switchTab('playlists');
-                }
+                if (typeof switchTab === 'function') switchTab('playlists');
             });
         }
     });
