@@ -3,7 +3,7 @@ let isSplitterActiveNow = false;
 
 function renderSplitterScreen(trackObj) {
     currentSplitterTrack = trackObj;
-    isSplitterActiveNow = true; // Включаем блокировку переключения треков плеера
+    isSplitterActiveNow = true; 
     
     let splitterLayer = document.getElementById('vibe-splitter-screen');
     if (!splitterLayer) {
@@ -71,7 +71,6 @@ function renderSplitterScreen(trackObj) {
         </div>
     `;
 
-    // ИСПРАВЛЕНО: Принудительный сброс на 0-ю секунду и автоматический Play при старте Разбора
     const audio = document.getElementById('audio');
     if (audio) {
         audio.currentTime = 0;
@@ -80,9 +79,8 @@ function renderSplitterScreen(trackObj) {
         if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
     }
 
-    // ИСПРАВЛЕНО: Кнопка Закрыть теперь полностью функциональна и сбрасывает ИИ-эффекты
     document.getElementById('close-splitter-btn').onclick = () => {
-        isSplitterActiveNow = false; // Отключаем блокировку перескока треков
+        isSplitterActiveNow = false; 
         if (typeof resetSplitterFilters === 'function') resetSplitterFilters();
         splitterLayer.style.display = 'none';
     };
@@ -115,13 +113,13 @@ function runSplitterNeuralSimulation() {
     ];
 
     let timer = setInterval(() => {
-        currentPct += 4; // Сделали прогресс-бар чуть шустрее для удобства
+        currentPct += 4; 
         progBar.style.width = currentPct + '%';
 
-        if (currentPct === 20) statusText.textContent = statuses[0];
-        if (currentPct === 44) statusText.textContent = statuses[1];
-        if (currentPct === 68) statusText.textContent = statuses[2];
-        if (currentPct === 88) statusText.textContent = statuses[3];
+        if (currentPct === 20) statusText.textContent = statuses;
+        if (currentPct === 44) statusText.textContent = statuses;
+        if (currentPct === 68) statusText.textContent = statuses;
+        if (currentPct === 88) statusText.textContent = statuses;
 
         if (currentPct >= 100) {
             clearInterval(timer);
@@ -130,20 +128,12 @@ function runSplitterNeuralSimulation() {
             
             if (typeof bindLiveMixerSliders === 'function') bindLiveMixerSliders();
             
-            // ИСПРАВЛЕНО: Кнопка "Скачать Стемы" теперь РЕАЛЬНО выкачивает MP3-файл в папку Загрузки/Проводник телефона
+            // Связываем клик со скачиванием из нового файла
             document.getElementById('download-splitter-result-btn').onclick = () => {
-                if (currentSplitterTrack && currentSplitterTrack.audio) {
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = currentSplitterTrack.audio;
-                    downloadLink.download = `VibeAI_${currentSplitterTrack.title}.mp3`;
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                }
+                if (typeof exportModifiedAudioResult === 'function') exportModifiedAudioResult();
             };
         }
     }, 40);
 }
 
-// Отдаем флаг активности наружу для перехвата автоплея
 window.isSplitterActiveNow = () => isSplitterActiveNow;
