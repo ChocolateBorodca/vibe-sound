@@ -55,10 +55,6 @@
                     <i data-lucide="music-4"></i>
                     <span>Плейлисты</span>
                 </div>
-                <div id="menu-stats" class="menu-item">
-                    <i data-lucide="bar-chart-3"></i>
-                    <span>Статистика</span>
-                </div>
                 <div class="menu-item" id="menu-settings">
                     <i data-lucide="sliders"></i>
                     <span>Настройки</span>
@@ -129,11 +125,6 @@
                 <!-- Наполнение генерируется через vibe-playlists.js -->
             </section>
 
-            <!-- ВКЛАДКА: СТАТИСТИКА -->
-            <section id="tab-stats" class="tab-content" style="display: none;">
-                <!-- Наполнение генерируется через stats.js -->
-            </section>
-
             <!-- ВКЛАДКА: НАСТРОЙКИ -->
             <section id="tab-settings" class="tab-content" style="display: none;">
                 <!-- Наполнение генерируется через vibe-settings.js -->
@@ -169,7 +160,7 @@
         });
     </script>
     
-    <!-- ИСПРАВЛЕНО: База данных теперь грузится СТРОГО ПЕРВОЙ, открывая доступ к музыке -->
+    <!-- Безопасная фоновая цепочка подгрузки базы данных и ядра плеера -->
     <script src="database.js"></script>
     <script src="context-menu.js"></script>
     <script src="script.js"></script>
