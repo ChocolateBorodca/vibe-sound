@@ -22,28 +22,6 @@ const bgWallpaper = document.getElementById('bg-wallpaper');
 const bgGlowLayer = document.getElementById('bg-glow-layer');
 const coverParent = document.getElementById('cover-parent');
 
-if (!document.getElementById('stats-custom-styles')) {
-    const styleElement = document.createElement('style');
-    styleElement.id = 'stats-custom-styles';
-    styleElement.textContent = `
-        .stats-chart-scroll-area {
-            display: flex !important;
-            gap: 24px !important;
-            padding: 10px 10px 20px 10px !important;
-            overflow-x: auto !important;
-            overflow-y: hidden !important;
-            scrollbar-width: thin !important;
-            scrollbar-color: rgba(255, 42, 116, 0.3) transparent !important;
-            -webkit-overflow-scrolling: touch !important;
-            cursor: grab !important;
-        }
-        .stats-chart-scroll-area:active { cursor: grabbing !important; }
-        .stats-chart-scroll-area::-webkit-scrollbar { height: 4px !important; }
-        .stats-chart-scroll-area::-webkit-scrollbar-thumb { background-color: rgba(255, 42, 116, 0.3) !important; border-radius: 4px !important; }
-    `;
-    document.head.appendChild(styleElement);
-}
-
 function loadTrack() {
     if (tracks.length === 0) {
         title.textContent = "Нет треков";
@@ -54,7 +32,6 @@ function loadTrack() {
         return;
     }
     
-    // ИСПРАВЛЕНО: Защита индекса от вылета за границы массива
     if (currentIndex >= tracks.length || currentIndex < 0) {
         currentIndex = 0;
     }
@@ -62,7 +39,7 @@ function loadTrack() {
     const current = tracks[currentIndex];
     audio.src = current.audio;
     
-    const trackGenreLabel = current.genre ? ` [${current.genre}]` : '';
+    const trackGenreLabel = current.genre ? " [" + current.genre + "]" : "";
     title.textContent = current.title + trackGenreLabel;
     artist.textContent = current.artist;
     progress.value = 0;
@@ -75,3 +52,171 @@ function loadTrack() {
         cover.src = current.cover;
     }
 }
+
+function recordPlayEvent(trackId) {
+    totalListens++;
+    localStorage.setItem('vibe_total_plays', totalListens);
+
+    let playData = JSON.parse(localStorage.getItem('vibe_detailed_plays') || "{}");
+    playData[trackId] = (playData[trackId] || 0) + 1;
+    localStorage.setItem('vibe_detailed_plays', JSON.stringify(playData));
+
+    const currentHour = new Date().getHours();
+    let hourlyData = JSON.parse(localStorage.getItem('vibe_hourly_plays') || "{}");
+    hourlyData[currentHour] = (hourlyData[currentHour] || 0) + 1;
+    localStorage.setItem('vibe_hourly_plays', JSON.stringify(hourlyData));
+}
+
+function togglePlay() {
+    if (tracks.length === 0) return;
+    if (audio.paused) {
+        if (localStorage.getItem('set-fade') === 'true') {
+            audio.volume = 0;
+            audio.play().catch(function() {});
+            let volInterval = setInterval(function() {
+                if (audio.volume < 0.9) audio.volume += 0.1;
+                else { audio.volume = 1; clearInterval(volInterval); }
+            }, 100);
+        } else {
+            audio.volume = 1;
+            audio.play().catch(function() {});
+        }
+        
+        playIcon.setAttribute('data-lucide', 'pause');
+        if (tracks[currentIndex]) recordPlayEvent(tracks[currentIndex].id);
+    } else {
+        audio.pause();
+        playIcon.setAttribute('data-lucide', 'play');
+    }
+    if (window.lucide) lucide.createIcons();
+}
+
+function nextTrack() {
+    if (tracks.length === 0) return;
+    
+    if (typeof isWaveActive !== 'undefined' && isWaveActive) {
+        if (typeof playNextWaveTrack === 'function') playNextWaveTrack();
+        return;
+    }
+
+    currentIndex = (currentIndex + 1) % tracks.length;
+    loadTrack();
+    audio.play().catch(function() {});
+    playIcon.setAttribute('data-lucide', 'pause');
+    if (window.lucide) lucide.createIcons();
+    recordPlayEvent(tracks[currentIndex].id);
+}
+
+function prevTrack() {
+    if (tracks.length === 0) return;
+    currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+    loadTrack();
+    audio.play().catch(function() {});
+    playIcon.setAttribute('data-lucide', 'pause');
+    if (window.lucide) lucide.createIcons();
+    recordPlayEvent(tracks[currentIndex].id);
+}
+
+playBtn.addEventListener('click', togglePlay);
+nextBtn.addEventListener('click', nextTrack);
+prevBtn.addEventListener('click', prevTrack);
+
+function formatTime(seconds) {
+    if (isNaN(seconds)) return '0:00';
+    let min = Math.floor(seconds / 60);
+    let sec = Math.floor(seconds % 60);
+    return min + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+audio.addEventListener('timeupdate', function() {
+    if (audio.duration) {
+        progress.value = (audio.currentTime / audio.duration) * 100;
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+    }
+});
+
+audio.addEventListener('loadedmetadata', function() {
+    durationEl.textContent = formatTime(audio.duration);
+});
+
+progress.addEventListener('input', function() {
+    if (audio.duration) {
+        audio.currentTime = (progress.value / 100) * audio.duration;
+    }
+});
+
+audio.addEventListener('ended', function() {
+    if (tracks.length === 0) return;
+    
+    if (localStorage.getItem('set-loop') === 'true') {
+        audio.currentTime = 0;
+        audio.play().catch(function() {});
+        return;
+    }
+
+    if (typeof isWaveActive !== 'undefined' && isWaveActive) {
+        if (typeof handleWaveTrackEnded === 'function') handleWaveTrackEnded();
+    } else {
+        nextTrack();
+    }
+});
+
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(function(tab) {
+        tab.style.display = 'none';
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.menu-item').forEach(function(item) {
+        item.classList.remove('active');
+    });
+
+    const targetTab = document.getElementById('tab-' + tabName);
+    if (targetTab) {
+        targetTab.style.display = 'block';
+        targetTab.classList.add('active');
+    }
+    
+    document.querySelectorAll('.menu-item').forEach(function(item) {
+        if (tabName === 'main' && item.textContent.includes('Главная')) item.classList.add('active');
+        if (tabName === 'favorites' && item.textContent.includes('Любимое')) item.classList.add('active');
+        if (tabName === 'wallpaper' && item.textContent.includes('Обои')) item.classList.add('active');
+    });
+
+    let titleText = "Главная";
+    if (tabName === 'favorites') titleText = "Медиатека";
+    if (tabName === 'wallpaper') titleText = "Обои";
+    
+    const pageTitle = document.getElementById('page-title');
+    if (pageTitle) pageTitle.textContent = titleText;
+}
+
+document.getElementById('menu-main').addEventListener('click', function() { switchTab('main'); });
+document.getElementById('menu-favorites').addEventListener('click', function() { switchTab('favorites'); });
+document.getElementById('menu-wallpaper').addEventListener('click', function() { switchTab('wallpaper'); });
+
+function setWallpaper(wpId) {
+    currentWallpaperId = wpId;
+    const wp = wallpapers.find(function(w) { return w.id === wpId; });
+    if (wp) {
+        if (wp.isClassic) {
+            bgWallpaper.style.backgroundImage = "none";
+            const isGlowOn = localStorage.getItem('set-glow') !== 'false';
+            bgGlowLayer.style.display = isGlowOn ? "block" : "none";
+        } else {
+            bgWallpaper.style.backgroundImage = "url('" + wp.url + "')";
+            bgGlowLayer.style.display = "none";
+        }
+        if (typeof saveSettingToDB === "function") saveSettingToDB("currentWallpaper", wpId);
+    }
+    document.querySelectorAll('.wallpaper-card-item').forEach(function(card, i) {
+        card.classList.toggle('active', wallpapers[i].id === wpId);
+    });
+}
+
+if (localStorage.getItem('set-glow') === 'false') {
+    if (bgGlowLayer) bgGlowLayer.style.display = 'none';
+}
+
+if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
+if (typeof buildWallpaperUI === 'function') buildWallpaperUI();
+loadTrack();
