@@ -92,7 +92,6 @@ function buildFavoritesUI() {
     tracks.forEach((track) => {
         const row = document.createElement('div');
         
-        // ИСПРАВЛЕНО: Ищем активный трек строго по его уникальному ID
         const isPlayingNow = (tracks[currentIndex] && tracks[currentIndex].id === track.id);
         row.className = `track-row ${isPlayingNow ? 'playing-now' : ''}`;
         
@@ -113,13 +112,13 @@ function buildFavoritesUI() {
         `;
         
         row.addEventListener('click', () => {
-            // ИСПРАВЛЕНО: При клике находим точную позицию трека в массиве по его ID
             let exactIdx = tracks.findIndex(t => t.id === track.id);
             if (exactIdx !== -1) {
                 currentIndex = exactIdx;
                 if (typeof loadTrack === 'function') loadTrack();
                 if (audio) audio.play().catch(() => {});
-                if (typeof switchTab === 'function') switchTab('main');
+                // ИСПРАВЛЕНО: Убрали switchTab('main'), чтобы оставаться в Медиатеке
+                if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
             }
         });
         favoritesList.appendChild(row);
