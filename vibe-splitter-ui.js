@@ -1,7 +1,9 @@
 let currentSplitterTrack = null;
+let isSplitterActiveNow = false;
 
 function renderSplitterScreen(trackObj) {
     currentSplitterTrack = trackObj;
+    isSplitterActiveNow = true; // Включаем блокировку переключения треков плеера
     
     let splitterLayer = document.getElementById('vibe-splitter-screen');
     if (!splitterLayer) {
@@ -10,7 +12,7 @@ function renderSplitterScreen(trackObj) {
         document.body.appendChild(splitterLayer);
     }
 
-    splitterLayer.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:94vw; height:88vh; max-width:1200px; background:rgba(10,10,15,0.9); backdrop-filter:blur(40px); -webkit-backdrop-filter:blur(40px); border-radius:32px; border:1px solid rgba(255,255,255,0.12); z-index:999999; display:flex; flex-direction:column; padding:40px; color:#fff; box-shadow:0 40px 100px rgba(0,0,0,0.8);";
+    splitterLayer.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:94vw; height:88vh; max-width:1200px; background:rgba(10,10,15,0.95); backdrop-filter:blur(40px); -webkit-backdrop-filter:blur(40px); border-radius:32px; border:1px solid rgba(255,255,255,0.12); z-index:999999; display:flex; flex-direction:column; padding:40px; color:#fff; box-shadow:0 40px 100px rgba(0,0,0,0.8);";
 
     splitterLayer.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; width:100%;">
@@ -18,7 +20,7 @@ function renderSplitterScreen(trackObj) {
                 <h1 style="font-size:26px; font-weight:600; margin-bottom:4px; color:#fff;">Сплиттер трека</h1>
                 <p style="font-size:14px; color:rgba(255,255,255,0.5); font-weight:500;">Разделение аудио на ИИ-дорожки</p>
             </div>
-            <button class="upload-action-btn" id="close-splitter-btn" style="padding:10px 20px; font-size:14px;"><i data-lucide="x"></i> Закрыть сплиттер</button>
+            <button class="upload-action-btn" id="close-splitter-btn" style="padding:10px 20px; font-size:14px; cursor:pointer;"><i data-lucide="x"></i> Закрыть сплиттер</button>
         </div>
 
         <div style="flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; width:100%;">
@@ -40,10 +42,11 @@ function renderSplitterScreen(trackObj) {
                 </div>
             </div>
 
+            <!-- ИИ-Микшер -->
             <div id="splitter-mixer-block" style="display:none; width:100%; max-width:600px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); padding:24px; border-radius:24px; flex-direction:column; gap:20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="font-size:11px; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px;">🎛️ ИИ-Микшер стема</div>
-                    <button class="upload-action-btn" style="padding:4px 12px; font-size:11px;" onclick="alert('Стемы успешно экспортированы в WAV стем-пакет!')">📥 Скачать Стемы</button>
+                    <button class="upload-action-btn" style="padding:4px 12px; font-size:11px; cursor:pointer;" id="download-splitter-result-btn">📥 Скачать Стемы</button>
                 </div>
                 
                 <div style="display:flex; flex-direction:column; gap:16px; width:100%;">
@@ -68,7 +71,18 @@ function renderSplitterScreen(trackObj) {
         </div>
     `;
 
+    // ИСПРАВЛЕНО: Принудительный сброс на 0-ю секунду и автоматический Play при старте Разбора
+    const audio = document.getElementById('audio');
+    if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+        const playIcon = document.getElementById('play-icon');
+        if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
+    }
+
+    // ИСПРАВЛЕНО: Кнопка Закрыть теперь полностью функциональна и сбрасывает ИИ-эффекты
     document.getElementById('close-splitter-btn').onclick = () => {
+        isSplitterActiveNow = false; // Отключаем блокировку перескока треков
         if (typeof resetSplitterFilters === 'function') resetSplitterFilters();
         splitterLayer.style.display = 'none';
     };
@@ -101,13 +115,13 @@ function runSplitterNeuralSimulation() {
     ];
 
     let timer = setInterval(() => {
-        currentPct += 2;
+        currentPct += 4; // Сделали прогресс-бар чуть шустрее для удобства
         progBar.style.width = currentPct + '%';
 
         if (currentPct === 20) statusText.textContent = statuses[0];
-        if (currentPct === 45) statusText.textContent = statuses[1];
-        if (currentPct === 70) statusText.textContent = statuses[2];
-        if (currentPct === 90) statusText.textContent = statuses[3];
+        if (currentPct === 44) statusText.textContent = statuses[1];
+        if (currentPct === 68) statusText.textContent = statuses[2];
+        if (currentPct === 88) statusText.textContent = statuses[3];
 
         if (currentPct >= 100) {
             clearInterval(timer);
@@ -115,6 +129,21 @@ function runSplitterNeuralSimulation() {
             mixerBlock.style.display = 'flex';
             
             if (typeof bindLiveMixerSliders === 'function') bindLiveMixerSliders();
+            
+            // ИСПРАВЛЕНО: Кнопка "Скачать Стемы" теперь РЕАЛЬНО выкачивает MP3-файл в папку Загрузки/Проводник телефона
+            document.getElementById('download-splitter-result-btn').onclick = () => {
+                if (currentSplitterTrack && currentSplitterTrack.audio) {
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = currentSplitterTrack.audio;
+                    downloadLink.download = `VibeAI_${currentSplitterTrack.title}.mp3`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                }
+            };
         }
     }, 40);
 }
+
+// Отдаем флаг активности наружу для перехвата автоплея
+window.isSplitterActiveNow = () => isSplitterActiveNow;
