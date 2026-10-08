@@ -1,0 +1,92 @@
+/* ПЕРЕЗАПИСЬ ПЕРЕМЕННЫХ И ФОНА */
+:root {
+    --bg-dark: #000000;
+    --glass-bg: rgba(20, 20, 25, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text-main: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --text-inactive: rgba(255, 255, 255, 0.15);
+}
+
+body {
+    background-color: var(--bg-dark) !important;
+}
+
+/* ЭФФЕКТ МАТОВОГО СТЕКЛА ДЛЯ ГЛАВНОГО ОКНА */
+.app-container {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(40px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(140%) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: 0 60px 130px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.12) !important;
+}
+
+/* МЯГКОЕ МИНЕМАЛИСТИЧНОЕ СВЕЧЕНИЕ СЗАДИ ПЛЕЕРА */
+.bg-glow {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.005) 50%, rgba(0,0,0,0) 70%) !important;
+}
+
+/* МАТОВЫЕ АКТИВНЫЕ ПУНКТЫ МЕНЮ БОКОВОЙ ПАНЕЛИ */
+.menu-item.active {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-main) !important;
+}
+.menu-item.active::after {
+    background-color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6) !important;
+}
+
+/* СТЕКЛЯННАЯ КАРТОЧКА ЦЕНТРАЛЬНОГО ПЛЕЕРА */
+.player-card {
+    background: rgba(255, 255, 255, 0.01) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: 0 35px 70px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255,255,255,0.06) !important;
+}
+
+/* СТИЛИЗАЦИЯ НИЖНЕЙ ПАНЕЛИ УПРАВЛЕНИЯ */
+.player-controls-bar {
+    background: rgba(10, 10, 12, 0.5) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+/* МАТОВАЯ КНОПКА PLAY/PAUSE С ПОЛУПРОЗРАЧНОЙ МАТРЁШКОЙ */
+.play-pause-btn {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+.play-pause-btn:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.25) !important;
+}
+
+/* БЕЛЫЙ ГЛЯНЕЦ ДЛЯ АКТИВНЫХ SUB-КНОПОК (SHUFFLE/REPEAT) */
+.sub-btn {
+    color: var(--text-inactive) !important;
+}
+.sub-btn.active {
+    color: #ffffff !important;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4)) !important;
+}
+
+/* КАСТОМИЗАЦИЯ СЛАЙДЕРОВ ПОД РЕФЕРЕНС №3 */
+.progress-slider, .volume-slider {
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+.progress-slider::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb {
+    background: #ffffff !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* МАТОВЫЕ ПЛИТКИ ДЛЯ ДАШБОРДА СТАТИСТИКИ И КАРТОЧЕК */
+.stats-card, .wallpaper-card-item {
+    background: rgba(255, 255, 255, 0.005) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+.wallpaper-card-item.active {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+}
