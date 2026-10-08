@@ -1,215 +1,175 @@
-/* ПОДКЛЮЧЕНИЕ ПРАВИЛЬНОГО МИНИМАЛИСТИЧНОГО ШРИФТА ДЛЯ РАЗРАБОТЧИКОВ */
+/* ПОДКЛЮЧЕНИЕ ПРЕМИАЛЬНОГО ЧИСТОГО ШРИФТА APPLE */
 @import url('https://googleapis.com');
 
 :root {
-    --bg-dark: #000000 !important;
-    --panel-bg: #050507 !important;
-    --border-main: 1px solid rgba(255, 255, 255, 0.12) !important;
-    --border-active: 1px solid rgba(255, 255, 255, 0.5) !important;
-    --text-main: #ffffff !important;
-    --text-muted: rgba(255, 255, 255, 0.3) !important;
-    --font-cyber: 'DM Mono', monospace !important;
+    --bg-dark: #07070a;
+    --glass-bg: rgba(255, 255, 255, 0.025);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text-main: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.45);
+    --apple-blur: blur(32px) saturate(160%);
 }
 
-/* СКРЫТИЕ СТАРЫХ КРУГЛЫХ КНОПОК «МОЯ ВОЛНА» */
-#vibe-center-wave-btn, .vibe-orbit-node-btn {
-    border-radius: 0px !important;
-    background: transparent !important;
-    border: var(--border-main) !important;
-    color: #fff !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-}
-
-/* ГЛОБАЛЬНЫЙ ШРИФТ И УДАЛЕНИЕ ИКОНОК */
+/* ВОЗВРАЩАЕМ ДЕФОЛТНЫЙ ШРИФТ И СБРАСЫВАЕМ ХАКЕРСКИЕ ХУКИ */
 * {
-    font-family: var(--font-cyber) !important;
-    letter-spacing: -0.3px !important;
-}
-.sidebar i, .menu-item i, .upload-action-btn i, .ctrl-btn i {
-    display: none !important; /* Полностью вырезаем все старые иконки Lucide */
+    font-family: 'Inter', sans-serif !important;
+    letter-spacing: normal !important;
 }
 
-/* УДАЛЕНИЕ СКРОЛЛБАРОВ ДЛЯ ТАЧПАДА */
-::-webkit-scrollbar { display: none !important; width: 0px !important; height: 0px !important; }
-.app-container, .main-content, .tab-content { -ms-overflow-style: none !important; scrollbar-width: none !important; }
-
-/* ТЕКСТ НА АНГЛИЙСКОМ */
-#page-title { display: none !important; }
-.content-header::after {
-    content: "// TERMINAL_CORE_ACTIVE" !important;
-    font-size: 13px !important;
-    color: var(--text-muted) !important;
-    text-transform: uppercase !important;
+body {
+    background-color: var(--bg-dark) !important;
 }
 
-/* ПРИНУДИТЕЛЬНЫЙ ПЕРЕВОД ПУНКТОВ */
-.menu-item span { display: none !important; }
-.menu-item::after { font-size: 12px !important; text-transform: uppercase !important; font-weight: 500 !important; }
-#menu-main::after { content: "01 / SYSTEM_HOME" !important; }
-#menu-wave::after { content: "02 / AUDIO_WAVE" !important; }
-#menu-favorites::after { content: "03 / MEDIA_NODE" !important; }
-#menu-wallpaper::after { content: "04 / GRID_SKINS" !important; }
-#menu-playlists::after { content: "05 / PLAYLISTS" !important; }
-#menu-settings::after { content: "06 / PREFERENCES" !important; }
+/* СКРЫВАЕМ СТАНДАРТНЫЙ СКРОЛЛБАР БРАУЗЕРА, ОСТАВЛЯЯ ТАЧПАД */
+::-webkit-scrollbar {
+    width: 4px !important;
+    height: 4px !important;
+}
+::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+}
 
-/* УДАЛЕНИЕ МАРКЕРОВ С ОШИБКАМИ НАЛОЖЕНИЯ */
-.menu-item.active::before, .menu-item.active::after {
-    display: none !important;
-    content: "" !important;
+/* ВОЗВРАЩАЕМ ОРИГИНАЛЬНЫЙ ТЕКСТ ИЗ HTML (УБИРАЕМ CSS-ПЕРЕВОД) */
+#page-title { display: block !important; }
+.content-header::after, .menu-item::after { content: "" !important; display: none !important; }
+.menu-item span { display: inline !important; }
+.sidebar i, .menu-item i, .upload-action-btn i, .ctrl-btn i { display: inline-block !important; }
+
+/* НАСТОЯЩЕЕ СТЕКЛЯННОЕ ОКНО ПЛЕЕРА В СТИЛЕ APPLE APPLE */
+.app-container {
+    position: relative !important;
+    display: flex !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--apple-blur) !important;
+    -webkit-backdrop-filter: var(--apple-blur) !important;
+    border-radius: 32px !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ОРИГИНАЛЬНАЯ БОКОВАЯ ПАНЕЛЬ НА СВОЕМ МЕСТЕ */
+.sidebar {
+    position: static !important;
+    width: 260px !important;
+    background: rgba(255, 255, 255, 0.01) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding: 24px 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+}
+.sidebar::before { content: "" !important; display: none !important; }
+
+/* ВОЗВРАЩАЕМ КРУГЛЫЕ КНОПКИ ДЛЯ «МОЕЙ ВОЛНЫ» В ИСХОДНЫЙ ВИД */
+#vibe-center-wave-btn, .vibe-orbit-node-btn {
+    border-radius: 50% !important;
+}
+.vibe-orbit-node-btn {
+    border-radius: 20px !important;
+}
+
+/* КРАСИВОЕ СТЕКЛЯННОЕ МЕНЮ АКТИВНОГО ПУНКТА */
+.menu-item {
+    border-radius: 12px !important;
+    border: 1px solid transparent !important;
 }
 .menu-item.active {
     background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
-/* КАРДИНАЛЬНОЕ ИЗМЕНЕНИЕ РАСПОЛОЖЕНИЯ (МЕНЯЕМ СЕТКУ ПАНЕЛИ) */
-.app-container {
-    background: var(--panel-bg) !important;
-    border: var(--border-main) !important;
-    border-radius: 0px !important;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.95) !important;
-}
-
-.sidebar {
-    width: 280px !important;
-    background: #020203 !important;
-    border-right: var(--border-main) !important;
-    padding: 20px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important; /* Разносим элементы по краям панели */
-}
-
-/* ПЕРЕНОСИМ КАРТОЧКУ ПЛЕЕРА В ЛЕВЫЙ ВЕРХНИЙ УГОЛ (НАД МЕНЮ) */
+/* ВОЗВРАЩАЕМ ЦЕНТРАЛЬНЫЙ БЛОК ПЛЕЕРА */
 .main-content {
+    margin-left: 0px !important;
     padding-bottom: 110px !important;
 }
-#tab-main {
-    display: none !important; /* Убираем пустую дефолтную вкладку по центру */
-}
-
-.sidebar::before {
-    content: "VIBE_SOUND_v2.5" !important;
-    font-size: 11px !important;
-    font-weight: 500 !important;
-    color: var(--text-muted) !important;
-    margin-bottom: 10px !important;
-    text-transform: uppercase !important;
-}
-
-/* ДИНАМИЧЕСКИЙ ПЕРЕНОС ТЕКУЩЕГО ТРЕКА В БОКОВУЮ ПАНЕЛЬ */
-/* Мы используем селекторы, чтобы забрать логические блоки и вписать их в разметку */
 .player-card {
-    position: absolute !important;
-    top: 50px !important;
-    left: 20px !important;
-    width: 240px !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    align-items: flex-start !important;
-    z-index: 9999 !important;
-}
-.player-cover {
-    width: 240px !important;
-    height: 160px !important; /* Делаем обложку аккуратным горизонтальным прямоугольником */
-    border: var(--border-main) !important;
-    filter: grayscale(100%) !important;
-    margin-bottom: 12px !important;
-}
-.player-info {
-    text-align: left !important;
-}
-.player-info h2 {
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    text-transform: uppercase !important;
-    color: #fff !important;
-}
-.player-info p {
-    font-size: 11px !important;
-    color: var(--text-muted) !important;
-}
-
-/* СДВИГАЕМ МЕНЮ В САМЫЙ НИЗ ЛЕВОЙ ПАНЕЛИ */
-.menu {
-    margin-top: auto !important;
-    width: 100% !important;
+    position: static !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 3px !important;
+    align-items: center !important;
+    max-width: 340px !important;
+    margin: 4vh auto 0 !important;
+    background: rgba(255, 255, 255, 0.01) !important;
+    border: 1px solid var(--glass-border) !important;
+    padding: 24px !important;
+    border-radius: 24px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
 }
-.menu-item {
-    padding: 8px 12px !important;
+.player-cover {
+    width: 280px !important;
+    height: 280px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    filter: none !important;
+    margin-bottom: 24px !important;
+}
+.player-info {
+    text-align: center !important;
 }
 
-/* ПРАВЫЙ ТЕРМИНАЛ КОНТЕНТА (ОГРОМНОЕ ЧИСТОЕ ПРОСТРАНСТВО) */
-.main-content {
-    margin-left: 20px !important;
-}
-.tab-content {
-    padding: 20px 40px !important;
-}
-
-/* НИЖНЯЯ КОНСОЛЬ УПРАВЛЕНИЯ ТРЕКОМ */
+/* НИЖНЯЯ ПАНЕЛЬ СТЕКЛЯННОГО ИНТЕРФЕЙСА APPLE */
 .player-controls-bar {
-    background: #000000 !important;
-    border-top: var(--border-main) !important;
-    height: 110px !important;
-    padding: 0 40px !important;
+    position: absolute !important;
+    background: rgba(10, 10, 15, 0.45) !important;
+    backdrop-filter: var(--apple-blur) !important;
+    -webkit-backdrop-filter: var(--apple-blur) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    height: 120px !important;
+    padding: 0 45px !important;
 }
-.timeline-container {
-    max-width: 100% !important;
-}
+
+/* СЛИВАЕМ ВСЮ СИНЕВУ: ЧИСТЫЕ БЕЛЫЕ СЛАЙДЕРЫ */
 .progress-slider, .volume-slider {
     background: rgba(255, 255, 255, 0.08) !important;
-    height: 3px !important;
+    height: 4px !important;
+    border-radius: 4px !important;
 }
 .progress-slider::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb {
-    width: 4px !important;
-    height: 12px !important;
+    width: 10px !important;
+    height: 10px !important;
     background: #ffffff !important;
-    border-radius: 0px !important;
-    box-shadow: none !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
 }
 
-/* УПРАВЛЕНИЕ ГРОМКОСТЬЮ БЕЗ СИНЕВЫ */
-.volume-container {
-    border: var(--border-main) !important;
-    background: #000 !important;
-    padding: 4px 8px !important;
-}
-.volume-slider {
-    width: 70px !important;
-}
-
+/* ВОЗВРАЩАЕМ КРУГЛУЮ КНОПКУ PLAY/PAUSE С ПОЛУПРОЗРАЧНЫМ СТИЛЕМ */
 .play-pause-btn {
-    border: var(--border-main) !important;
-    background: transparent !important;
-    color: #fff !important;
-    height: 32px !important;
-    width: 60px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
 }
 .play-pause-btn:hover {
-    background: #fff !important;
-    color: #000 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
 }
 
-/* СТРОГИЕ СЕТКИ И СПИСКИ */
-.track-row, .stats-card, .wallpaper-card-item, .upload-action-btn {
-    border-radius: 0px !important;
-    border: var(--border-main) !important;
+/* ОЧИЩАЕМ КОНТЕЙНЕР ГРОМКОСТИ ОТ СИНЕВЫ И СТИРАЕМ БОРДЮРЫ */
+.volume-container {
+    position: static !important;
+    border: none !important;
     background: transparent !important;
+    padding: 0 !important;
 }
-.track-row.playing-now {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border-color: #fff !important;
+.volume-slider {
+    width: 100px !important;
+}
+
+/* ВОЗВРАЩАЕМ ЗАКРУГЛЕНИЯ КАРТОЧКАМ И КНОПКАМ */
+.track-row, .stats-card, .wallpaper-card-item, .upload-action-btn {
+    border-radius: 14px !important;
+    border: 1px solid var(--glass-border) !important;
+    background: rgba(255, 255, 255, 0.005) !important;
 }
 .track-row img {
-    filter: grayscale(100%) !important;
-    border-radius: 0px !important;
+    border-radius: 8px !important;
+    filter: none !important;
 }
