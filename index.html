@@ -7,8 +7,16 @@
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
     <link href="https://googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Библиотека иконок Lucide -->
     <script src="https://unpkg.com"></script>
+    
+    <!-- Подключение основного CSS-файла плеера -->
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Подключение второго файла стилей с премиальным эффектом матового стекла -->
+    <link rel="stylesheet" href="glass.css">
+    
     <style>
         .stats-grid {
             display: grid;
@@ -28,7 +36,7 @@
         <aside class="sidebar">
             <div class="brand">
                 <div class="logo">
-                    <i data-lucide="music" style="color: #ff2a74;"></i>
+                    <i data-lucide="music" style="color: #ffffff;"></i>
                     <span>Vibe Sound</span>
                 </div>
                 <button class="collapse-btn"><i data-lucide="sidebar"></i></button>
@@ -40,7 +48,7 @@
                     <span>Главная</span>
                 </div>
                 <div id="menu-wave" class="menu-item">
-                    <i data-lucide="waves" style="color: #ff2a74;"></i>
+                    <i data-lucide="waves"></i>
                     <span>Моя Волна</span>
                 </div>
                 <div id="menu-favorites" class="menu-item">
@@ -87,7 +95,7 @@
             </section>
 
             <!-- ВКЛАДКА: ЛЮБИМОЕ (МЕДИАТЕКА) -->
-            <section id="tab-favorites" class="tab-content">
+            <section id="tab-favorites" class="tab-content" style="display: none;">
                 <div class="playlist-container">
                     <div class="playlist-top-bar">
                         <div class="playlist-header-text">Ваша медиатека</div>
@@ -107,7 +115,7 @@
             </section>
 
             <!-- ВКЛАДКА: ОБОИ -->
-            <section id="tab-wallpaper" class="tab-content">
+            <section id="tab-wallpaper" class="tab-content" style="display: none;">
                 <div class="wallpaper-container">
                     <div class="playlist-top-bar">
                         <div class="playlist-header-text">Фоновое оформление</div>
@@ -143,11 +151,19 @@
                 </div>
 
                 <div class="controls-buttons">
+                    <button class="ctrl-btn sub-btn" id="shuffle"><i data-lucide="shuffle"></i></button>
                     <button class="ctrl-btn" id="prev"><i data-lucide="skip-back"></i></button>
                     <button class="play-pause-btn" id="play">
                         <i data-lucide="play" id="play-icon"></i>
                     </button>
                     <button class="ctrl-btn" id="next"><i data-lucide="skip-forward"></i></button>
+                    <button class="ctrl-btn sub-btn" id="repeat"><i data-lucide="repeat"></i></button>
+                </div>
+                
+                <!-- Слайдер управления громкостью -->
+                <div class="volume-container" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; justify-content: center;">
+                    <i data-lucide="volume-2" style="width: 16px; height: 16px; color: #fff;"></i>
+                    <input type="range" id="volume" class="volume-slider" value="100" max="100" style="width: 100px; cursor: pointer;">
                 </div>
             </footer>
         </main>
@@ -160,7 +176,7 @@
         });
     </script>
     
-    <!-- Безопасная фоновая цепочка подгрузки базы данных и ядра плеера -->
+    <!-- Безопасная цепочка подгрузки ядра плеера -->
     <script src="database.js"></script>
     <script src="context-menu.js"></script>
     <script src="script.js"></script>
