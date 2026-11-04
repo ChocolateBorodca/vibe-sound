@@ -13,6 +13,7 @@ const playIcon = document.getElementById('play-icon');
 const prevBtn = document.getElementById('prev');
 const nextBtn = document.getElementById('next');
 const progress = document.getElementById('progress');
+const volumeSlider = document.getElementById('volume');
 const currentTimeEl = document.getElementById('current-time');
 const durationEl = document.getElementById('duration');
 const cover = document.getElementById('cover');
@@ -69,16 +70,23 @@ function recordPlayEvent(trackId) {
 
 function togglePlay() {
     if (tracks.length === 0) return;
+    
+    const targetVolume = volumeSlider ? parseFloat(volumeSlider.value) / 100 : 1;
+
     if (audio.paused) {
         if (localStorage.getItem('set-fade') === 'true') {
             audio.volume = 0;
             audio.play().catch(function() {});
             let volInterval = setInterval(function() {
-                if (audio.volume < 0.9) audio.volume += 0.1;
-                else { audio.volume = 1; clearInterval(volInterval); }
-            }, 100);
+                if (audio.volume < targetVolume - 0.05) {
+                    audio.volume += 0.05;
+                } else { 
+                    audio.volume = targetVolume; 
+                    clearInterval(volInterval); 
+                }
+            }, 50);
         } else {
-            audio.volume = 1;
+            audio.volume = targetVolume;
             audio.play().catch(function() {});
         }
         
@@ -95,7 +103,7 @@ function nextTrack() {
     if (tracks.length === 0) return;
     
     if (typeof isWaveActive !== 'undefined' && isWaveActive) {
-        if (typeof playNextWaveTrack === 'function') playNextWaveTrack();
+        if (typeof handleWaveTrackEnded === 'function') handleWaveTrackEnded();
         return;
     }
 
@@ -145,6 +153,13 @@ progress.addEventListener('input', function() {
     }
 });
 
+if (volumeSlider) {
+    volumeSlider.addEventListener('input', () => {
+        audio.volume = parseFloat(volumeSlider.value) / 100;
+    });
+}
+
+// ЦЕНТРАЛИЗОВАННЫЙ ДИСПЕТЧЕР ОКОНЧАНИЯ ПЕСНИ (Решает проблему конфликтов)
 audio.addEventListener('ended', function() {
     if (tracks.length === 0) return;
     
@@ -154,45 +169,21 @@ audio.addEventListener('ended', function() {
         return;
     }
 
+    // 1. Приоритет режиму «Моя Волна»
     if (typeof isWaveActive !== 'undefined' && isWaveActive) {
         if (typeof handleWaveTrackEnded === 'function') handleWaveTrackEnded();
-    } else {
-        nextTrack();
+        return;
     }
+
+    // 2. Второй приоритет — активный плейлист
+    if (typeof currentPlaylistTracksPool !== 'undefined' && currentPlaylistTracksPool.length > 0) {
+        if (typeof playNextTrackInPlaylist === 'function') playNextTrackInPlaylist();
+        return;
+    }
+
+    // 3. Дефолтный режим медиатеки
+    nextTrack();
 });
-
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(function(tab) {
-        tab.style.display = 'none';
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.menu-item').forEach(function(item) {
-        item.classList.remove('active');
-    });
-
-    const targetTab = document.getElementById('tab-' + tabName);
-    if (targetTab) {
-        targetTab.style.display = 'block';
-        targetTab.classList.add('active');
-    }
-    
-    document.querySelectorAll('.menu-item').forEach(function(item) {
-        if (tabName === 'main' && item.textContent.includes('Главная')) item.classList.add('active');
-        if (tabName === 'favorites' && item.textContent.includes('Любимое')) item.classList.add('active');
-        if (tabName === 'wallpaper' && item.textContent.includes('Обои')) item.classList.add('active');
-    });
-
-    let titleText = "Главная";
-    if (tabName === 'favorites') titleText = "Медиатека";
-    if (tabName === 'wallpaper') titleText = "Обои";
-    
-    const pageTitle = document.getElementById('page-title');
-    if (pageTitle) pageTitle.textContent = titleText;
-}
-
-document.getElementById('menu-main').addEventListener('click', function() { switchTab('main'); });
-document.getElementById('menu-favorites').addEventListener('click', function() { switchTab('favorites'); });
-document.getElementById('menu-wallpaper').addEventListener('click', function() { switchTab('wallpaper'); });
 
 function setWallpaper(wpId) {
     currentWallpaperId = wpId;
@@ -209,7 +200,7 @@ function setWallpaper(wpId) {
         if (typeof saveSettingToDB === "function") saveSettingToDB("currentWallpaper", wpId);
     }
     document.querySelectorAll('.wallpaper-card-item').forEach(function(card, i) {
-        card.classList.toggle('active', wallpapers[i].id === wpId);
+        if(wallpapers[i]) card.classList.toggle('active', wallpapers[i].id === wpId);
     });
 }
 
@@ -217,17 +208,14 @@ if (localStorage.getItem('set-glow') === 'false') {
     if (bgGlowLayer) bgGlowLayer.style.display = 'none';
 }
 
-if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
-if (typeof buildWallpaperUI === 'function') buildWallpaperUI();
-loadTrack();
-// МОБИЛЬНЫЙ ХУК ДЛЯ ПЕРЕКЛЮЧЕНИЯ БОКОВОЙ ПАНЕЛИ
+// МОБИЛЬНЫЙ ХУК ДЛЯ ВЫЕЗЖАЮЩЕГО САЙДБАРА
 document.addEventListener('DOMContentLoaded', () => {
-    const logoBlock = document.querySelector('.brand') || document.querySelector('.logo');
+    const brandBlock = document.querySelector('.sidebar .brand');
     const sidebar = document.querySelector('.sidebar');
-    
-    if (logoBlock && sidebar) {
-        logoBlock.addEventListener('click', (e) => {
-            // Переключаем класс активности только на мобильных экранах
+    const mainContent = document.querySelector('.main-content');
+
+    if (brandBlock && sidebar) {
+        brandBlock.addEventListener('click', (e) => {
             if (window.innerWidth <= 768) {
                 e.stopPropagation();
                 sidebar.classList.toggle('mobile-open');
@@ -235,12 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Закрываем меню при клике на любой пункт, чтобы не мешало слушать трек
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', () => {
-            if (window.innerWidth <= 768 && sidebar) {
+    if (mainContent && sidebar) {
+        mainContent.addEventListener('click', () => {
+            if (sidebar.classList.contains('mobile-open')) {
                 sidebar.classList.remove('mobile-open');
             }
         });
-    });
+    }
 });
