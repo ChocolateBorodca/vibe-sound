@@ -14,6 +14,7 @@
 }
 
 * {
+    box-sizing: border-box;
     font-family: 'Inter', sans-serif !important;
     letter-spacing: normal !important;
 }
@@ -23,7 +24,7 @@ body {
 }
 
 /* ==========================================================================
-   2. ТОТАЛЬНОЕ УНИЧТОЖЕНИЕ ПОЛОС ПРОКРУТКИ (ДЛЯ ДЕСКТОПНЫХ ТАЧПАДОВ И МОБИЛОК)
+   2. ТОТАЛЬНОЕ УНИЧТОЖЕНИЕ ПОЛОС ПРОКРУТКИ (ТАЧПАДЫ И МОБИЛЬНЫЕ)
    ========================================================================== */
 ::-webkit-scrollbar {
     width: 0px !important;
@@ -32,25 +33,23 @@ body {
 }
 
 html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpaper-container, #playlists-grid, .wallpaper-grid {
-    -ms-overflow-style: none !important;  /* IE и Edge */
+    -ms-overflow-style: none !important;  /* IE/Edge */
     scrollbar-width: none !important;  /* Firefox */
 }
 
-/* Нативная плавная прокрутка пальцем на телефонах */
 .main-content, .tab-content {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important; 
 }
 
 /* ==========================================================================
-   3. ИСХОДНЫЙ ТЕКСТ И СТРУКТУРА (СБРОС ХАКЕРСКИХ ХУКОВ)
+   3. ИСХОДНАЯ СТРУКТУРА
    ========================================================================== */
 #page-title { display: block !important; }
 .content-header::after, .menu-item::after { content: "" !important; display: none !important; }
 .menu-item span { display: inline !important; }
 .sidebar i, .menu-item i, .upload-action-btn i, .ctrl-btn i { display: inline-block !important; }
 
-/* КРУГЛЫЕ КНОПКИ ДЛЯ «МОЕЙ ВОЛНЫ» ОБЫЧНОГО ВИДА */
 #vibe-center-wave-btn, .vibe-orbit-node-btn { border-radius: 50% !important; }
 .vibe-orbit-node-btn { border-radius: 20px !important; }
 
@@ -68,7 +67,6 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     box-shadow: 0 50px 100px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
 }
 
-/* ДЕФОЛТНАЯ БОКОВАЯ ПАНЕЛЬ ДЛЯ ДЕСКТОПА */
 .sidebar {
     position: static !important;
     width: 260px !important;
@@ -81,7 +79,6 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
 }
 .sidebar::before { content: "" !important; display: none !important; }
 
-/* СТЕКЛЯННОЕ МЕНЮ АКТИВНОГО ПУНКТА */
 .menu-item {
     border-radius: 12px !important;
     border: 1px solid transparent !important;
@@ -93,7 +90,6 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     color: #ffffff !important;
 }
 
-/* ЦЕНТРАЛЬНАЯ КАРТОЧКА ПЛЕЕРА */
 .main-content { margin-left: 0px !important; padding-bottom: 110px !important; }
 .player-card {
     position: static !important;
@@ -113,17 +109,16 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     height: 280px !important;
     border-radius: 16px !important;
     border: 1px solid rgba(255,255,255,0.05) !important;
-    filter: none !important;
     margin-bottom: 24px !important;
 }
 .player-info { text-align: center !important; }
 
 /* ==========================================================================
-   5. ПАНЕЛЬ И КНОПКИ УПРАВЛЕНИЯ ЗВУКОМ (БЕЗ СИНЕВЫ)
+   5. ПАНЕЛЬ УПРАВЛЕНИЯ И ИСПРАВЛЕНИЕ СИНЕВЫ СЛАЙДЕРОВ
    ========================================================================== */
 .player-controls-bar {
     position: absolute !important;
-    background: rgba(10, 10, 15, 0.45) !important;
+    background: rgba(10, 10, 15, 0.55) !important;
     backdrop-filter: var(--apple-blur) !important;
     -webkit-backdrop-filter: var(--apple-blur) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
@@ -131,67 +126,51 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     padding: 0 45px !important;
 }
 
-/* МИНИМАЛИСТИЧНЫЕ БЕЛЫЕ СЛАЙДЕРЫ ТАЙМЛАЙНА */
-.progress-slider {
-    background: rgba(255, 255, 255, 0.08) !important;
+.timeline-container { width: 100% !important; display: flex !important; align-items: center !important; }
+
+/* Принудительное перекрашивание таймлайна и громкости */
+.progress-slider, .volume-slider, #volume, input[type="range"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: rgba(255, 255, 255, 0.15) !important;
     height: 4px !important;
     border-radius: 4px !important;
-}
-.progress-slider::-webkit-slider-thumb {
-    width: 10px !important;
-    height: 10px !important;
-    background: #ffffff !important;
-    border-radius: 50% !important;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
+    outline: none !important;
 }
 
-/* КНОПКА PLAY С МАТОВОЙ МАТРЁШКОЙ */
-.play-pause-btn {
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
-    box-shadow: none !important;
-}
-.play-pause-btn:hover {
+.progress-slider::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb, #volume::-webkit-slider-thumb, input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 12px !important;
+    height: 12px !important;
     background: #ffffff !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6) !important;
+}
+
+/* МОНОХРОМНАЯ КОНТРАСТНАЯ КНОПКА PLAY/PAUSE */
+.play-pause-btn {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important; /* Делаем ее полностью видимой на темном фоне */
+    border: 1px solid #ffffff !important;
+    color: #000000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2) !important;
+}
+.play-pause-btn i, .play-pause-btn svg {
+    fill: #000000 !important;
     color: #000000 !important;
 }
 
 .sub-btn { color: var(--text-inactive) !important; }
 .sub-btn.active { color: #ffffff !important; filter: drop-shadow(0 0 8px rgba(255,255,255,0.4)) !important; }
 
-/* УДАЛЕНИЕ СИНЕГО СТАНДАРТНОГО ПОЛЗУНКА ГРОМКОСТИ WINDOWS */
-.volume-container, [id="volume"]-container, .volume-slider, #volume {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-#volume, input[id="volume"], .volume-slider {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    background: rgba(255, 255, 255, 0.15) !important;
-    height: 4px !important;
-    border-radius: 4px !important;
-    width: 100px !important;
-    cursor: pointer !important;
-    position: static !important;
-}
-
-#volume::-webkit-slider-thumb, input[id="volume"]::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    width: 10px !important;
-    height: 10px !important;
-    border-radius: 50% !important;
-    background: #ffffff !important;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
-    transition: transform 0.1s !important;
-}
+.volume-container { background: transparent !important; border: none !important; }
+#volume, .volume-slider { width: 100px !important; }
 
 /* ==========================================================================
    6. СЕТКИ И КАРТОЧКИ КОНТЕНТА
@@ -201,11 +180,11 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     border: 1px solid var(--glass-border) !important;
     background: rgba(255, 255, 255, 0.005) !important;
 }
-.track-row img { border-radius: 8px !important; filter: none !important; }
+.track-row img { border-radius: 8px !important; }
 .track-row.playing-now { background: rgba(255, 255, 255, 0.02) !important; border-color: rgba(255, 255, 255, 0.1) !important; }
 
 /* ==========================================================================
-   7. УЛЬТИМАТИВНЫЙ МЕДИА-ЗАПРОС ДЛЯ МОБИЛЬНЫХ (ВЫЕЗЖАЮЩИЙ SIDEBAR)
+   7. УЛЬТИМАТИВНЫЙ МЕДИА-ЗАПРОС ДЛЯ ТЕЛЕФОНОВ (ОТ 320px ДО 430px)
    ========================================================================== */
 @media screen and (max-width: 768px) {
     .app-container {
@@ -219,16 +198,16 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
         display: block !important;
     }
 
-    /* СКРЫТЫЙ СЛЕВА SIDEBAR С ВЫЕЗДОМ ПО ТАПУ */
+    /* СКРЫТЫЙ СЛЕВА SIDEBAR С ЭФФЕКТОМ ВЫЕЗДА */
     .sidebar {
         position: fixed !important;
         top: 0 !important;
-        left: -260px !important;
-        width: 250px !important;
+        left: -270px !important; /* Спрятан */
+        width: 260px !important;
         height: 100vh !important;
-        background: rgba(10, 10, 15, 0.75) !important;
-        backdrop-filter: blur(35px) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(35px) saturate(150%) !important;
+        background: rgba(10, 10, 15, 0.85) !important;
+        backdrop-filter: blur(40px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(40px) saturate(150%) !important;
         border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
         z-index: 999999 !important;
         display: flex !important;
@@ -238,89 +217,103 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
         transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
     }
 
-    /* КЛАСС ДЛЯ ВЫЕЗДА ВЕРТИКАЛЬНОЙ ПАНЕЛИ НА ЭКРАН */
     .sidebar.mobile-open {
-        left: 0 !important;
-        box-shadow: 30px 0 60px rgba(0, 0, 0, 0.6) !important;
+        left: 0 !important; /* Выезжает по клику */
+        box-shadow: 30px 0 60px rgba(0, 0, 0, 0.7) !important;
     }
 
-    /* ПАРИРУЮЩИЙ ТРИГГЕР-ЛОГОТИП ДЛЯ ОТКРЫТИЯ/ЗАКРЫТИЯ МЕНЮ */
+    /* ФИКС ТРИГГЕРА-ЛОГОТИПА (ТЕПЕРЬ ОН ГАРАНТИРОВАННО ВИДЕН СВЕРХУ) */
     .brand {
         position: fixed !important;
-        top: 20px !important;
-        left: 20px !important;
+        top: 16px !important;
+        left: 16px !important;
         z-index: 888888 !important;
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        padding: 10px 16px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 12px 20px !important;
         border-radius: 14px !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px) !important;
         cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        min-height: 44px !important; /* Удобный размер под тап пальцем */
     }
+    
     .sidebar .brand {
         position: static !important;
         padding: 0 0 15px 0 !important;
         border: none !important;
         background: transparent !important;
-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+
+    .workspace-selector { display: none !important; }
+
+    .menu {
+        flex-direction: column !important;
+        max-width: 100% !important;
+        gap: 8px !important;
+        margin-top: 15px !important;
+    }
+    .menu-item { 
+        font-size: 16px !important; /* Читаемый размер шрифта */
+        padding: 14px 16px !important; 
+width: 100% !important;
+min-height: 48px !important; /* Размер под нажатие пальцем */
 }
-.workspace-selector { display: none !important; }
-.menu {
-flex-direction: column !important;
-max-width: 100% !important;
-gap: 6px !important;
-margin-top: 15px !important;
-}
-.menu-item { font-size: 14px !important; padding: 11px 14px !important; width: 100% !important; }
-/* ОЧИЩЕННАЯ РАБОЧАЯ ЗОНА НА ВЕСЬ ЭКРАН ТЕЛЕФОНА */
+/* РАБОЧАЯ ЗОНА НА ВЕСЬ ЭКРАН СМАРТФОНА /
 .main-content {
 width: 100% !important;
 height: 100vh !important;
-padding-top: 85px !important;
-padding-bottom: 145px !important;
+padding-top: 90px !important; / Отступ сверху под парящую кнопку-логотип */
+padding-bottom: 150px !important;
 overflow-y: auto !important;
 }
-.content-header { padding: 20px 20px 5px !important; }
-.content-header h1 { font-size: 22px; font-weight: 600; }
+.content-header { padding: 10px 20px 5px !important; }
+.content-header h1 { font-size: 24px; font-weight: 600; }
 .tab-content { padding: 10px 20px 40px !important; }
-/* ЧИСТЫЙ ЦЕНТРАЛЬНЫЙ ПЛЕЕР (БЕЗ БОРДЮРОВ И КАРТОЧЕК) */
+/* ЧИСТЫЙ ЦЕНТРАЛЬНЫЙ МОБИЛЬНЫЙ ПЛЕЕР */
 .player-card {
 width: 100% !important;
 max-width: 100% !important;
 background: transparent !important;
 border: none !important;
 box-shadow: none !important;
-padding: 10px 20px !important;
-margin-top: 2vh !important;
+padding: 10px 10px !important;
+margin-top: 1vh !important;
 }
+/* Резиновая обложка под ширину экрана смартфона */
 .player-cover {
-width: 75vw !important;
-height: 75vw !important;
-max-width: 270px !important;
-max-height: 270px !important;
+width: 78vw !important;
+height: 78vw !important;
+max-width: 290px !important;
+max-height: 290px !important;
 border-radius: 20px !important;
-box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5) !important;
-margin-bottom: 25px !important;
+box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6) !important;
+margin-bottom: 20px !important;
 }
+.player-info h2 { font-size: 18px !important; }
 /* МОБИЛЬНЫЙ ФУТЕР ПЛЕЕРА */
 .player-controls-bar {
-height: 125px !important;
-padding: 0 24px !important;
-background: rgba(12, 12, 16, 0.45) !important;
+height: 130px !important;
+padding: 0 20px !important;
+background: rgba(10, 10, 12, 0.7) !important;
 }
-.timeline-container { width: 100% !important; gap: 10px !important; }
-.controls-buttons { gap: 32px !important; margin-top: 5px !important; }
+.timeline-container { width: 100% !important; gap: 8px !important; }
+.controls-buttons { gap: 36px !important; margin-top: 6px !important; }
+/* Крупные кнопки управления под палец */
 .play-pause-btn {
-width: 46px !important;
-height: 46px !important;
-background: rgba(255, 255, 255, 0.1) !important;
-border: 1px solid rgba(255, 255, 255, 0.2) !important;
-color: #ffffff !important;
+width: 52px !important;
+height: 52px !important;
+background: #ffffff !important;
+color: #000000 !important;
 }
+.ctrl-btn i, .ctrl-btn svg { width: 24px !important; height: 24px !important; }
 .volume-container { display: none !important; }
-.wallpaper-grid, #playlists-grid {
-grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+.wallpaper-grid, #playlists-grid, .stats-grid {
+grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)) !important;
 gap: 12px !important;
 }
+.upload-action-btn { min-height: 44px !important; font-size: 14px !important; width: 100%; justify-content: center; }
 }
