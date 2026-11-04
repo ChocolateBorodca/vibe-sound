@@ -33,8 +33,8 @@ body {
 }
 
 html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpaper-container, #playlists-grid, .wallpaper-grid {
-    -ms-overflow-style: none !important;  /* IE/Edge */
-    scrollbar-width: none !important;  /* Firefox */
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
 }
 
 .main-content, .tab-content {
@@ -43,7 +43,7 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
 }
 
 /* ==========================================================================
-   3. ИСХОДНАЯ СТРУКТУРА
+   3. ИСХОДНАЯ СТРУКТУРА ДЕСКТОПА
    ========================================================================== */
 #page-title { display: block !important; }
 .content-header::after, .menu-item::after { content: "" !important; display: none !important; }
@@ -53,9 +53,6 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
 #vibe-center-wave-btn, .vibe-orbit-node-btn { border-radius: 50% !important; }
 .vibe-orbit-node-btn { border-radius: 20px !important; }
 
-/* ==========================================================================
-   4. ДИЗАЙН ОСНОВНОГО КОРПУСА (FLUID GLASSMORPHISM)
-   ========================================================================== */
 .app-container {
     position: relative !important;
     display: flex !important;
@@ -77,7 +74,6 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     flex-direction: column !important;
     justify-content: flex-start !important;
 }
-.sidebar::before { content: "" !important; display: none !important; }
 
 .menu-item {
     border-radius: 12px !important;
@@ -111,11 +107,8 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     border: 1px solid rgba(255,255,255,0.05) !important;
     margin-bottom: 24px !important;
 }
-.player-info { text-align: center !important; }
 
-/* ==========================================================================
-   5. ПАНЕЛЬ УПРАВЛЕНИЯ И ИСПРАВЛЕНИЕ СИНЕВЫ СЛАЙДЕРОВ
-   ========================================================================== */
+/* СТИЛИЗАЦИЯ СЛАЙДЕРОВ И КНОПКИ PLAY */
 .player-controls-bar {
     position: absolute !important;
     background: rgba(10, 10, 15, 0.55) !important;
@@ -126,9 +119,6 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     padding: 0 45px !important;
 }
 
-.timeline-container { width: 100% !important; display: flex !important; align-items: center !important; }
-
-/* Принудительное перекрашивание таймлайна и громкости */
 .progress-slider, .volume-slider, #volume, input[type="range"] {
     -webkit-appearance: none !important;
     appearance: none !important;
@@ -137,7 +127,6 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     border-radius: 4px !important;
     outline: none !important;
 }
-
 .progress-slider::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb, #volume::-webkit-slider-thumb, input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none !important;
     appearance: none !important;
@@ -148,43 +137,29 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.6) !important;
 }
 
-/* МОНОХРОМНАЯ КОНТРАСТНАЯ КНОПКА PLAY/PAUSE */
 .play-pause-btn {
     width: 48px !important;
     height: 48px !important;
     border-radius: 50% !important;
-    background: #ffffff !important; /* Делаем ее полностью видимой на темном фоне */
+    background: #ffffff !important;
     border: 1px solid #ffffff !important;
     color: #000000 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2) !important;
 }
-.play-pause-btn i, .play-pause-btn svg {
-    fill: #000000 !important;
-    color: #000000 !important;
-}
-
-.sub-btn { color: var(--text-inactive) !important; }
-.sub-btn.active { color: #ffffff !important; filter: drop-shadow(0 0 8px rgba(255,255,255,0.4)) !important; }
-
+.play-pause-btn i, .play-pause-btn svg { fill: #000000 !important; color: #000000 !important; }
 .volume-container { background: transparent !important; border: none !important; }
 #volume, .volume-slider { width: 100px !important; }
 
-/* ==========================================================================
-   6. СЕТКИ И КАРТОЧКИ КОНТЕНТА
-   ========================================================================== */
 .track-row, .stats-card, .wallpaper-card-item, .upload-action-btn {
     border-radius: 14px !important;
     border: 1px solid var(--glass-border) !important;
     background: rgba(255, 255, 255, 0.005) !important;
 }
-.track-row img { border-radius: 8px !important; }
-.track-row.playing-now { background: rgba(255, 255, 255, 0.02) !important; border-color: rgba(255, 255, 255, 0.1) !important; }
 
 /* ==========================================================================
-   7. УЛЬТИМАТИВНЫЙ МЕДИА-ЗАПРОС ДЛЯ ТЕЛЕФОНОВ (ОТ 320px ДО 430px)
+   4. АДАПТИВНАЯ МОБИЛЬНАЯ ВЕРСИЯ (ДЛЯ СМАРТФОНОВ)
    ========================================================================== */
 @media screen and (max-width: 768px) {
     .app-container {
@@ -195,125 +170,155 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
         border-radius: 0px !important;
         border: none !important;
         position: relative !important;
-        display: block !important;
+        display: flex !important;
+        flex-direction: column !important; /* Строго сверху вниз */
+        justify-content: space-between !important;
     }
 
-    /* СКРЫТЫЙ СЛЕВА SIDEBAR С ЭФФЕКТОМ ВЫЕЗДА */
+    /* НЕЗАВИСИМЫЙ ВЫЕЗЖАЮЩИЙ SIDEBAR */
     .sidebar {
         position: fixed !important;
         top: 0 !important;
-        left: -270px !important; /* Спрятан */
+        left: -270px !important;
         width: 260px !important;
         height: 100vh !important;
-        background: rgba(10, 10, 15, 0.85) !important;
-        backdrop-filter: blur(40px) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(40px) saturate(150%) !important;
+        background: rgba(10, 10, 15, 0.9) !important;
+        backdrop-filter: blur(40px) !important;
+        -webkit-backdrop-filter: blur(40px) !important;
         border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
         z-index: 999999 !important;
         display: flex !important;
         flex-direction: column !important;
-        justify-content: flex-start !important;
-        padding: 24px 16px !important;
+        padding: 80px 16px 24px !important; /* Отступ сверху под кнопку */
         transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
     }
 
+    /* КЛАСС ДЛЯ ОТКРЫТИЯ ПАНЕЛИ ИЗ JS */
     .sidebar.mobile-open {
-        left: 0 !important; /* Выезжает по клику */
-        box-shadow: 30px 0 60px rgba(0, 0, 0, 0.7) !important;
+        left: 0 !important;
+        box-shadow: 30px 0 60px rgba(0, 0, 0, 0.8) !important;
     }
 
-    /* ФИКС ТРИГГЕРА-ЛОГОТИПА (ТЕПЕРЬ ОН ГАРАНТИРОВАННО ВИДЕН СВЕРХУ) */
-    .brand {
+    /* ИСПРАВЛЕНИЕ: ПРИНУДИТЕЛЬНАЯ КНОПКА МЕНЮ ДЛЯ ЛОГОТИПА ИЗ BRAND */
+    .brand, .sidebar .brand {
         position: fixed !important;
         top: 16px !important;
         left: 16px !important;
-        z-index: 888888 !important;
+        width: auto !important;
+        height: 44px !important;
+        z-index: 888888 !important; /* Поверх основного экрана */
         background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        padding: 12px 20px !important;
-        border-radius: 14px !important;
-        backdrop-filter: blur(15px) !important;
-        -webkit-backdrop-filter: blur(15px) !important;
-        cursor: pointer !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        padding: 0 18px !important;
+        border-radius: 12px !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
         display: flex !important;
         align-items: center !important;
-        min-height: 44px !important; /* Удобный размер под тап пальцем */
-    }
-    
-    .sidebar .brand {
-        position: static !important;
-        padding: 0 0 15px 0 !important;
-        border: none !important;
-        background: transparent !important;
-        backdrop-filter: none !important;
+        justify-content: center !important;
+        cursor: pointer !important;
     }
 
-    .workspace-selector { display: none !important; }
+    .brand .collapse-btn, .sidebar .brand .collapse-btn {
+        display: none !important; /* Убираем лишнюю мелкую иконку */
+    }
 
     .menu {
         flex-direction: column !important;
-        max-width: 100% !important;
+        width: 100% !important;
         gap: 8px !important;
-        margin-top: 15px !important;
+        margin-top: 10px !important;
     }
-    .menu-item { 
-        font-size: 16px !important; /* Читаемый размер шрифта */
-        padding: 14px 16px !important; 
+    .menu-item {
+        font-size: 16px !important;
+        padding: 14px 16px !important;
+        min-height: 48px !important;
+    }
+
+    /* ЦЕНТРАЛЬНОЕ ПРОСТРАНСТВО КОНТЕНТА */
+    .main-content {
+        flex-grow: 1 !important;
+        width: 100% !important;
+        height: calc(100vh - 120px) !important; /* Вычитаем высоту футера */
+        padding-top: 75px !important; /* Чтобы заголовок не заезжал под плашку Vibe Sound */
+        padding-bottom: 20px !important;
+        overflow-y: auto !important;
+        margin-left: 0px !important;
+    }
+
+    .content-header { padding: 10px 24px 5px !important; }
+    .tab-content { padding: 10px 24px 20px !important; }
+
+    /* РЕЗИНОВАЯ АДАПТАЦИЯ ПЛЕЕРА ПО ВЫСОТЕ */
+    .player-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 10px !important;
+        margin-top: 1vh !important;
+    }
+
+    .player-cover {
+        width: 68vw !important;
+        height: 68vw !important;
+        max-width: 250px !important;
+        max-height: 250px !important;
+        border-radius: 16px !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+        margin-bottom: 16px !important;
+    }
+
+    .player-info h2 { font-size: 18px !important; }
+    .player-info p { font-size: 13px !important; }
+
+    /* ЖЕСТКАЯ ФИКСАЦИЯ НИЖНЕГО ФУТЕРУ ПЛЕЕРА НА ТЕЛЕФОНЕ */
+    .player-controls-bar {
+        position: relative !important;
 width: 100% !important;
-min-height: 48px !important; /* Размер под нажатие пальцем */
-}
-/* РАБОЧАЯ ЗОНА НА ВЕСЬ ЭКРАН СМАРТФОНА /
-.main-content {
-width: 100% !important;
-height: 100vh !important;
-padding-top: 90px !important; / Отступ сверху под парящую кнопку-логотип */
-padding-bottom: 150px !important;
-overflow-y: auto !important;
-}
-.content-header { padding: 10px 20px 5px !important; }
-.content-header h1 { font-size: 24px; font-weight: 600; }
-.tab-content { padding: 10px 20px 40px !important; }
-/* ЧИСТЫЙ ЦЕНТРАЛЬНЫЙ МОБИЛЬНЫЙ ПЛЕЕР */
-.player-card {
-width: 100% !important;
-max-width: 100% !important;
-background: transparent !important;
-border: none !important;
-box-shadow: none !important;
-padding: 10px 10px !important;
-margin-top: 1vh !important;
-}
-/* Резиновая обложка под ширину экрана смартфона */
-.player-cover {
-width: 78vw !important;
-height: 78vw !important;
-max-width: 290px !important;
-max-height: 290px !important;
-border-radius: 20px !important;
-box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6) !important;
-margin-bottom: 20px !important;
-}
-.player-info h2 { font-size: 18px !important; }
-/* МОБИЛЬНЫЙ ФУТЕР ПЛЕЕРА */
-.player-controls-bar {
-height: 130px !important;
+height: 120px !important;
+left: 0 !important;
+bottom: 0 !important;
 padding: 0 20px !important;
-background: rgba(10, 10, 12, 0.7) !important;
+background: rgba(10, 10, 12, 0.75) !important;
+border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+display: flex !important;
+flex-direction: column !important;
+justify-content: center !important;
+align-items: center !important;
+z-index: 99999 !important;
 }
-.timeline-container { width: 100% !important; gap: 8px !important; }
-.controls-buttons { gap: 36px !important; margin-top: 6px !important; }
-/* Крупные кнопки управления под палец */
+.timeline-container {
+width: 100% !important;
+gap: 10px !important;
+margin-bottom: 6px !important;
+}
+.controls-buttons {
+gap: 36px !important;
+margin-top: 4px !important;
+align-items: center !important;
+}
 .play-pause-btn {
-width: 52px !important;
-height: 52px !important;
+width: 48px !important;
+height: 48px !important;
 background: #ffffff !important;
 color: #000000 !important;
 }
-.ctrl-btn i, .ctrl-btn svg { width: 24px !important; height: 24px !important; }
-.volume-container { display: none !important; }
+.ctrl-btn i, .ctrl-btn svg {
+width: 22px !important;
+height: 22px !important;
+}
+.volume-container {
+display: none !important; /* Громкость кнопками телефона */
+}
 .wallpaper-grid, #playlists-grid, .stats-grid {
-grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)) !important;
+grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
 gap: 12px !important;
 }
-.upload-action-btn { min-height: 44px !important; font-size: 14px !important; width: 100%; justify-content: center; }
+.upload-action-btn {
+min-height: 44px !important;
+font-size: 14px !important;
+width: 100% !important;
+justify-content: center !important;
 }
