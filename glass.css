@@ -1,5 +1,5 @@
 /* ==========================================================================
-   1. ПРЕМИАЛЬНЫЕ ПЕРЕМЕННЫЕ И ШРИФТЫ APPLE
+   1. ПРЕМИАЛЬНЫЙ GLASSMORPHISM И СБРОС СТАРЫХ ОШИБОК
    ========================================================================== */
 @import url('https://googleapis.com');
 
@@ -9,115 +9,50 @@
     --glass-border: rgba(255, 255, 255, 0.08);
     --text-main: #ffffff;
     --text-muted: rgba(255, 255, 255, 0.45);
-    --text-inactive: rgba(255, 255, 255, 0.15);
     --apple-blur: blur(32px) saturate(160%);
 }
 
 * {
-    box-sizing: border-box;
     font-family: 'Inter', sans-serif !important;
-    letter-spacing: normal !important;
 }
 
 body {
     background-color: var(--bg-dark) !important;
 }
 
-/* ==========================================================================
-   2. ТОТАЛЬНОЕ УНИЧТОЖЕНИЕ ПОЛОС ПРОКРУТКИ (ТАЧПАДЫ И МОБИЛЬНЫЕ)
-   ========================================================================== */
+/* СКРЫТИЕ ЛИШНИХ СКРОЛЛБАРОВ ДЛЯ ТАЧПАДОВ */
 ::-webkit-scrollbar {
     width: 0px !important;
     height: 0px !important;
     display: none !important;
 }
-
-html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpaper-container, #playlists-grid, .wallpaper-grid {
+html, body, .app-container, .main-content, .tab-content {
     -ms-overflow-style: none !important;
     scrollbar-width: none !important;
 }
 
-.main-content, .tab-content {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important; 
-}
-
-/* ==========================================================================
-   3. ИСХОДНАЯ СТРУКТУРА ДЕСКТОПА
-   ========================================================================== */
-#page-title { display: block !important; }
-.content-header::after, .menu-item::after { content: "" !important; display: none !important; }
-.menu-item span { display: inline !important; }
-.sidebar i, .menu-item i, .upload-action-btn i, .ctrl-btn i { display: inline-block !important; }
-
-#vibe-center-wave-btn, .vibe-orbit-node-btn { border-radius: 50% !important; }
-.vibe-orbit-node-btn { border-radius: 20px !important; }
-
+/* ЭФФЕКТ СТЕКЛА ДЛЯ ГЛАВНОГО КОНТЕЙНЕРА */
 .app-container {
-    position: relative !important;
-    display: flex !important;
     background: var(--glass-bg) !important;
     backdrop-filter: var(--apple-blur) !important;
     -webkit-backdrop-filter: var(--apple-blur) !important;
-    border-radius: 32px !important;
     border: 1px solid var(--glass-border) !important;
-    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
 }
 
+/* ДЕСКТОПНАЯ БОКОВАЯ ПАНЕЛЬ */
 .sidebar {
-    position: static !important;
-    width: 260px !important;
     background: rgba(255, 255, 255, 0.005) !important;
     border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-    padding: 24px 16px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important;
 }
 
-.menu-item {
-    border-radius: 12px !important;
-    border: 1px solid transparent !important;
-}
 .menu-item.active {
     background: rgba(255, 255, 255, 0.04) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-    color: #ffffff !important;
 }
 
-.main-content { margin-left: 0px !important; padding-bottom: 110px !important; }
-.player-card {
-    position: static !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    max-width: 340px !important;
-    margin: 4vh auto 0 !important;
-    background: rgba(255, 255, 255, 0.005) !important;
-    border: 1px solid var(--glass-border) !important;
-    padding: 24px !important;
-    border-radius: 24px !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
-}
-.player-cover {
-    width: 280px !important;
-    height: 280px !important;
-    border-radius: 16px !important;
-    border: 1px solid rgba(255,255,255,0.05) !important;
-    margin-bottom: 24px !important;
-}
-
-.player-controls-bar {
-    position: absolute !important;
-    background: rgba(10, 10, 15, 0.55) !important;
-    backdrop-filter: var(--apple-blur) !important;
-    -webkit-backdrop-filter: var(--apple-blur) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
-    height: 120px !important;
-    padding: 0 45px !important;
-}
-
+/* ==========================================================================
+   2. УДАЛЕНИЕ СИНЕВЫ С ПОЛЗУНКА ГРОМКОСТИ НА ПК
+   ========================================================================== */
 .progress-slider, .volume-slider, #volume, input[type="range"] {
     -webkit-appearance: none !important;
     appearance: none !important;
@@ -126,6 +61,7 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     border-radius: 4px !important;
     outline: none !important;
 }
+
 .progress-slider::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb, #volume::-webkit-slider-thumb, input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none !important;
     appearance: none !important;
@@ -133,32 +69,16 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     height: 12px !important;
     background: #ffffff !important;
     border-radius: 50% !important;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
 }
 
 .play-pause-btn {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 50% !important;
     background: #ffffff !important;
-    border: 1px solid #ffffff !important;
     color: #000000 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-.play-pause-btn i, .play-pause-btn svg { fill: #000000 !important; color: #000000 !important; }
-.volume-container { background: transparent !important; border: none !important; }
-#volume, .volume-slider { width: 100px !important; }
-
-.track-row, .stats-card, .wallpaper-card-item, .upload-action-btn {
-    border-radius: 14px !important;
-    border: 1px solid var(--glass-border) !important;
-    background: rgba(255, 255, 255, 0.005) !important;
 }
 
 /* ==========================================================================
-   4. УЛЬТИМАТИВНАЯ МОБИЛЬНАЯ ВЕРСИЯ С ГАРАНТИРОВАННЫМ ВЫВОДОМ КНОПОК
+   3. ПОЛНАЯ АДАПТАЦИЯ ПОД ТЕЛЕФОН БЕЗ ПОТЕРИ ФУНКЦИОНАЛА
    ========================================================================== */
 @media screen and (max-width: 768px) {
     .app-container {
@@ -171,43 +91,44 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
         position: relative !important;
         display: flex !important;
         flex-direction: column !important;
-        justify-content: space-between !important;
     }
 
-    /* ВЫЕЗЖАЮЩИЙ SIDEBAR */
+    /* ВЫЕЗЖАЮЩАЯ БОКОВАЯ ПАНЕЛЬ СО ВСЕМИ ВОЗМОЖНОСТЯМИ ИЗ НОУТА */
     .sidebar {
         position: fixed !important;
         top: 0 !important;
-        left: -270px !important;
+        left: -270px !important; /* Прячется влево */
         width: 260px !important;
         height: 100vh !important;
-        background: rgba(10, 10, 15, 0.95) !important;
+        background: rgba(10, 10, 15, 0.9) !important;
         backdrop-filter: blur(40px) !important;
         -webkit-backdrop-filter: blur(40px) !important;
         border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
         z-index: 999999 !important;
         display: flex !important;
         flex-direction: column !important;
-        padding: 90px 16px 24px !important;
-        transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+        padding: 80px 16px 24px !important; /* Место под логотип сверху */
+        transition: left 0.3s ease !important;
     }
 
+    /* КЛАСС ОТКРЫТИЯ МЕНЮ ПО НАЖАТИЮ НА ЛОГОТИП */
     .sidebar.mobile-open {
         left: 0 !important;
         box-shadow: 30px 0 60px rgba(0, 0, 0, 0.8) !important;
     }
 
-    /* ПРИНУДИТЕЛЬНАЯ ПАРИРУЮЩАЯ КНОПКА МЕНЮ ВЕРХУ СЛЕВА */
+    /* ФИКС КНОПКИ ВЫЗОВА МЕНЮ (МЫ НЕ ПРЯЧЕМ ЕЕ, ОНА ТЕПЕРЬ ВСЕГДА ДОСТУПНА НА ТЕЛЕФОНЕ) */
     .brand, .sidebar .brand {
         position: fixed !important;
         top: 16px !important;
         left: 16px !important;
-        width: 130px !important;
-        height: 42px !important;
+        width: auto !important;
+        height: 44px !important;
         z-index: 888888 !important;
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 20px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        padding: 0 16px !important;
+        border-radius: 12px !important;
         backdrop-filter: blur(15px) !important;
         -webkit-backdrop-filter: blur(15px) !important;
         display: flex !important;
@@ -215,35 +136,30 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
         justify-content: center !important;
         cursor: pointer !important;
     }
-    /* Если иконка сломалась, принудительно пишем понятный текст меню прямо на кнопке */
-    .brand::before {
-        content: "☰ MENU" !important;
-        color: #fff !important;
-        font-size: 13px !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.5px !important;
-    }
+    
+    /* Оставляем оригинальные иконки и текст логотипа */
     .brand * {
-        display: none !important; /* Прячем сломанные внутренности */
+        display: flex !important;
+    }
+    .brand .collapse-btn {
+        display: none !important; /* Убираем только лишнюю кнопку сворачивания */
     }
 
     .menu {
         flex-direction: column !important;
         width: 100% !important;
-        gap: 8px !important;
-        margin-top: 10px !important;
+        gap: 6px !important;
     }
     .menu-item {
-        font-size: 16px !important;
-        padding: 14px 16px !important;
-        min-height: 48px !important;
+        padding: 12px 16px !important;
+        font-size: 15px !important;
     }
 
-    /* ЗОНА СМАРТФОНА */
+    /* СВОБОДНАЯ ЗОНА КОНТЕНТА ТЕЛЕФОНА */
     .main-content {
         flex-grow: 1 !important;
         width: 100% !important;
-        height: calc(100vh - 145px) !important;
+        height: calc(100vh - 120px) !important;
         padding-top: 75px !important;
         padding-bottom: 20px !important;
         overflow-y: auto !important;
@@ -251,11 +167,10 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     }
 
     .content-header { padding: 10px 24px 5px !important; }
-    .tab-content { padding: 10px 24px 20px !important; }
 
+    /* РЕЗИНОВЫЙ КОМПАКТНЫЙ ПЛЕЕР ПО ЦЕНТРУ */
     .player-card {
         width: 100% !important;
-        max-width: 100% !important;
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
@@ -268,76 +183,59 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
         height: 70vw !important;
         max-width: 250px !important;
         max-height: 250px !important;
-        border-radius: 16px !important;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5) !important;
         margin-bottom: 16px !important;
     }
 
-    /* ЖЕСТКАЯ ФИКСАЦИЯ НИЖНЕГО ФУТЕРУ ПЛЕЕРА НА ТЕЛЕФОНЕ */
+    /* ИДЕАЛЬНО ФИКСИРОВАННЫЙ НИЖНИЙ ПУЛЬТ УПРАВЛЕНИЯ */
     .player-controls-bar {
         position: relative !important;
         width: 100% !important;
-        height: 140px !important; /* Увеличили высоту, чтобы вместить все кнопки */
+        height: 120px !important;
         left: 0 !important;
         bottom: 0 !important;
         padding: 0 20px !important;
-background: rgba(10, 10, 12, 0.8) !important;
-border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-display: flex !important;
-flex-direction: column !important;
-justify-content: center !important;
-align-items: center !important;
-z-index: 99999 !important;
-}
-.timeline-container {
-width: 100% !important;
-gap: 10px !important;
-margin-bottom: 12px !important;
-}
-/* ГАРАНТИРОВАННЫЙ ВЫВОД ВСЕХ КНОПОК ПЕРЕМОТКИ (PREV, PLAY, NEXT) */
-.controls-buttons {
-display: flex !important;
-width: 100% !important;
-max-width: 280px !important;
-justify-content: space-between !important;
-align-items: center !important;
-margin-top: 4px !important;
-}
-/* Принудительно делаем кнопки видимыми, даже если иконки Lucide не загрузились */
-.ctrl-btn, .play-pause-btn {
-display: flex !important;
-align-items: center !important;
-justify-content: center !important;
-min-width: 44px !important;
-min-height: 44px !important;
-background: rgba(255, 255, 255, 0.05) !important;
-border: 1px solid rgba(255, 255, 255, 0.15) !important;
-color: #fff !important;
-}
-#prev::before { content: "◀◀" !important; font-size: 14px !important; }
-#next::before { content: "▶▶" !important; font-size: 14px !important; }
-#shuffle::before { content: "🔀" !important; font-size: 14px !important; }
-#repeat::before { content: "🔁" !important; font-size: 14px !important; }
-/* Скрываем пустые теги иконок, заменяя их текстовыми ASCII-символами */
-.controls-buttons i, .controls-buttons svg {
-display: none !important;
-}
-.play-pause-btn {
-width: 52px !important;
-height: 52px !important;
-border-radius: 50% !important;
-background: #ffffff !important;
-color: #000000 !important;
-}
-/* Если трек на паузе — пишем PLAY, если играет — PAUSE */
-.play-pause-btn::before {
-content: "▶" !important;
-font-size: 16px !important;
-color: #000 !important;
-}
-.volume-container { display: none !important; }
-.wallpaper-grid, #playlists-grid, .stats-grid {
-grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
-gap: 12px !important;
-}
+        background: rgba(10, 10, 12, 0.75) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        z-index: 99999 !important;
+    }
+
+    .timeline-container {
+        width: 100% !important;
+        gap: 12px !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* ВСЕ ТВОИ ОРИГИНАЛЬНЫЕ ИКОНКИ И КНОПКИ ИЗ ПРОШЛОГО КОДА НА МЕСТЕ */
+    .controls-buttons {
+        display: flex !important;
+        gap: 24px !important;
+        align-items: center !important;
+    }
+
+    .play-pause-btn {
+        width: 46px !important;
+        height: 46px !important;
+        border-radius: 50% !important;
+    }
+    
+    .ctrl-btn i, .ctrl-btn svg, .play-pause-btn i, .play-pause-btn svg {
+        display: inline-block !important; /* Гарантируем отображение оригинальных иконок */
+    }
+
+    /* Скрываем только ползунок громкости на мобилках, чтобы он не забивал футер */
+    .volume-container {
+        display: none !important;
+    }
+
+    /* Адаптация сеток контента (Медиатека, Обои, Плейлисты) */
+    .wallpaper-grid, #playlists-grid, .stats-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+        gap: 12px !important;
+    }
 }
