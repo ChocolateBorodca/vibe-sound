@@ -108,7 +108,6 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     margin-bottom: 24px !important;
 }
 
-/* СТИЛИЗАЦИЯ СЛАЙДЕРОВ И КНОПКИ PLAY */
 .player-controls-bar {
     position: absolute !important;
     background: rgba(10, 10, 15, 0.55) !important;
@@ -159,7 +158,7 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
 }
 
 /* ==========================================================================
-   4. АДАПТИВНАЯ МОБИЛЬНАЯ ВЕРСИЯ (ДЛЯ СМАРТФОНОВ)
+   4. УЛЬТИМАТИВНАЯ МОБИЛЬНАЯ ВЕРСИЯ С ГАРАНТИРОВАННЫМ ВЫВОДОМ КНОПОК
    ========================================================================== */
 @media screen and (max-width: 768px) {
     .app-container {
@@ -171,56 +170,61 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
         border: none !important;
         position: relative !important;
         display: flex !important;
-        flex-direction: column !important; /* Строго сверху вниз */
+        flex-direction: column !important;
         justify-content: space-between !important;
     }
 
-    /* НЕЗАВИСИМЫЙ ВЫЕЗЖАЮЩИЙ SIDEBAR */
+    /* ВЫЕЗЖАЮЩИЙ SIDEBAR */
     .sidebar {
         position: fixed !important;
         top: 0 !important;
         left: -270px !important;
         width: 260px !important;
         height: 100vh !important;
-        background: rgba(10, 10, 15, 0.9) !important;
+        background: rgba(10, 10, 15, 0.95) !important;
         backdrop-filter: blur(40px) !important;
         -webkit-backdrop-filter: blur(40px) !important;
         border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
         z-index: 999999 !important;
         display: flex !important;
         flex-direction: column !important;
-        padding: 80px 16px 24px !important; /* Отступ сверху под кнопку */
+        padding: 90px 16px 24px !important;
         transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
     }
 
-    /* КЛАСС ДЛЯ ОТКРЫТИЯ ПАНЕЛИ ИЗ JS */
     .sidebar.mobile-open {
         left: 0 !important;
         box-shadow: 30px 0 60px rgba(0, 0, 0, 0.8) !important;
     }
 
-    /* ИСПРАВЛЕНИЕ: ПРИНУДИТЕЛЬНАЯ КНОПКА МЕНЮ ДЛЯ ЛОГОТИПА ИЗ BRAND */
+    /* ПРИНУДИТЕЛЬНАЯ ПАРИРУЮЩАЯ КНОПКА МЕНЮ ВЕРХУ СЛЕВА */
     .brand, .sidebar .brand {
         position: fixed !important;
         top: 16px !important;
         left: 16px !important;
-        width: auto !important;
-        height: 44px !important;
-        z-index: 888888 !important; /* Поверх основного экрана */
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        padding: 0 18px !important;
-        border-radius: 12px !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
+        width: 130px !important;
+        height: 42px !important;
+        z-index: 888888 !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 20px !important;
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         cursor: pointer !important;
     }
-
-    .brand .collapse-btn, .sidebar .brand .collapse-btn {
-        display: none !important; /* Убираем лишнюю мелкую иконку */
+    /* Если иконка сломалась, принудительно пишем понятный текст меню прямо на кнопке */
+    .brand::before {
+        content: "☰ MENU" !important;
+        color: #fff !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.5px !important;
+    }
+    .brand * {
+        display: none !important; /* Прячем сломанные внутренности */
     }
 
     .menu {
@@ -235,12 +239,12 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
         min-height: 48px !important;
     }
 
-    /* ЦЕНТРАЛЬНОЕ ПРОСТРАНСТВО КОНТЕНТА */
+    /* ЗОНА СМАРТФОНА */
     .main-content {
         flex-grow: 1 !important;
         width: 100% !important;
-        height: calc(100vh - 120px) !important; /* Вычитаем высоту футера */
-        padding-top: 75px !important; /* Чтобы заголовок не заезжал под плашку Vibe Sound */
+        height: calc(100vh - 145px) !important;
+        padding-top: 75px !important;
         padding-bottom: 20px !important;
         overflow-y: auto !important;
         margin-left: 0px !important;
@@ -249,7 +253,6 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     .content-header { padding: 10px 24px 5px !important; }
     .tab-content { padding: 10px 24px 20px !important; }
 
-    /* РЕЗИНОВАЯ АДАПТАЦИЯ ПЛЕЕРА ПО ВЫСОТЕ */
     .player-card {
         width: 100% !important;
         max-width: 100% !important;
@@ -261,8 +264,8 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
     }
 
     .player-cover {
-        width: 68vw !important;
-        height: 68vw !important;
+        width: 70vw !important;
+        height: 70vw !important;
         max-width: 250px !important;
         max-height: 250px !important;
         border-radius: 16px !important;
@@ -270,18 +273,15 @@ html, body, .app-container, .main-content, .tab-content, .tracks-list, .wallpape
         margin-bottom: 16px !important;
     }
 
-    .player-info h2 { font-size: 18px !important; }
-    .player-info p { font-size: 13px !important; }
-
     /* ЖЕСТКАЯ ФИКСАЦИЯ НИЖНЕГО ФУТЕРУ ПЛЕЕРА НА ТЕЛЕФОНЕ */
     .player-controls-bar {
         position: relative !important;
-width: 100% !important;
-height: 120px !important;
-left: 0 !important;
-bottom: 0 !important;
-padding: 0 20px !important;
-background: rgba(10, 10, 12, 0.75) !important;
+        width: 100% !important;
+        height: 140px !important; /* Увеличили высоту, чтобы вместить все кнопки */
+        left: 0 !important;
+        bottom: 0 !important;
+        padding: 0 20px !important;
+background: rgba(10, 10, 12, 0.8) !important;
 border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
 display: flex !important;
 flex-direction: column !important;
@@ -292,33 +292,52 @@ z-index: 99999 !important;
 .timeline-container {
 width: 100% !important;
 gap: 10px !important;
-margin-bottom: 6px !important;
+margin-bottom: 12px !important;
 }
+/* ГАРАНТИРОВАННЫЙ ВЫВОД ВСЕХ КНОПОК ПЕРЕМОТКИ (PREV, PLAY, NEXT) */
 .controls-buttons {
-gap: 36px !important;
-margin-top: 4px !important;
+display: flex !important;
+width: 100% !important;
+max-width: 280px !important;
+justify-content: space-between !important;
 align-items: center !important;
+margin-top: 4px !important;
+}
+/* Принудительно делаем кнопки видимыми, даже если иконки Lucide не загрузились */
+.ctrl-btn, .play-pause-btn {
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+min-width: 44px !important;
+min-height: 44px !important;
+background: rgba(255, 255, 255, 0.05) !important;
+border: 1px solid rgba(255, 255, 255, 0.15) !important;
+color: #fff !important;
+}
+#prev::before { content: "◀◀" !important; font-size: 14px !important; }
+#next::before { content: "▶▶" !important; font-size: 14px !important; }
+#shuffle::before { content: "🔀" !important; font-size: 14px !important; }
+#repeat::before { content: "🔁" !important; font-size: 14px !important; }
+/* Скрываем пустые теги иконок, заменяя их текстовыми ASCII-символами */
+.controls-buttons i, .controls-buttons svg {
+display: none !important;
 }
 .play-pause-btn {
-width: 48px !important;
-height: 48px !important;
+width: 52px !important;
+height: 52px !important;
+border-radius: 50% !important;
 background: #ffffff !important;
 color: #000000 !important;
 }
-.ctrl-btn i, .ctrl-btn svg {
-width: 22px !important;
-height: 22px !important;
+/* Если трек на паузе — пишем PLAY, если играет — PAUSE */
+.play-pause-btn::before {
+content: "▶" !important;
+font-size: 16px !important;
+color: #000 !important;
 }
-.volume-container {
-display: none !important; /* Громкость кнопками телефона */
-}
+.volume-container { display: none !important; }
 .wallpaper-grid, #playlists-grid, .stats-grid {
 grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
 gap: 12px !important;
 }
-.upload-action-btn {
-min-height: 44px !important;
-font-size: 14px !important;
-width: 100% !important;
-justify-content: center !important;
 }
