@@ -220,3 +220,27 @@ if (localStorage.getItem('set-glow') === 'false') {
 if (typeof buildFavoritesUI === 'function') buildFavoritesUI();
 if (typeof buildWallpaperUI === 'function') buildWallpaperUI();
 loadTrack();
+// МОБИЛЬНЫЙ ХУК ДЛЯ ПЕРЕКЛЮЧЕНИЯ БОКОВОЙ ПАНЕЛИ
+document.addEventListener('DOMContentLoaded', () => {
+    const logoBlock = document.querySelector('.brand') || document.querySelector('.logo');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (logoBlock && sidebar) {
+        logoBlock.addEventListener('click', (e) => {
+            // Переключаем класс активности только на мобильных экранах
+            if (window.innerWidth <= 768) {
+                e.stopPropagation();
+                sidebar.classList.toggle('mobile-open');
+            }
+        });
+    }
+
+    // Закрываем меню при клике на любой пункт, чтобы не мешало слушать трек
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768 && sidebar) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+    });
+});
